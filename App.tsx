@@ -43,6 +43,7 @@ import confetti from 'canvas-confetti';
 import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } from './locales/LanguageContext';
 import { getPremiumStatus } from './services/premiumService';
 import { PremiumProvider, usePremium, PremiumGate } from './services/PremiumContext';
+import { loadGamificationData, getLevelFromXp, addXp, checkAchievements, getCurrentWeeklyChallenge } from './services/gamificationService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -80,6 +81,32 @@ const ProgressRing = ({ progress, label, subLabel, color = "#00D4AA", size = 80 
       <div className="absolute flex flex-col items-center justify-center">
         <span className="text-2xl font-bold tracking-tight text-white">{label}</span>
         <span className="text-xs text-white/60">{subLabel}</span>
+      </div>
+    </div>
+  );
+};
+
+// XP Level Bar Component
+const XpLevelBar = () => {
+  const data = loadGamificationData();
+  const levelInfo = getLevelFromXp(data.xp);
+
+  return (
+    <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
+      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FFD700] to-[#FF8C00] flex items-center justify-center font-bold text-black text-sm">
+        {levelInfo.level}
+      </div>
+      <div className="flex-1">
+        <div className="flex justify-between text-xs mb-1">
+          <span className="font-medium">Уровень {levelInfo.level}</span>
+          <span className="text-white/50">{levelInfo.currentLevelXp}/{levelInfo.nextLevelXp} XP</span>
+        </div>
+        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#FFD700] to-[#00D4AA] rounded-full transition-all duration-500"
+            style={{ width: `${levelInfo.progress * 100}%` }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -671,6 +698,30 @@ const Dashboard = ({
         </div>
       )}
 
+      {/* XP & Level Progress */}
+      <XpLevelBar />
+
+      {/* Weekly Challenge */}
+      {(() => {
+        const challenge = getCurrentWeeklyChallenge();
+        return (
+          <div className={`${GLASS_PANEL_LIGHT} p-3`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">{challenge.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold">{challenge.nameRu}</p>
+                  <p className="text-xs text-white/50">{challenge.descriptionRu}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-[#FFD700]">+{challenge.xpReward} XP</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Main Stats - Dual Rings */}
       <div className={`${GLASS_PANEL} p-4 relative overflow-hidden shrink-0`}>
         <div className="absolute top-[-50%] left-[-50%] w-full h-full bg-[#00D4AA]/10 blur-[60px] rounded-full pointer-events-none" />
@@ -877,7 +928,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
   streak: StreakData,
   onRequestWeeklyReview: () => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'AI Coach'>('Calendar');
+  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'Badges' | 'AI Coach'>('Calendar');
   const { t } = useLanguage();
 
   // Generate GitHub-style calendar (last 35 days, 5 weeks)
@@ -943,13 +994,13 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
 
       {/* Tab Switcher */}
       <div className={`p-1 rounded-xl bg-white/10 flex shrink-0`}>
-        {(['Calendar', 'Stats', 'AI Coach'] as const).map((tab) => (
+        {(['Calendar', 'Stats', 'Badges', 'AI Coach'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === tab ? 'bg-white/20 shadow-sm' : 'text-white/50'}`}
           >
-            {tab === 'Calendar' ? t.history.calendar : tab === 'Stats' ? t.history.stats : t.history.aiCoach}
+            {tab === 'Calendar' ? t.history.calendar : tab === 'Stats' ? t.history.stats : tab === 'Badges' ? '🏆' : t.history.aiCoach}
           </button>
         ))}
       </div>
@@ -1054,6 +1105,47 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             </ResponsiveContainer>
           </div>
         </>
+      )}
+
+      {activeTab === 'Badges' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold">Достижения</h3>
+            <span className="text-xs text-white/50">
+              {loadGamificationData().unlockedAchievements.length}/14 разблокировано
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { id: 'first_day', icon: '🎯', name: 'Первый день' },
+              { id: 'streak_3', icon: '🔥', name: '3 дня подряд' },
+              { id: 'streak_7', icon: '⚡', name: '7 дней подряд' },
+              { id: 'streak_14', icon: '💪', name: '14 дней силы' },
+              { id: 'streak_30', icon: '🏆', name: 'Мастер месяца' },
+              { id: 'streak_100', icon: '👑', name: 'Клуб сотни' },
+              { id: 'habits_10', icon: '✅', name: '10 привычек' },
+              { id: 'habits_50', icon: '🦸', name: '50 привычек' },
+              { id: 'habits_100', icon: '🌟', name: '100 привычек' },
+              { id: 'steps_10k', icon: '👟', name: 'Первые 10К' },
+              { id: 'steps_100k', icon: '🏃', name: 'Марафонец' },
+              { id: 'level_5', icon: '⭐', name: 'Уровень 5' },
+              { id: 'level_10', icon: '🎖️', name: 'Уровень 10' },
+              { id: 'first_meal', icon: '🍽️', name: 'Первая еда' },
+            ].map((achievement) => {
+              const unlocked = loadGamificationData().unlockedAchievements.includes(achievement.id);
+              return (
+                <div
+                  key={achievement.id}
+                  className={`${GLASS_PANEL_LIGHT} p-3 text-center ${unlocked ? '' : 'opacity-40 grayscale'}`}
+                >
+                  <span className="text-2xl block mb-1">{achievement.icon}</span>
+                  <p className="text-xs font-medium">{achievement.name}</p>
+                  {unlocked && <span className="text-[8px] text-[#00D4AA]">✓</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {activeTab === 'AI Coach' && (
