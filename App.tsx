@@ -157,7 +157,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
         {step === 2 && (
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-6 text-center">What is your main goal?</h2>
-            <div className="w-full space-y-4 flex-1 overflow-y-auto">
+            <div className="w-full space-y-4 flex-1 overflow-y-auto px-1">
               {['Weight Loss', 'More Energy', 'Build Discipline', 'Better Health'].map((g) => (
                 <button
                   key={g}
@@ -175,7 +175,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-2 text-center">Select your habits</h2>
             <p className="text-white/50 text-sm mb-6 text-center">Choose 3-5 habits to track daily</p>
-            <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto">
+            <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto px-1">
               {AVAILABLE_HABITS.map((habit) => (
                 <button
                   key={habit.id}
