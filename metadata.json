@@ -1,0 +1,7 @@
+{
+  "name": "Daily Discipline",
+  "description": "A premium daily discipline tracker with Liquid Glass UI and Gemini AI insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
