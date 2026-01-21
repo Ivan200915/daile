@@ -69,12 +69,29 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem(STORAGE_KEY, lang);
     };
 
-    // Re-detect on mount (for Telegram)
+    // Re-detect on mount (for Telegram) - with delay for WebApp to initialize
     useEffect(() => {
-        const telegramLang = detectTelegramLanguage();
-        if (telegramLang && !localStorage.getItem(STORAGE_KEY)) {
-            setLanguageState(telegramLang);
+        const detectAndSet = () => {
+            const telegramLang = detectTelegramLanguage();
+            if (telegramLang && !localStorage.getItem(STORAGE_KEY)) {
+                setLanguageState(telegramLang);
+            }
+        };
+
+        // Try immediately
+        detectAndSet();
+
+        // Also try after a short delay (Telegram WebApp may initialize async)
+        const timer = setTimeout(detectAndSet, 100);
+
+        // And listen for Telegram WebApp ready event
+        // @ts-ignore
+        if (window.Telegram?.WebApp) {
+            // @ts-ignore
+            window.Telegram.WebApp.ready();
         }
+
+        return () => clearTimeout(timer);
     }, []);
 
     const value: LanguageContextType = {
