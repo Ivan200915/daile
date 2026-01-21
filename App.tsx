@@ -46,6 +46,8 @@ import { PremiumProvider, usePremium, PremiumGate } from './services/PremiumCont
 import { loadGamificationData, getLevelFromXp, addXp, checkAchievements, getCurrentWeeklyChallenge } from './services/gamificationService';
 import { analyzeCorrelations, generateRecommendations, generateReportData } from './services/analyticsService';
 import { hapticMedium, hapticSuccess, hapticLevelUp } from './services/feedbackService';
+import { loadPet, createPet, feedPet, getPetEmoji, getPetMood, getPetMessage } from './services/petService';
+import { CURRENT_SEASON, loadSeasonProgress, getSeasonDaysRemaining } from './services/seasonService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -718,6 +720,51 @@ const Dashboard = ({
               </div>
               <div className="text-right">
                 <p className="text-xs text-[#FFD700]">+{challenge.xpReward} XP</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Virtual Pet Widget */}
+      {(() => {
+        const pet = loadPet();
+        if (!pet) return null;
+        const mood = getPetMood(pet);
+        return (
+          <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
+            <div className="text-4xl">{getPetEmoji(pet)}</div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold">{pet.name}</span>
+                <span className="text-xs text-white/50">Ур. {pet.level}</span>
+              </div>
+              <p className="text-xs text-white/60">{mood.emoji} {mood.textRu}</p>
+            </div>
+            <div className="text-right">
+              <span className="text-xs text-[#00D4AA]">💕 {pet.happiness}%</span>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Season Banner */}
+      {(() => {
+        const progress = loadSeasonProgress();
+        const daysLeft = getSeasonDaysRemaining();
+        return (
+          <div className={`${GLASS_PANEL} p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">{CURRENT_SEASON.emoji}</span>
+                <div>
+                  <p className="text-sm font-semibold">{CURRENT_SEASON.nameRu}</p>
+                  <p className="text-xs text-white/50">{daysLeft} дней осталось</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-[#FFD700]">{progress?.points || 0}</p>
+                <p className="text-xs text-white/50">очков</p>
               </div>
             </div>
           </div>
