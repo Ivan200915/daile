@@ -143,7 +143,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-[#00D4AA]/20 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="z-10 flex-1 flex flex-col items-center overflow-y-auto overflow-x-visible no-scrollbar pb-6 px-1">
+      <div className="z-10 flex-1 flex flex-col items-center overflow-y-auto overflow-x-visible no-scrollbar pb-6 p-1">
         {step === 1 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-white/20 to-transparent backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(0,212,170,0.3)] flex items-center justify-center mb-4">
@@ -157,7 +157,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
         {step === 2 && (
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-6 text-center">What is your main goal?</h2>
-            <div className="w-full space-y-4 flex-1 overflow-y-auto px-1">
+            <div className="w-full space-y-4 flex-1 overflow-y-auto p-1">
               {['Weight Loss', 'More Energy', 'Build Discipline', 'Better Health'].map((g) => (
                 <button
                   key={g}
@@ -175,7 +175,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-2 text-center">Select your habits</h2>
             <p className="text-white/50 text-sm mb-6 text-center">Choose 3-5 habits to track daily</p>
-            <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto px-1">
+            <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto p-1">
               {AVAILABLE_HABITS.map((habit) => (
                 <button
                   key={habit.id}
