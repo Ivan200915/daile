@@ -41,7 +41,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 import confetti from 'canvas-confetti';
 import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } from './locales/LanguageContext';
-import { createInvoice, openTelegramInvoice } from './services/paymentService';
+import { getPremiumStatus } from './services/premiumService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1141,6 +1141,14 @@ const SettingsScreen = ({
     : null;
 
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+
+  // Check premium status on mount
+  useEffect(() => {
+    getPremiumStatus().then(status => {
+      setIsPremium(status.isPremium);
+    });
+  }, []);
 
   const handleUpgrade = () => {
     // Direct Tribute payment link for Premium subscription
@@ -1250,21 +1258,32 @@ const SettingsScreen = ({
         </button>
       </div>
 
-      {/* Subscription Placeholder */}
+      {/* Subscription */}
       <div className={`${GLASS_PANEL} p-5`}>
         <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">{t.settings.subscription}</h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-semibold">{t.settings.freePlan}</p>
-            <p className="text-xs text-white/50">{t.settings.freeFeatures}</p>
+            {isPremium ? (
+              <>
+                <p className="font-semibold text-[#00D4AA]">⭐ Premium</p>
+                <p className="text-xs text-white/50">Все функции разблокированы</p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold">{t.settings.freePlan}</p>
+                <p className="text-xs text-white/50">{t.settings.freeFeatures}</p>
+              </>
+            )}
           </div>
-          <button
-            onClick={handleUpgrade}
-            disabled={isUpgrading}
-            className={`px-4 py-2 ${GLASS_BUTTON} text-[#00D4AA] text-sm font-semibold disabled:opacity-50`}
-          >
-            {isUpgrading ? 'Loading...' : t.common.upgrade}
-          </button>
+          {!isPremium && (
+            <button
+              onClick={handleUpgrade}
+              disabled={isUpgrading}
+              className={`px-4 py-2 ${GLASS_BUTTON} text-[#00D4AA] text-sm font-semibold disabled:opacity-50`}
+            >
+              {isUpgrading ? 'Loading...' : t.common.upgrade}
+            </button>
+          )}
         </div>
       </div>
 
