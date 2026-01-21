@@ -1142,16 +1142,16 @@ const SettingsScreen = ({
 
   const [isUpgrading, setIsUpgrading] = useState(false);
 
-  const handleUpgrade = async () => {
-    setIsUpgrading(true);
-    // Default price 250 Stars (XTR) for Premium
-    const link = await createInvoice(250, 'Premium Month');
-    setIsUpgrading(false);
+  const handleUpgrade = () => {
+    // Direct Tribute payment link for Premium subscription
+    const paymentLink = 'https://web.tribute.tg/p/pXj';
 
-    if (link) {
-      openTelegramInvoice(link);
+    // @ts-ignore
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.openLink(paymentLink);
     } else {
-      alert('Could not create invoice. Please try again later.');
+      window.open(paymentLink, '_blank');
     }
   };
 
