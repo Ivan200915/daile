@@ -25,9 +25,9 @@ git push -u origin main
 | Secret Name | Значение |
 |------------|----------|
 | `VPS_HOST` | IP адрес VPS (например: `123.45.67.89`) |
-| `VPS_USER` | Пользователь SSH (например: `root` или `deploy`) |
+| `VPS_USER` | Пользователь SSH (рекомендуется: `deploy`) |
 | `VPS_PORT` | Порт SSH (обычно `22`) |
-| `SSH_PRIVATE_KEY` | Содержимое `~/.ssh/id_rsa` (приватный ключ) |
+| `VPS_SSH_KEY` | Приватный ключ для деплоя (сгенерированный специально для этого) |
 | `GEMINI_API_KEY` | API ключ Google Gemini |
 
 ---
@@ -52,10 +52,30 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 apt install nodejs -y
 ```
 
-### 2.3 Создать директорию для приложения
+### 2.3 Создать пользователя для деплоя (Best Practice)
+> 🛡️ **Безопасность:** Не используйте `root` для деплоя. Создадим пользователя `deploy`.
+
+```bash
+# Создать пользователя
+adduser deploy
+
+# Дать права sudo без пароля (для GitHub Actions)
+echo "deploy ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Настроить SSH для deploy
+mkdir -p /home/deploy/.ssh
+chmod 700 /home/deploy/.ssh
+touch /home/deploy/.ssh/authorized_keys
+chmod 600 /home/deploy/.ssh/authorized_keys
+chown -R deploy:deploy /home/deploy/.ssh
+```
+
+### 2.4 Создать директорию для приложения
 ```bash
 mkdir -p /var/www/daily-discipline
-chown -R www-data:www-data /var/www/daily-discipline
+# Важно: права даем пользователю deploy
+chown -R deploy:deploy /var/www/daily-discipline
+chmod -R 755 /var/www/daily-discipline
 ```
 
 ### 2.4 Настроить Nginx
@@ -95,17 +115,29 @@ nginx -t  # Проверить конфигурацию
 systemctl reload nginx
 ```
 
-### 2.5 Настроить SSH ключ для GitHub Actions
+### 2.6 Настроить SSH ключ (Deploy Key)
+Рекомендуется создать **отдельный ключ** для деплоя, а не использовать личный.
+
+1. **На локальном компьютере:**
 ```bash
-# На локальной машине сгенерировать ключ (если нет):
-ssh-keygen -t rsa -b 4096 -C "deploy@daily-discipline"
+# Генерируем новый ключ (не перезаписывая старый!)
+ssh-keygen -t ed25519 -C "deploy@daily-discipline" -f ~/.ssh/daily_deploy_key
 
-# Скопировать публичный ключ на VPS:
-ssh-copy-id -i ~/.ssh/id_rsa.pub root@YOUR_VPS_IP
-
-# Приватный ключ добавить в GitHub Secrets как SSH_PRIVATE_KEY
-cat ~/.ssh/id_rsa
+# Выведет два файла:
+# ~/.ssh/daily_deploy_key (ПРИВАТНЫЙ) → копируем в GitHub Secrets (VPS_SSH_KEY)
+# ~/.ssh/daily_deploy_key.pub (ПУБЛИЧНЫЙ) → добавляем на VPS
 ```
+
+2. **Добавить публичный ключ на VPS:**
+```bash
+# На VPS (в файле /home/deploy/.ssh/authorized_keys)
+nano /home/deploy/.ssh/authorized_keys
+# Вставить содержимое daily_deploy_key.pub
+```
+
+3. **В GitHub Secrets:**
+- `VPS_USER`: `deploy`
+- `SSH_PRIVATE_KEY`: Содержимое `~/.ssh/daily_deploy_key`
 
 ---
 
