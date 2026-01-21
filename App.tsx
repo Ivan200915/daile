@@ -140,7 +140,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
   };
 
   return (
-    <div className="h-full flex flex-col p-6 pt-12 relative">
+    <div className="h-full flex flex-col p-6 pt-20 pb-10 relative">
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-[#00D4AA]/20 blur-[100px] rounded-full pointer-events-none" />
 
@@ -236,7 +236,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
         )}
       </div>
 
-      <div className="w-full z-10 pt-4 bg-transparent space-y-3">
+      <div className="w-full z-10 pt-4 pb-6 bg-transparent space-y-3">
         {step > 1 && (
           <button onClick={back} className={`w-full h-12 ${GLASS_BUTTON} flex items-center justify-center`}>
             {t.common.cancel}
