@@ -124,8 +124,35 @@ systemctl reload nginx
 ssh-keygen -t ed25519 -C "deploy@daily-discipline" -f ~/.ssh/daily_deploy_key
 
 # Выведет два файла:
-# ~/.ssh/daily_deploy_key (ПРИВАТНЫЙ) → копируем в GitHub Secrets (VPS_SSH_KEY)
-# ~/.ssh/daily_deploy_key.pub (ПУБЛИЧНЫЙ) → добавляем на VPS
+# ~/.ssh/daily_deploy_key (ПРИВАТНЫЙ)### 2.5 Настроить SSH ключ для GitHub Actions
+```bash
+# На локальной машине сгенерировать ключ (если нет):
+ssh-keygen -t rsa -b 4096 -C "deploy@daily-discipline"
+
+# Скопировать публичный ключ на VPS:
+ssh-copy-id -i ~/.ssh/id_rsa.pub root@YOUR_VPS_IP
+
+# Приватный ключ добавить в GitHub Secrets как VPS_SSH_KEY
+cat ~/.ssh/id_rsa
+```
+
+## 3. Настройка Бэкенда (Платежи)
+Для нативных платежей Telegram (Tribute/ЮKassa) требуестя Node.js сервер.
+
+1. **Добавьте новые Secrets в GitHub:**
+   - `TELEGRAM_BOT_TOKEN`: Токен от @BotFather
+   - `PAYMENT_PROVIDER_TOKEN`: Токен провайдера (Tribute) от @BotFather
+
+2. **Backend автоматически деплоится** вместе с обновленным `deploy.yml`.
+   Он запускает процесс `daily-discipline-api` через PM2.
+
+3. **Важно:** Убедитесь, что на сервере установлен Node.js:
+   ```bash
+   node -v
+   # Если нет:
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+   ```ily_deploy_key.pub (ПУБЛИЧНЫЙ) → добавляем на VPS
 ```
 
 2. **Добавить публичный ключ на VPS:**

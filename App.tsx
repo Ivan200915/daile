@@ -40,7 +40,8 @@ import {
 } from './services/healthService';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 import confetti from 'canvas-confetti';
-import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } from './locales';
+import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } from './locales/LanguageContext';
+import { createInvoice, openTelegramInvoice } from './services/paymentService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1139,6 +1140,21 @@ const SettingsScreen = ({
     ? TERRA_PROVIDERS.find(p => p.id === connectedDevice.provider)
     : null;
 
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setIsUpgrading(true);
+    // Default price 499 RUB for Premium
+    const link = await createInvoice(499, 'Premium Month');
+    setIsUpgrading(false);
+
+    if (link) {
+      openTelegramInvoice(link);
+    } else {
+      alert('Could not create invoice. Please try again later.');
+    }
+  };
+
   return (
     <div className="flex-1 px-5 pt-20 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-28">
       <h2 className="text-2xl font-bold">{t.settings.title}</h2>
@@ -1242,8 +1258,12 @@ const SettingsScreen = ({
             <p className="font-semibold">{t.settings.freePlan}</p>
             <p className="text-xs text-white/50">{t.settings.freeFeatures}</p>
           </div>
-          <button className={`px-4 py-2 ${GLASS_BUTTON} text-[#00D4AA] text-sm font-semibold`}>
-            {t.common.upgrade}
+          <button
+            onClick={handleUpgrade}
+            disabled={isUpgrading}
+            className={`px-4 py-2 ${GLASS_BUTTON} text-[#00D4AA] text-sm font-semibold disabled:opacity-50`}
+          >
+            {isUpgrading ? 'Loading...' : t.common.upgrade}
           </button>
         </div>
       </div>

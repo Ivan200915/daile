@@ -27,7 +27,7 @@ jobs:
         env:
           API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
-      - name: Deploy to VPS via SSH
+      - name: Deploy Frontend to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -38,7 +38,17 @@ jobs:
           target: "/var/www/daily-discipline"
           strip_components: 1
 
-      - name: Restart Nginx (optional)
+      - name: Deploy Backend to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "server/*,nginx.conf,start_server.sh"
+          target: "/var/www/daily-discipline"
+
+      - name: Setup & Restart Services
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -46,5 +56,24 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            sudo systemctl reload nginx || true
-            echo "Deployed at $(date)"
+            # Update Nginx Config
+            sudo cp /var/www/daily-discipline/nginx.conf /etc/nginx/sites-available/default
+            sudo nginx -t && sudo systemctl reload nginx
+
+            # Setup Backend
+            cd /var/www/daily-discipline/server
+            # Create .env file with secrets
+            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" > .env
+            echo "PAYMENT_PROVIDER_TOKEN=${{ secrets.PAYMENT_PROVIDER_TOKEN }}" >> .env
+            
+            # Install & Restart
+            npm install --production
+            if command -v pm2 &> /dev/null; then
+                pm2 reload daily-discipline-api || pm2 start index.js --name "daily-discipline-api"
+            else
+                npm install -g pm2
+                pm2 start index.js --name "daily-discipline-api"
+            fi
+            pm2 save
+
+            echo "Deployed Backend & Frontend at $(date)"
