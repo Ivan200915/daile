@@ -92,7 +92,7 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
   ];
 
   return (
-    <div className={`${GLASS_PANEL} rounded-t-[24px] rounded-b-none border-b-0 px-4 py-3 flex justify-around items-center`}>
+    <div className={`${GLASS_PANEL} rounded-t-[24px] rounded-b-none border-b-0 px-4 py-3 pb-8 flex justify-around items-center`}>
       {tabs.map(tab => (
         <button
           key={tab.key}
@@ -140,7 +140,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
   };
 
   return (
-    <div className="h-full flex flex-col p-6 pt-20 pb-10 relative">
+    <div className="h-full flex flex-col px-5 pt-24 pb-10 relative">
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-[#00D4AA]/20 blur-[100px] rounded-full pointer-events-none" />
 
@@ -630,7 +630,7 @@ const Dashboard = ({
   };
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-5 overflow-y-auto no-scrollbar pb-24 px-1">
+    <div className="h-full flex flex-col px-5 pt-20 space-y-5 overflow-y-auto no-scrollbar pb-28">
       {editingMetric && (
         <EditMetricModal
           metric={editingMetric}
@@ -928,7 +928,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
   };
 
   return (
-    <div className="flex-1 p-6 flex flex-col space-y-5 overflow-y-auto no-scrollbar pb-24 px-1">
+    <div className="flex-1 px-5 pt-20 flex flex-col space-y-5 overflow-y-auto no-scrollbar pb-28">
       <div className="flex justify-between items-center shrink-0">
         <h2 className="text-2xl font-bold">{t.history.title}</h2>
         {streak.freezesAvailable > 0 && (
@@ -1140,7 +1140,7 @@ const SettingsScreen = ({
     : null;
 
   return (
-    <div className="flex-1 p-6 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-24 px-1">
+    <div className="flex-1 px-5 pt-20 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-28">
       <h2 className="text-2xl font-bold">{t.settings.title}</h2>
 
       {/* Connected Devices */}
