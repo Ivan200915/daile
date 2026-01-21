@@ -1,75 +1,128 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { Meal, MacroData } from '../types';
+import { MacroData } from '../types';
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Together AI configuration
+const TOGETHER_API_KEY = process.env.API_KEY || '';
+const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions';
+
+// Best vision model on Together AI for quality results
+const VISION_MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8';
+const TEXT_MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8';
+
+const isApiConfigured = TOGETHER_API_KEY && TOGETHER_API_KEY !== 'no_key' && TOGETHER_API_KEY !== 'dummy';
+
+// Helper to call Together AI API
+async function callTogetherAI(messages: any[], model: string): Promise<string | null> {
+  if (!isApiConfigured) return null;
+
+  try {
+    const response = await fetch(TOGETHER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: 1024,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Together AI Error:', response.status, await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch (error) {
+    console.error('Together AI Request Error:', error);
+    return null;
+  }
+}
 
 // Analyze food image to get name and macros
 export const analyzeFoodImage = async (base64Image: string): Promise<{ name: string; macros: MacroData } | null> => {
-  try {
-    const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+  const fallback = {
+    name: "Detected Meal (Demo)",
+    macros: { calories: 450, protein: 20, fat: 15, carbs: 55 }
+  };
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: cleanBase64,
-              mimeType: "image/jpeg",
-            },
-          },
-          {
-            text: "Identify this dish. Return JSON with fields: name (string), calories (number), protein (number, grams), fat (number, grams), carbs (number, grams). Estimate based on a standard serving size visible."
-          },
-        ],
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            calories: { type: Type.NUMBER },
-            protein: { type: Type.NUMBER },
-            fat: { type: Type.NUMBER },
-            carbs: { type: Type.NUMBER },
-          },
+  if (!isApiConfigured) return fallback;
+
+  const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+
+  const messages = [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'image_url',
+          image_url: {
+            url: `data:image/jpeg;base64,${cleanBase64}`
+          }
         },
-      },
-    });
+        {
+          type: 'text',
+          text: `Analyze this food image. Identify the dish and estimate its nutritional content for a standard serving.
 
-    const text = response.text;
-    if (!text) return null;
+Return ONLY valid JSON in this exact format (no other text):
+{"name": "dish name", "calories": 0, "protein": 0, "fat": 0, "carbs": 0}
 
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("Gemini Food Analysis Error:", error);
-    // Fallback mock data if API fails or key is missing
+Where calories is total kcal, and protein/fat/carbs are in grams.`
+        }
+      ]
+    }
+  ];
+
+  const response = await callTogetherAI(messages, VISION_MODEL);
+
+  if (!response) return fallback;
+
+  try {
+    // Extract JSON from response (may have extra text)
+    const jsonMatch = response.match(/\{[\s\S]*?\}/);
+    if (!jsonMatch) return fallback;
+
+    const parsed = JSON.parse(jsonMatch[0]);
     return {
-      name: "Detected Meal",
-      macros: { calories: 450, protein: 20, fat: 15, carbs: 55 }
+      name: parsed.name || "Unknown Dish",
+      macros: {
+        calories: parsed.calories || 0,
+        protein: parsed.protein || 0,
+        fat: parsed.fat || 0,
+        carbs: parsed.carbs || 0
+      }
     };
+  } catch (error) {
+    console.error('JSON Parse Error:', error);
+    return fallback;
   }
 };
 
 // Generate a daily insight
 export const generateDailyInsight = async (steps: number, sleep: number, meals: number): Promise<string> => {
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `User Stats Today: ${steps} steps, ${sleep} hours sleep, ${meals} meals logged. 
-      Generate a single, short, motivating one-sentence insight or correlation (max 15 words). 
-      Example: "On days with 7k+ steps, you sleep 20min longer."`,
-    });
-    return response.text || "Consistency is key to long-term success.";
-  } catch (error) {
-    console.error("Gemini Insight Error:", error);
-    return "Great job staying active today!";
-  }
+  const fallback = "Consistency is key to long-term success.";
+
+  if (!isApiConfigured) return fallback;
+
+  const messages = [
+    {
+      role: 'system',
+      content: 'You are a brief health coach. Respond with exactly one short motivating sentence (max 15 words).'
+    },
+    {
+      role: 'user',
+      content: `User stats today: ${steps} steps, ${sleep} hours sleep, ${meals} meals logged. Give a quick insight.`
+    }
+  ];
+
+  const response = await callTogetherAI(messages, TEXT_MODEL);
+  return response || fallback;
 };
 
-// Generate weekly AI review
+// Weekly review data type
 export interface WeeklyReviewData {
   avgSteps: number;
   avgSleep: number;
@@ -80,16 +133,34 @@ export interface WeeklyReviewData {
   currentStreak: number;
 }
 
+// Generate weekly AI review
 export const generateWeeklyReview = async (data: WeeklyReviewData): Promise<{
   summary: string;
   insights: string[];
   recommendation: string;
   grade: string;
 }> => {
-  try {
-    const prompt = `You are a health coach. Analyze this week's data and provide feedback in JSON format.
+  const fallback = {
+    summary: "Keep building your healthy habits day by day!",
+    insights: [
+      "Consistency is more important than perfection",
+      "Small improvements compound over time",
+      "Focus on one habit at a time for best results"
+    ],
+    recommendation: "Try to increase your step count by 500 steps next week.",
+    grade: "B"
+  };
 
-Weekly Stats:
+  if (!isApiConfigured) return fallback;
+
+  const messages = [
+    {
+      role: 'system',
+      content: 'You are a health coach analyzing weekly data. Respond ONLY with valid JSON, no other text.'
+    },
+    {
+      role: 'user',
+      content: `Analyze this week's health data:
 - Average Steps: ${data.avgSteps}/day (goal: 10,000)
 - Average Sleep: ${data.avgSleep} hours (goal: 8)
 - Average Active Minutes: ${data.avgActive} min (goal: 60)
@@ -98,45 +169,28 @@ Weekly Stats:
 - Habit Completion: ${data.habitCompletionRate}%
 - Current Streak: ${data.currentStreak} days
 
-Return JSON with:
-- summary: 1 sentence overview (max 20 words)
-- insights: array of 3 specific observations/correlations (each max 15 words)
-- recommendation: 1 actionable tip for next week (max 20 words)
-- grade: letter grade A/B/C/D based on overall performance`;
+Return JSON:
+{"summary": "1 sentence overview", "insights": ["insight1", "insight2", "insight3"], "recommendation": "1 actionable tip", "grade": "A/B/C/D"}`
+    }
+  ];
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            summary: { type: Type.STRING },
-            insights: { type: Type.ARRAY, items: { type: Type.STRING } },
-            recommendation: { type: Type.STRING },
-            grade: { type: Type.STRING },
-          },
-        },
-      },
-    });
+  const response = await callTogetherAI(messages, TEXT_MODEL);
 
-    const text = response.text;
-    if (!text) throw new Error("No response");
+  if (!response) return fallback;
 
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("Gemini Weekly Review Error:", error);
-    // Fallback
+  try {
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return fallback;
+
+    const parsed = JSON.parse(jsonMatch[0]);
     return {
-      summary: "Keep building your healthy habits day by day!",
-      insights: [
-        "Consistency is more important than perfection",
-        "Small improvements compound over time",
-        "Focus on one habit at a time for best results"
-      ],
-      recommendation: "Try to increase your step count by 500 steps next week.",
-      grade: "B"
+      summary: parsed.summary || fallback.summary,
+      insights: Array.isArray(parsed.insights) ? parsed.insights : fallback.insights,
+      recommendation: parsed.recommendation || fallback.recommendation,
+      grade: parsed.grade || fallback.grade
     };
+  } catch (error) {
+    console.error('Weekly Review Parse Error:', error);
+    return fallback;
   }
 };
