@@ -45,6 +45,7 @@ import { getPremiumStatus } from './services/premiumService';
 import { PremiumProvider, usePremium, PremiumGate } from './services/PremiumContext';
 import { loadGamificationData, getLevelFromXp, addXp, checkAchievements, getCurrentWeeklyChallenge } from './services/gamificationService';
 import { analyzeCorrelations, generateRecommendations, generateReportData } from './services/analyticsService';
+import { hapticMedium, hapticSuccess, hapticLevelUp } from './services/feedbackService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1627,10 +1628,12 @@ function AppContent() {
   };
 
   const toggleHabit = (id: string) => {
+    hapticMedium(); // Vibrate on habit toggle
     setHabits(habits.map(h => h.id === id ? { ...h, completed: !h.completed } : h));
   };
 
   const handleCheckInFinish = (insight: string) => {
+    hapticSuccess(); // Celebration vibration on day close
     // Update today's log as closed
     const todayLog: DailyLog = {
       date: getTodayDate(),
