@@ -137,11 +137,11 @@ cat ~/.ssh/id_rsa
 ```
 
 ## 3. Настройка Бэкенда (Платежи)
-Для нативных платежей Telegram (Tribute/ЮKassa) требуестя Node.js сервер.
+Для нативных платежей Telegram (Stars ⭐ или Tribute) требуется Node.js сервер.
 
 1. **Добавьте новые Secrets в GitHub:**
    - `TELEGRAM_BOT_TOKEN`: Токен от @BotFather
-   - `PAYMENT_PROVIDER_TOKEN`: Токен провайдера (Tribute) от @BotFather
+   - `PAYMENT_PROVIDER_TOKEN`: Токен провайдера (Tribute). **Оставьте пустым (или не добавляйте), если используете только Telegram Stars (⭐ XTR).**
 
 2. **Backend автоматически деплоится** вместе с обновленным `deploy.yml`.
    Он запускает процесс `daily-discipline-api` через PM2.

@@ -1144,8 +1144,8 @@ const SettingsScreen = ({
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
-    // Default price 499 RUB for Premium
-    const link = await createInvoice(499, 'Premium Month');
+    // Default price 250 Stars (XTR) for Premium
+    const link = await createInvoice(250, 'Premium Month');
     setIsUpgrading(false);
 
     if (link) {

@@ -23,17 +23,20 @@ app.post('/api/create-invoice', async (req, res) => {
     try {
         const { title, description, payload, price, currency } = req.body;
 
-        // Price in smallest units (cents/kopecks). E.g. 100 RUB = 10000
-        const prices = [{ label: 'Premium', amount: price * 100 }];
+        const isStars = currency === 'XTR';
+
+        // For Stars (XTR), price is direct count. For fiat, it's cents.
+        const amount = isStars ? price : price * 100;
+        const prices = [{ label: title || 'Premium', amount: amount }];
 
         const response = await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`, {
             title: title || 'Premium Subscription',
             description: description || 'Unlock all features',
             payload: payload || 'premium_upgrade',
-            provider_token: PAYMENTS_TOKEN,
-            currency: currency || 'RUB',
+            // For Stars, provider_token must be empty string
+            provider_token: isStars ? '' : PAYMENTS_TOKEN,
+            currency: currency || 'XTR',
             prices: prices,
-            // prices: [{ label: 'Premium', amount: 10000 }], // 100.00 RUB example
             need_name: false,
             need_phone_number: false,
             need_email: false,

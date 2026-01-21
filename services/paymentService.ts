@@ -17,8 +17,8 @@ export const createInvoice = async (price: number, label: string): Promise<strin
                 title: 'Daily Discipline Premium',
                 description: `Upgrade to ${label}`,
                 payload: `premium_${price}`,
-                price: price, // in basic units (e.g. RUB)
-                currency: 'RUB'
+                price: price, // in Stars (XTR)
+                currency: 'XTR'
             })
         });
 
