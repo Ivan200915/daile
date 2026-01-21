@@ -86,6 +86,71 @@ app.post('/api/webhook', async (req, res) => {
             // For static app, we rely on the client refreshing or checking status
         }
 
+        // C. Bot Commands
+        if (update.message && update.message.text) {
+            const chatId = update.message.chat.id;
+            const text = update.message.text;
+            const userId = update.message.from.id;
+
+            // /start command
+            if (text.startsWith('/start')) {
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `👋 Привет! Я Daily Discipline Bot.\n\n🎯 Открой приложение, чтобы начать отслеживать привычки:\nhttps://t.me/DailyDisciplin_bot/app\n\nКоманды:\n/stats - статистика за неделю\n/today - прогресс сегодня\n/streak - текущий стрик\n/help - все команды`,
+                    parse_mode: 'HTML'
+                });
+            }
+
+            // /help command
+            if (text === '/help') {
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `📋 <b>Доступные команды:</b>\n\n/stats - 📊 Статистика за неделю\n/today - ✅ Прогресс сегодня\n/streak - 🔥 Текущий стрик\n/premium - ⭐ Улучшить подписку\n/help - ❓ Эта справка\n\n🎯 Открыть приложение:\nhttps://t.me/DailyDisciplin_bot/app`,
+                    parse_mode: 'HTML'
+                });
+            }
+
+            // /stats command
+            if (text === '/stats') {
+                // TODO: Fetch real stats from database
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `📊 <b>Твоя статистика за неделю:</b>\n\n✅ Закрыто дней: 5/7\n💪 Привычек выполнено: 28\n🍽️ Приёмов пищи: 14\n⚡ Средняя энергия: 7.2/10\n\n🎯 Открой приложение для деталей:\nhttps://t.me/DailyDisciplin_bot/app`,
+                    parse_mode: 'HTML'
+                });
+            }
+
+            // /today command
+            if (text === '/today') {
+                const today = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+                // TODO: Fetch real today's data
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `📅 <b>${today}</b>\n\n🎯 Привычки: 3/5 выполнено\n🍽️ Еда: 2 приёма залогировано\n👟 Шаги: 4,230\n😴 Сон: 7.5ч\n\n✅ Открой приложение, чтобы закрыть день:\nhttps://t.me/DailyDisciplin_bot/app`,
+                    parse_mode: 'HTML'
+                });
+            }
+
+            // /streak command
+            if (text === '/streak') {
+                // TODO: Fetch real streak data
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `🔥 <b>Твой стрик:</b>\n\n🔥 Текущий: 7 дней\n🏆 Лучший: 14 дней\n❄️ Заморозок: 2\n\n💪 Продолжай в том же духе!\nhttps://t.me/DailyDisciplin_bot/app`,
+                    parse_mode: 'HTML'
+                });
+            }
+
+            // /premium command
+            if (text === '/premium') {
+                await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    chat_id: chatId,
+                    text: `⭐ <b>Daily Discipline Premium</b>\n\n✅ AI-коуч и персональные инсайты\n✅ Полная история без ограничений\n✅ Продвинутая аналитика\n✅ Приоритетная поддержка\n\n💳 Улучшить подписку:\nhttps://web.tribute.tg/p/pXj`,
+                    parse_mode: 'HTML'
+                });
+            }
+        }
+
     } catch (error) {
         console.error('Webhook Error:', error.message);
     }
