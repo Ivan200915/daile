@@ -139,11 +139,11 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
   };
 
   return (
-    <div className="h-full flex flex-col p-6 pt-12 relative overflow-hidden">
+    <div className="h-full flex flex-col p-6 pt-12 relative">
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-[#00D4AA]/20 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="z-10 flex-1 flex flex-col items-center overflow-y-auto no-scrollbar pb-6">
+      <div className="z-10 flex-1 flex flex-col items-center overflow-y-auto overflow-x-visible no-scrollbar pb-6 px-1">
         {step === 1 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-white/20 to-transparent backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(0,212,170,0.3)] flex items-center justify-center mb-4">
@@ -626,7 +626,7 @@ const Dashboard = ({
   };
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-5 overflow-y-auto no-scrollbar pb-24">
+    <div className="h-full flex flex-col p-6 space-y-5 overflow-y-auto no-scrollbar pb-24 px-1">
       {editingMetric && (
         <EditMetricModal
           metric={editingMetric}
@@ -924,7 +924,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
   };
 
   return (
-    <div className="flex-1 p-6 flex flex-col space-y-5 overflow-y-auto no-scrollbar pb-24">
+    <div className="flex-1 p-6 flex flex-col space-y-5 overflow-y-auto no-scrollbar pb-24 px-1">
       <div className="flex justify-between items-center shrink-0">
         <h2 className="text-2xl font-bold">{t.history.title}</h2>
         {streak.freezesAvailable > 0 && (
@@ -1136,7 +1136,7 @@ const SettingsScreen = ({
     : null;
 
   return (
-    <div className="flex-1 p-6 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-24">
+    <div className="flex-1 p-6 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-24 px-1">
       <h2 className="text-2xl font-bold">{t.settings.title}</h2>
 
       {/* Connected Devices */}
