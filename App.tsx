@@ -42,6 +42,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip
 import confetti from 'canvas-confetti';
 import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } from './locales/LanguageContext';
 import { getPremiumStatus } from './services/premiumService';
+import { PremiumProvider, usePremium, PremiumGate } from './services/PremiumContext';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1056,37 +1057,39 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
       )}
 
       {activeTab === 'AI Coach' && (
-        <div className="space-y-4">
-          <div className={`${GLASS_PANEL} p-6 text-center`}>
-            <span className="text-5xl mb-4 block">🤖</span>
-            <h3 className="text-xl font-bold mb-2">{t.history.weeklyAICoach}</h3>
-            <p className="text-sm text-white/60 mb-6">
-              {t.history.weeklyAICoachDesc}
-            </p>
-            <button
-              onClick={onRequestWeeklyReview}
-              className={`w-full py-4 ${ACCENT_BUTTON} flex items-center justify-center space-x-2`}
-            >
-              <span>{t.history.generateReview}</span>
-              <Icons.ArrowRight size={18} />
-            </button>
-          </div>
+        <PremiumGate feature="AI-коуч">
+          <div className="space-y-4">
+            <div className={`${GLASS_PANEL} p-6 text-center`}>
+              <span className="text-5xl mb-4 block">🤖</span>
+              <h3 className="text-xl font-bold mb-2">{t.history.weeklyAICoach}</h3>
+              <p className="text-sm text-white/60 mb-6">
+                {t.history.weeklyAICoachDesc}
+              </p>
+              <button
+                onClick={onRequestWeeklyReview}
+                className={`w-full py-4 ${ACCENT_BUTTON} flex items-center justify-center space-x-2`}
+              >
+                <span>{t.history.generateReview}</span>
+                <Icons.ArrowRight size={18} />
+              </button>
+            </div>
 
-          {/* Sample Insights */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-white/70">{t.history.recentInsights}</h4>
-            {[
-              { icon: '🏃', txt: "More steps = better sleep quality" },
-              { icon: '🥗', txt: "High protein lunch reduced snacking" },
-              { icon: '⚡', txt: "Energy peaks after morning workouts" },
-            ].map((ins, i) => (
-              <div key={i} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
-                <span className="text-2xl">{ins.icon}</span>
-                <p className="text-sm font-medium">{ins.txt}</p>
-              </div>
-            ))}
+            {/* Sample Insights */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-white/70">{t.history.recentInsights}</h4>
+              {[
+                { icon: '🏃', txt: "More steps = better sleep quality" },
+                { icon: '🥗', txt: "High protein lunch reduced snacking" },
+                { icon: '⚡', txt: "Energy peaks after morning workouts" },
+              ].map((ins, i) => (
+                <div key={i} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
+                  <span className="text-2xl">{ins.icon}</span>
+                  <p className="text-sm font-medium">{ins.txt}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </PremiumGate>
       )}
     </div>
   );
@@ -1293,6 +1296,22 @@ const SettingsScreen = ({
         <p className="font-semibold">{user.goal}</p>
       </div>
 
+      {/* Notifications */}
+      <div className={`${GLASS_PANEL} p-5`}>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🔔 Уведомления</h3>
+        <div className="space-y-3">
+          <label className="flex items-center justify-between">
+            <span className="text-sm">Утреннее напоминание (9:00)</span>
+            <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#00D4AA]" />
+          </label>
+          <label className="flex items-center justify-between">
+            <span className="text-sm">Вечернее напоминание (21:00)</span>
+            <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#00D4AA]" />
+          </label>
+        </div>
+        <p className="text-xs text-white/40 mt-3">Бот отправит напоминание в Telegram</p>
+      </div>
+
       {/* Language Selector */}
       {onLanguageChange && (
         <div className={`${GLASS_PANEL} p-5`}>
@@ -1311,6 +1330,27 @@ const SettingsScreen = ({
           </div>
         </div>
       )}
+      {/* Referral Program */}
+      <div className={`${GLASS_PANEL} p-5`}>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🎁 Пригласи друга</h3>
+        <p className="text-sm text-white/60 mb-4">Получи 7 дней Premium за каждого друга!</p>
+        <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
+          <code className="text-[#00D4AA] font-mono text-sm">t.me/DailyDisciplin_bot?start=ref_DD...</code>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText('https://t.me/DailyDisciplin_bot?start=ref_DD123');
+              alert('Ссылка скопирована!');
+            }}
+            className="text-xs bg-[#00D4AA]/20 text-[#00D4AA] px-3 py-1 rounded-lg"
+          >
+            📋 Copy
+          </button>
+        </div>
+        <div className="flex justify-between mt-3 text-sm">
+          <span className="text-white/50">Приглашено: <strong className="text-white">0</strong></span>
+          <span className="text-white/50">Заработано: <strong className="text-[#00D4AA]">0 дней</strong></span>
+        </div>
+      </div>
 
       {/* Danger Zone */}
       <div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
@@ -1585,8 +1625,10 @@ function AppContent() {
 // Wrapped export with LanguageProvider
 export default function App() {
   return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
+    <PremiumProvider>
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
+    </PremiumProvider>
   );
 }
