@@ -630,7 +630,7 @@ const Dashboard = ({
   };
 
   return (
-    <div className="h-full flex flex-col px-5 pt-20 space-y-5 overflow-y-auto no-scrollbar pb-28">
+    <div className="h-full flex flex-col px-5 pt-24 space-y-5 overflow-y-auto no-scrollbar pb-28">
       {editingMetric && (
         <EditMetricModal
           metric={editingMetric}
