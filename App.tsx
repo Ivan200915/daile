@@ -110,6 +110,7 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
 // --- Screens ---
 
 const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings) => void }) => {
+  const { t } = useLanguage();
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState('');
   const [selectedHabits, setSelectedHabits] = useState<string[]>(['water', 'workout', 'no-sugar']);
@@ -149,22 +150,27 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
             <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-white/20 to-transparent backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(0,212,170,0.3)] flex items-center justify-center mb-4">
               <Icons.Active size={40} className="text-[#00D4AA]" />
             </div>
-            <h1 className="text-4xl font-bold leading-tight">Discipline in<br /><span className="text-[#00D4AA]">2 mins/day</span></h1>
-            <p className="text-white/60 text-lg">The tracker that works by itself.</p>
+            <h1 className="text-4xl font-bold leading-tight">{t.onboarding.welcome}<br /><span className="text-[#00D4AA]">2 mins/day</span></h1>
+            <p className="text-white/60 text-lg">{t.onboarding.welcomeSubtitle}</p>
           </div>
         )}
 
         {step === 2 && (
           <div className="w-full flex-1 flex flex-col">
-            <h2 className="text-2xl font-bold mb-6 text-center">What is your main goal?</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">{t.onboarding.chooseGoal}</h2>
             <div className="w-full space-y-4 flex-1 overflow-y-auto p-1">
-              {['Weight Loss', 'More Energy', 'Build Discipline', 'Better Health'].map((g) => (
+              {[
+                { key: 'Weight Loss', label: t.onboarding.goals.weightLoss },
+                { key: 'More Energy', label: t.onboarding.goals.moreEnergy },
+                { key: 'Build Discipline', label: t.onboarding.goals.buildDiscipline },
+                { key: 'Better Health', label: t.onboarding.goals.improveHealth }
+              ].map((g) => (
                 <button
-                  key={g}
-                  onClick={() => setGoal(g)}
-                  className={`w-full p-5 text-left ${GLASS_PANEL_LIGHT} ${goal === g ? 'ring-2 ring-[#00D4AA] bg-[#00D4AA]/10' : ''}`}
+                  key={g.key}
+                  onClick={() => setGoal(g.key)}
+                  className={`w-full p-5 text-left ${GLASS_PANEL_LIGHT} ${goal === g.key ? 'ring-2 ring-[#00D4AA] bg-[#00D4AA]/10' : ''}`}
                 >
-                  <span className="text-lg font-medium">{g}</span>
+                  <span className="text-lg font-medium">{g.label}</span>
                 </button>
               ))}
             </div>
@@ -173,8 +179,8 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
 
         {step === 3 && (
           <div className="w-full flex-1 flex flex-col">
-            <h2 className="text-2xl font-bold mb-2 text-center">Select your habits</h2>
-            <p className="text-white/50 text-sm mb-6 text-center">Choose 3-5 habits to track daily</p>
+            <h2 className="text-2xl font-bold mb-2 text-center">{t.onboarding.pickHabits}</h2>
+            <p className="text-white/50 text-sm mb-6 text-center">{t.onboarding.pickHabitsHint}</p>
             <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto p-1">
               {AVAILABLE_HABITS.map((habit) => (
                 <button
@@ -187,17 +193,16 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
                 </button>
               ))}
             </div>
-            <p className="text-center text-white/40 text-sm mt-4">{selectedHabits.length}/5 selected</p>
           </div>
         )}
 
         {step === 4 && (
           <div className="w-full flex-1 flex flex-col">
-            <h2 className="text-2xl font-bold mb-2 text-center">Your stats (optional)</h2>
+            <h2 className="text-2xl font-bold mb-2 text-center">{t.onboarding.yourStats}</h2>
             <p className="text-white/50 text-sm mb-6 text-center">Helps calculate personalized calorie goals</p>
             <div className="space-y-4">
               <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-                <label className="text-sm text-white/50 block mb-2">Height (cm)</label>
+                <label className="text-sm text-white/50 block mb-2">{t.onboarding.height}</label>
                 <input
                   type="number"
                   value={height}
@@ -207,7 +212,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
                 />
               </div>
               <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-                <label className="text-sm text-white/50 block mb-2">Weight (kg)</label>
+                <label className="text-sm text-white/50 block mb-2">{t.onboarding.weight}</label>
                 <input
                   type="number"
                   value={weight}
@@ -217,16 +222,15 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
                 />
               </div>
             </div>
-            <button onClick={next} className="text-[#00D4AA] mt-4 text-sm">Skip this step →</button>
           </div>
         )}
 
         {step === 5 && (
           <div className="w-full flex-1 flex flex-col items-center justify-center text-center">
-            <h2 className="text-2xl font-bold mb-6">Health Connect</h2>
+            <h2 className="text-2xl font-bold mb-6">{t.onboarding.connectHealth}</h2>
             <div className={`${GLASS_PANEL} p-8 flex flex-col items-center space-y-4`}>
               <Icons.Active size={48} className="text-red-500" />
-              <p className="text-white/70">We automatically sync steps, sleep, and activity from Apple Health.</p>
+              <p className="text-white/70">{t.onboarding.connectHealthSubtitle}</p>
             </div>
           </div>
         )}
@@ -235,7 +239,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
       <div className="w-full z-10 pt-4 bg-transparent space-y-3">
         {step > 1 && (
           <button onClick={back} className={`w-full h-12 ${GLASS_BUTTON} flex items-center justify-center`}>
-            Back
+            {t.common.cancel}
           </button>
         )}
         <button
@@ -260,7 +264,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           disabled={(step === 2 && !goal) || (step === 3 && selectedHabits.length < 3)}
           className={`w-full h-14 ${ACCENT_BUTTON} flex items-center justify-center text-lg disabled:opacity-50`}
         >
-          {step === 1 ? 'Start' : step === 5 ? 'Connect & Finish' : 'Next'}
+          {step === 1 ? t.onboarding.start : step === 5 ? t.onboarding.connectFinish : t.common.next}
         </button>
       </div>
     </div>
