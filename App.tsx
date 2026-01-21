@@ -44,6 +44,7 @@ import { LanguageProvider, useLanguage, LANGUAGE_NAMES, AVAILABLE_LANGUAGES } fr
 import { getPremiumStatus } from './services/premiumService';
 import { PremiumProvider, usePremium, PremiumGate } from './services/PremiumContext';
 import { loadGamificationData, getLevelFromXp, addXp, checkAchievements, getCurrentWeeklyChallenge } from './services/gamificationService';
+import { analyzeCorrelations, generateRecommendations, generateReportData } from './services/analyticsService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1104,6 +1105,47 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {/* AI Insights */}
+          {(() => {
+            const correlations = analyzeCorrelations(logs);
+            const recommendations = generateRecommendations(logs);
+            return (
+              <>
+                {/* Correlations */}
+                {correlations.length > 0 && (
+                  <div className={`${GLASS_PANEL} p-4`}>
+                    <h3 className="text-sm font-semibold text-white/70 mb-3">🧠 Обнаружены паттерны</h3>
+                    <div className="space-y-2">
+                      {correlations.slice(0, 3).map((c, i) => (
+                        <div key={i} className={`${GLASS_PANEL_LIGHT} p-3`}>
+                          <p className="text-sm">{c.insightRu}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {recommendations.length > 0 && (
+                  <div className={`${GLASS_PANEL} p-4`}>
+                    <h3 className="text-sm font-semibold text-white/70 mb-3">💡 Рекомендации</h3>
+                    <div className="space-y-2">
+                      {recommendations.slice(0, 3).map((r, i) => (
+                        <div key={i} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
+                          <span className="text-xl">{r.icon}</span>
+                          <div>
+                            <p className="text-sm font-medium">{r.titleRu}</p>
+                            <p className="text-xs text-white/50">{r.descriptionRu}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </>
       )}
 
