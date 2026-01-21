@@ -1102,6 +1102,7 @@ const SettingsScreen = ({
   language?: Language,
   onLanguageChange?: (lang: Language) => void
 }) => {
+  const { t } = useLanguage();
   const [calories, setCalories] = useState(user.targetCalories.toString());
   const [protein, setProtein] = useState(user.targetProtein.toString());
   const [connectedDevice, setConnectedDevice] = useState<TerraUser | null>(getConnectedDevice());
@@ -1136,11 +1137,11 @@ const SettingsScreen = ({
 
   return (
     <div className="flex-1 p-6 flex flex-col space-y-6 overflow-y-auto no-scrollbar pb-24">
-      <h2 className="text-2xl font-bold">Settings</h2>
+      <h2 className="text-2xl font-bold">{t.settings.title}</h2>
 
       {/* Connected Devices */}
       <div className={`${GLASS_PANEL} p-5 space-y-4`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider">Connected Devices</h3>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider">{t.settings.connectedDevices}</h3>
 
         {connectedDevice && connectedProvider ? (
           <div className={`${GLASS_PANEL_LIGHT} p-4 flex items-center justify-between`}>
@@ -1155,7 +1156,7 @@ const SettingsScreen = ({
               onClick={handleDisconnect}
               className="text-red-400 text-sm"
             >
-              Disconnect
+              {t.common.disconnect}
             </button>
           </div>
         ) : (
@@ -1166,7 +1167,7 @@ const SettingsScreen = ({
                 className={`w-full p-4 ${GLASS_PANEL_LIGHT} flex items-center justify-center space-x-2 text-[#00D4AA]`}
               >
                 <Icons.Plus size={18} />
-                <span className="font-medium">Connect Fitness Tracker</span>
+                <span className="font-medium">{t.settings.connectFitness}</span>
               </button>
             ) : (
               <div className="space-y-2">
@@ -1187,7 +1188,7 @@ const SettingsScreen = ({
                   onClick={() => setShowProviders(false)}
                   className="w-full text-center text-white/50 text-sm mt-2"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </button>
               </div>
             )}
@@ -1195,17 +1196,17 @@ const SettingsScreen = ({
         )}
 
         <p className="text-xs text-white/40 text-center">
-          Syncs steps, sleep, and activity automatically
+          {t.settings.syncsAuto}
         </p>
       </div>
 
       {/* Goals Section */}
       <div className={`${GLASS_PANEL} p-5 space-y-4`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider">Daily Goals</h3>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider">{t.settings.dailyGoals}</h3>
 
         <div className="space-y-3">
           <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-            <label className="text-sm text-white/50 block mb-2">Calories</label>
+            <label className="text-sm text-white/50 block mb-2">{t.settings.caloriesGoal}</label>
             <input
               type="number"
               value={calories}
@@ -1214,7 +1215,7 @@ const SettingsScreen = ({
             />
           </div>
           <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-            <label className="text-sm text-white/50 block mb-2">Protein (g)</label>
+            <label className="text-sm text-white/50 block mb-2">{t.settings.proteinGoal}</label>
             <input
               type="number"
               value={protein}
@@ -1225,27 +1226,27 @@ const SettingsScreen = ({
         </div>
 
         <button onClick={save} className={`w-full py-3 ${ACCENT_BUTTON}`}>
-          Save Goals
+          {t.settings.saveGoals}
         </button>
       </div>
 
       {/* Subscription Placeholder */}
       <div className={`${GLASS_PANEL} p-5`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Subscription</h3>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">{t.settings.subscription}</h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-semibold">Free Plan</p>
-            <p className="text-xs text-white/50">3 days history • Basic tracking</p>
+            <p className="font-semibold">{t.settings.freePlan}</p>
+            <p className="text-xs text-white/50">{t.settings.freeFeatures}</p>
           </div>
           <button className={`px-4 py-2 ${GLASS_BUTTON} text-[#00D4AA] text-sm font-semibold`}>
-            Upgrade
+            {t.common.upgrade}
           </button>
         </div>
       </div>
 
       {/* Goal */}
       <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-        <p className="text-sm text-white/50">Your Goal</p>
+        <p className="text-sm text-white/50">{t.settings.yourGoal}</p>
         <p className="font-semibold">{user.goal}</p>
       </div>
 
@@ -1270,16 +1271,16 @@ const SettingsScreen = ({
 
       {/* Danger Zone */}
       <div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
-        <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">Danger Zone</h3>
+        <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">{t.settings.dangerZone}</h3>
         <button
           onClick={() => {
-            if (confirm('Are you sure? This will delete all your data.')) {
+            if (confirm(t.settings.resetConfirm)) {
               onReset();
             }
           }}
           className="w-full py-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-400 font-medium"
         >
-          Reset All Data
+          {t.settings.resetAllData}
         </button>
       </div>
     </div>
