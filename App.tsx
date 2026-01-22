@@ -773,6 +773,54 @@ const Dashboard = ({
         );
       })()}
 
+      {/* Mood Predictor Widget */}
+      {(() => {
+        // Build mock history from logs
+        const mockHistory = logs.slice(-7).map(log => ({
+          date: log.date,
+          mood: log.checkIn?.mood || 3,
+          energy: log.checkIn?.energy || 5,
+          habits: {
+            workout: log.habits?.some(h => h.id === 'workout' && h.completed) || false,
+            meditation: log.habits?.some(h => h.id === 'meditation' && h.completed) || false,
+            sleep: log.metrics?.sleepHours || 7,
+            steps: log.metrics?.steps || 5000
+          }
+        }));
+
+        if (mockHistory.length === 0) return null;
+
+        const todayHabits = {
+          workout: habits.some(h => h.id === 'workout' && h.completed),
+          meditation: habits.some(h => h.id === 'meditation' && h.completed),
+          sleep: 7.5,
+          steps: 6000
+        };
+
+        const prediction = predictTomorrowMood(mockHistory, todayHabits);
+
+        return (
+          <div className={`${GLASS_PANEL} p-4 bg-gradient-to-br from-purple-500/20 to-blue-500/20`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">🔮</span>
+                <div>
+                  <p className="text-sm font-semibold">Прогноз на завтра</p>
+                  <p className="text-xs text-white/50">{prediction.confidence}% уверенности</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mb-2">
+              <span className="text-4xl">{getMoodEmoji(prediction.predictedMood)}</span>
+              <div className="flex-1">
+                <p className="text-lg font-bold">{getMoodLabel(prediction.predictedMood).ru}</p>
+                <p className="text-xs text-white/60">{prediction.recommendationRu}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Main Stats - Dual Rings */}
       <div className={`${GLASS_PANEL} p-4 relative overflow-hidden shrink-0`}>
         <div className="absolute top-[-50%] left-[-50%] w-full h-full bg-[#00D4AA]/10 blur-[60px] rounded-full pointer-events-none" />
