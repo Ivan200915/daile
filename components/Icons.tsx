@@ -83,12 +83,22 @@ export const Icons = {
   Rabbit,
   Bird,
 
-  // Habits
+  // Habits (aliases)
   Water: Droplets,
   Workout: Dumbbell,
   NoSugar: Ban,
   Target,
   Flame,
+
+  // Habits (direct - for iconId lookup)
+  Droplets,
+  Dumbbell,
+  Ban,
+  Moon,
+  Footprints,
+  Activity,
+  Snowflake,
+  Zap,
 
   // Actions
   Plus,
