@@ -46,7 +46,8 @@ import {
   Pause,
   Square,
   Play,
-  Download
+  Download,
+  Sun
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -129,6 +130,7 @@ export const Icons = {
   Bell,
   Share: Share2,
   Download,
+  Sun,
 
   // Misc
   Idea: Lightbulb,
