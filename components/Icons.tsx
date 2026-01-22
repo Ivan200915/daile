@@ -32,7 +32,9 @@ import {
   Flame,
   CheckCircle,
   Leaf,
-  Edit
+  Leaf,
+  Edit,
+  Snowflake
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -59,6 +61,8 @@ export const Icons = {
   Sleep: Moon,
   Active: Activity,
   Energy: Zap,
+  Leaf,
+  Edit,
 
   // Habits
   Water: Droplets,

@@ -883,7 +883,9 @@ const Dashboard = ({
               {meal.imageUri ? (
                 <img src={meal.imageUri} className="w-12 h-12 rounded-xl object-cover" alt={meal.name} />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-white/10" />
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                  <IconBadge icon={Icons.Camera} size="sm" color="white" variant="plain" />
+                </div>
               )}
               <div className="flex-1">
                 <p className="font-medium">{meal.name}</p>
@@ -903,18 +905,33 @@ const Dashboard = ({
       <div className="shrink-0">
         <h3 className="text-xl font-bold mb-3">{t.dashboard.habits}</h3>
         <div className="grid grid-cols-1 gap-3">
-          {habits.map(habit => (
-            <button
-              key={habit.id}
-              onClick={() => toggleHabit(habit.id)}
-              className={`w-full p-4 rounded-2xl border flex items-center justify-between transition-all duration-300 ${habit.completed ? 'bg-[#00D4AA] border-[#00D4AA] shadow-[0_0_15px_rgba(0,212,170,0.3)]' : 'bg-white/5 border-white/10'}`}
-            >
-              <span className={`font-medium ${habit.completed ? 'text-black' : 'text-white'}`}>{habit.label}</span>
-              <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${habit.completed ? 'border-black/20 bg-black/10' : 'border-white/30'}`}>
-                {habit.completed && <Icons.Check size={14} className="text-black" />}
-              </div>
-            </button>
-          ))}
+          {habits.map(habit => {
+            const habitDef = AVAILABLE_HABITS.find(h => h.id === habit.id);
+            // @ts-ignore
+            const Icon = habitDef && habitDef.iconId && Icons[habitDef.iconId] ? Icons[habitDef.iconId] : Icons.Star;
+
+            return (
+              <button
+                key={habit.id}
+                onClick={() => toggleHabit(habit.id)}
+                className={`w-full p-4 rounded-2xl border flex items-center justify-between transition-all duration-300 ${habit.completed ? 'bg-[#00D4AA] border-[#00D4AA] shadow-[0_0_15px_rgba(0,212,170,0.3)]' : 'bg-white/5 border-white/10'}`}
+              >
+                <div className="flex items-center space-x-3">
+                  <IconBadge
+                    icon={Icon}
+                    size="sm"
+                    variant="circle"
+                    color={habit.completed ? '#000000' : '#00D4AA'}
+                    className={habit.completed ? 'bg-black/10' : 'bg-white/10'}
+                  />
+                  <span className={`font-medium ${habit.completed ? 'text-black' : 'text-white'}`}>{habit.label}</span>
+                </div>
+                <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${habit.completed ? 'border-black/20 bg-black/10' : 'border-white/30'}`}>
+                  {habit.completed && <Icons.Check size={14} className="text-black" />}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
 
