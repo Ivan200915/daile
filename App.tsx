@@ -757,15 +757,29 @@ const Dashboard = ({
         const pet = loadPet();
         if (!pet) return null;
         const mood = getPetMood(pet);
+
+        let PetIcon = Icons.Cat;
+        if (pet.type === 'dog') PetIcon = Icons.Dog;
+        if (pet.type === 'panda') PetIcon = Icons.Rabbit;
+        if (pet.type === 'dragon') PetIcon = Icons.Bird;
+
+        let MoodIcon = Icons.Meh;
+        if (mood.text === 'Very Happy') MoodIcon = Icons.SmilePlus;
+        if (mood.text === 'Happy') MoodIcon = Icons.Smile;
+        if (mood.text === 'Sad') MoodIcon = Icons.Frown;
+
         return (
           <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
-            <div className="text-4xl">{getPetEmoji(pet)}</div>
+            <IconBadge icon={PetIcon} size="lg" color="#00D4AA" variant="circle" glowIntensity="medium" />
             <div className="flex-1">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold">{pet.name}</span>
                 <span className="text-xs text-white/50">Ур. {pet.level}</span>
               </div>
-              <p className="text-xs text-white/60">{mood.emoji} {mood.textRu}</p>
+              <div className="flex items-center mt-1 space-x-1">
+                <MoodIcon size={12} className={pet.happiness > 50 ? "text-[#00D4AA]" : "text-[#FF6B6B]"} />
+                <p className="text-xs text-white/60">{mood.textRu}</p>
+              </div>
             </div>
             <div className="text-right">
               <span className="text-xs text-[#00D4AA]">💕 {pet.happiness}%</span>
@@ -981,14 +995,27 @@ const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string
     {
       q: "How was your day?",
       content: (
-        <div className="flex justify-between text-4xl mt-8">
-          {['😫', '😕', '😐', '🙂', '😊'].map((e, i) => (
+        <div className="flex justify-between mt-8 px-4">
+          {[
+            { level: 1, icon: Icons.Frown, color: '#EF4444' },
+            { level: 2, icon: Icons.Meh, color: '#F59E0B' },
+            { level: 3, icon: Icons.Meh, color: '#3B82F6' }, // Neutral
+            { level: 4, icon: Icons.Smile, color: '#10B981' },
+            { level: 5, icon: Icons.SmilePlus, color: '#00D4AA' }
+          ].map((m, i) => (
             <button
-              key={e}
-              onClick={() => { setMood(i + 1); setStage(1); }}
-              className={`hover:scale-125 transition duration-200 ${mood === i + 1 ? 'scale-125' : ''}`}
+              key={i}
+              onClick={() => { setMood(m.level); setStage(1); }}
+              className={`transition-all duration-200 ${mood === m.level ? 'scale-125' : 'hover:scale-110'}`}
             >
-              {e}
+              <IconBadge
+                icon={m.icon}
+                size="lg"
+                color={m.color}
+                variant="circle"
+                glowIntensity={mood === m.level ? 'high' : 'none'}
+                className={mood === m.level ? 'bg-white/10' : 'bg-transparent'}
+              />
             </button>
           ))}
         </div>

@@ -33,7 +33,15 @@ import {
   CheckCircle,
   Leaf,
   Edit,
-  Snowflake
+  Snowflake,
+  Frown,
+  Meh,
+  Smile,
+  SmilePlus,
+  Cat,
+  Dog,
+  Rabbit,
+  Bird
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -62,6 +70,18 @@ export const Icons = {
   Energy: Zap,
   Leaf,
   Edit,
+
+  // Moods
+  Frown,
+  Meh,
+  Smile,
+  SmilePlus,
+
+  // Pets
+  Cat,
+  Dog,
+  Rabbit,
+  Bird,
 
   // Habits
   Water: Droplets,
