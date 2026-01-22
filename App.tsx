@@ -11,6 +11,7 @@ import {
 } from './constants';
 import { Screen, Meal, Habit, UserSettings, DailyLog, StreakData } from './types';
 import { Icons } from './components/Icons';
+import IconBadge from './components/IconBadge';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview } from './services/geminiService';
 import {
   saveUserSettings,
@@ -132,10 +133,17 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
-          className={`flex flex-col items-center space-y-1 transition-all ${current === tab.key ? 'text-[#00D4AA]' : 'text-white/40'}`}
+          className={`flex flex-col items-center space-y-1 transition-all ${current === tab.key ? 'text-white' : 'text-white/40'}`}
         >
-          <tab.icon size={22} />
-          <span className="text-xs font-medium">{tab.label}</span>
+          <IconBadge
+            icon={tab.icon}
+            variant="circle"
+            size="sm"
+            color={current === tab.key ? '#00D4AA' : 'currentColor'}
+            glowIntensity={current === tab.key ? 'medium' : 'none'}
+            className={current === tab.key ? 'bg-white/10' : 'bg-transparent'}
+          />
+          <span className={`text-xs font-medium ${current === tab.key ? 'text-[#00D4AA]' : ''}`}>{tab.label}</span>
         </button>
       ))}
     </div>
@@ -182,9 +190,13 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
       <div className="z-10 flex-1 flex flex-col items-center overflow-y-auto overflow-x-visible no-scrollbar pb-6 p-1">
         {step === 1 && (
           <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-white/20 to-transparent backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(0,212,170,0.3)] flex items-center justify-center mb-4">
-              <Icons.Active size={40} className="text-[#00D4AA]" />
-            </div>
+            <IconBadge
+              icon={Icons.Active}
+              size="xl"
+              color="#00D4AA"
+              glowIntensity="high"
+              className="mb-4 scale-150"
+            />
             <h1 className="text-4xl font-bold leading-tight">{t.onboarding.welcome}<br /><span className="text-[#00D4AA]">2 mins/day</span></h1>
             <p className="text-white/60 text-lg">{t.onboarding.welcomeSubtitle}</p>
           </div>
@@ -842,9 +854,7 @@ const Dashboard = ({
             onClick={() => handleMetricClick(m.type)}
             className={`flex-none w-28 ${GLASS_PANEL_LIGHT} p-3 flex flex-col justify-between h-28 hover:bg-white/10 transition-all cursor-pointer active:scale-95`}
           >
-            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[#00D4AA]">
-              <m.icon size={16} />
-            </div>
+            <IconBadge icon={m.icon} variant="circle" size="sm" color="#00D4AA" />
             <div>
               <p className="text-lg font-bold">{m.val}</p>
               <p className="text-xs text-white/50">{m.label}</p>
@@ -993,7 +1003,7 @@ const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string
 
           <div className={`${GLASS_PANEL} p-6 w-full mb-6 flex flex-col items-start text-left`}>
             <div className="flex items-center space-x-2 text-[#00D4AA] mb-3">
-              <Icons.Idea size={20} className="text-[#FFD700]" />
+              <IconBadge icon={Icons.Idea} size="sm" color="#FFD700" variant="circle" />
               <span className="font-bold uppercase tracking-widest text-xs">Daily Insight</span>
             </div>
             <p className="text-lg leading-relaxed">
