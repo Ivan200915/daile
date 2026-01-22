@@ -229,16 +229,26 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
             <h2 className="text-2xl font-bold mb-2 text-center">{t.onboarding.pickHabits}</h2>
             <p className="text-white/50 text-sm mb-6 text-center">{t.onboarding.pickHabitsHint}</p>
             <div className="w-full grid grid-cols-2 gap-3 flex-1 overflow-y-auto p-1">
-              {AVAILABLE_HABITS.map((habit) => (
-                <button
-                  key={habit.id}
-                  onClick={() => toggleHabit(habit.id)}
-                  className={`p-4 text-left ${GLASS_PANEL_LIGHT} flex items-center space-x-3 ${selectedHabits.includes(habit.id) ? 'ring-2 ring-[#00D4AA] bg-[#00D4AA]/10' : ''}`}
-                >
-                  <span className="text-2xl">{habit.icon}</span>
-                  <span className="text-sm font-medium">{habit.label}</span>
-                </button>
-              ))}
+              {AVAILABLE_HABITS.map((habit) => {
+                // @ts-ignore
+                const Icon = Icons[habit.iconId] || Icons.Star;
+                return (
+                  <button
+                    key={habit.id}
+                    onClick={() => toggleHabit(habit.id)}
+                    className={`p-4 text-left ${GLASS_PANEL_LIGHT} flex items-center space-x-3 transition-all ${selectedHabits.includes(habit.id) ? 'ring-2 ring-[#00D4AA] bg-[#00D4AA]/10' : ''}`}
+                  >
+                    <IconBadge
+                      icon={Icon}
+                      size="sm"
+                      variant="circle"
+                      color={selectedHabits.includes(habit.id) ? '#00D4AA' : 'currentColor'}
+                      className={selectedHabits.includes(habit.id) ? 'bg-[#00D4AA]/20' : 'bg-white/10'}
+                    />
+                    <span className="text-sm font-medium">{habit.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1711,7 +1721,7 @@ function AppContent() {
       // Get or create today's log
       const selectedHabitLabels = savedUser.selectedHabits.map(id => {
         const habit = AVAILABLE_HABITS.find(h => h.id === id);
-        return { id, label: habit ? `${habit.icon} ${habit.label}` : id, completed: false };
+        return { id, label: habit ? habit.label : id, completed: false };
       });
       const todayLog = getOrCreateTodayLog(selectedHabitLabels.length > 0 ? selectedHabitLabels : MOCK_HABITS);
       setHabits(todayLog.habits);
@@ -1781,7 +1791,7 @@ function AppContent() {
     // Initialize habits from selected
     const selectedHabitLabels = settings.selectedHabits.map(id => {
       const habit = AVAILABLE_HABITS.find(h => h.id === id);
-      return { id, label: habit ? `${habit.icon} ${habit.label}` : id, completed: false };
+      return { id, label: habit ? habit.label : id, completed: false };
     });
     setHabits(selectedHabitLabels);
 

@@ -32,7 +32,6 @@ import {
   Flame,
   CheckCircle,
   Leaf,
-  Leaf,
   Edit,
   Snowflake
 } from 'lucide-react';
