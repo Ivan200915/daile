@@ -45,17 +45,18 @@ export const ACCENT_BUTTON = `
 export const TEXT_GRADIENT = "bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70";
 
 // Available habits for user selection during onboarding
+// Available habits for user selection during onboarding
 export const AVAILABLE_HABITS = [
-  { id: 'water', label: '2L Water', icon: '💧', category: 'health' },
-  { id: 'workout', label: 'Workout', icon: '💪', category: 'fitness' },
-  { id: 'no-sugar', label: 'No Sugar', icon: '🍬', category: 'nutrition' },
-  { id: 'meditation', label: 'Meditation', icon: '🧘', category: 'mindfulness' },
-  { id: 'steps', label: '10K Steps', icon: '🚶', category: 'fitness' },
-  { id: 'sleep', label: '7+ Hours Sleep', icon: '😴', category: 'health' },
-  { id: 'vegetables', label: 'Eat Vegetables', icon: '🥗', category: 'nutrition' },
-  { id: 'no-alcohol', label: 'No Alcohol', icon: '🍷', category: 'health' },
-  { id: 'journaling', label: 'Journaling', icon: '📝', category: 'mindfulness' },
-  { id: 'stretch', label: 'Stretching', icon: '🤸', category: 'fitness' },
+  { id: 'water', label: '2L Water', category: 'health', iconId: 'Droplets' },
+  { id: 'workout', label: 'Workout', category: 'fitness', iconId: 'Dumbbell' },
+  { id: 'no-sugar', label: 'No Sugar', category: 'nutrition', iconId: 'Ban' },
+  { id: 'meditation', label: 'Meditation', category: 'mindfulness', iconId: 'Moon' },
+  { id: 'steps', label: '10K Steps', category: 'fitness', iconId: 'Footprints' },
+  { id: 'sleep', label: '7+ Hours Sleep', category: 'health', iconId: 'Moon' },
+  { id: 'vegetables', label: 'Eat Vegetables', category: 'nutrition', iconId: 'Leaf' },
+  { id: 'no-alcohol', label: 'No Alcohol', category: 'health', iconId: 'Ban' },
+  { id: 'journaling', label: 'Journaling', category: 'mindfulness', iconId: 'Edit' },
+  { id: 'stretch', label: 'Stretching', category: 'fitness', iconId: 'Activity' },
 ] as const;
 
 // Default targets
@@ -66,7 +67,7 @@ export const DEFAULT_TARGETS = {
 
 // Default habits for quick start (first 3)
 export const MOCK_HABITS = [
-  { id: 'water', label: '💧 2L Water', completed: false },
-  { id: 'workout', label: '💪 Workout', completed: false },
-  { id: 'no-sugar', label: '🍬 No Sugar', completed: false },
+  { id: 'water', label: '2L Water', completed: false },
+  { id: 'workout', label: 'Workout', completed: false },
+  { id: 'no-sugar', label: 'No Sugar', completed: false },
 ];

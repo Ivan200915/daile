@@ -30,7 +30,9 @@ import {
   Home,
   Target,
   Flame,
-  CheckCircle
+  CheckCircle,
+  Leaf,
+  Edit
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
