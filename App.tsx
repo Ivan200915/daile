@@ -1286,7 +1286,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
                 {/* Correlations */}
                 {correlations.length > 0 && (
                   <div className={`${GLASS_PANEL} p-4`}>
-                    <h3 className="text-sm font-semibold text-white/70 mb-3">🧠 Обнаружены паттерны</h3>
+                    <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center"><Icons.Activity size={14} className="mr-2 text-purple-400" />Обнаружены паттерны</h3>
                     <div className="space-y-2">
                       {correlations.slice(0, 3).map((c, i) => (
                         <div key={i} className={`${GLASS_PANEL_LIGHT} p-3`}>
@@ -1300,7 +1300,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
                 {/* Recommendations */}
                 {recommendations.length > 0 && (
                   <div className={`${GLASS_PANEL} p-4`}>
-                    <h3 className="text-sm font-semibold text-white/70 mb-3">💡 Рекомендации</h3>
+                    <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center"><Icons.Idea size={14} className="mr-2 text-yellow-400" />Рекомендации</h3>
                     <div className="space-y-2">
                       {recommendations.slice(0, 3).map((r, i) => (
                         <div key={i} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
@@ -1324,7 +1324,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
         <div className="space-y-4">
           {/* Share Cards Section */}
           <div>
-            <h3 className="text-lg font-bold mb-3">📤 Поделиться успехами</h3>
+            <h3 className="text-lg font-bold mb-3 flex items-center"><Icons.Share size={16} className="mr-2 text-[#00D4AA]" />Поделиться успехами</h3>
             <div className="grid grid-cols-2 gap-3">
               <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
                 <IconBadge icon={Icons.Flame} size="md" color="#FF6B00" variant="circle" />
