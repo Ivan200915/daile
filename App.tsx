@@ -441,7 +441,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
             <p className="text-white/60 mb-6 font-medium">Capture your {mealType.toLowerCase()}</p>
             <div className="flex items-center justify-between w-full px-10">
               <label className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition cursor-pointer">
-                <Icons.Gallery size={24} />
+                <Icons.Gallery size={24} className="text-[#00D4AA]" />
                 <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
               </label>
 
@@ -450,7 +450,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
               </button>
 
               <button onClick={onCancel} className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition">
-                <Icons.Close size={24} />
+                <Icons.Close size={24} className="text-white/60" />
               </button>
             </div>
           </div>
@@ -461,7 +461,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
           <div className="h-[45%] w-full relative shrink-0">
             <img src={image} className="w-full h-full object-cover" alt="Meal" />
             <button onClick={() => setImage(null)} className="absolute top-4 left-4 p-2 bg-black/50 rounded-full backdrop-blur-md z-20">
-              <Icons.ArrowRight className="rotate-180" size={20} />
+              <Icons.ArrowRight className="rotate-180 text-[#00D4AA]" size={20} />
             </button>
           </div>
 
@@ -581,7 +581,7 @@ const EditMetricModal = ({
             <h3 className="text-xl font-bold">{config.title}</h3>
           </div>
           <button onClick={onClose} className="text-white/50 hover:text-white">
-            <Icons.Close size={24} />
+            <Icons.Close size={24} className="text-white/60" />
           </button>
         </div>
 
@@ -811,7 +811,7 @@ const Dashboard = ({
         <div className="flex justify-between items-end mb-3">
           <h3 className="text-xl font-bold">{t.dashboard.meals}</h3>
           <button onClick={goToAddMeal} className="text-[#00D4AA] text-sm font-medium flex items-center">
-            <Icons.Plus size={16} className="mr-1" /> {t.common.add}
+            <Icons.Plus size={16} className="mr-1 text-[#00D4AA]" /> {t.common.add}
           </button>
         </div>
         <div className="space-y-3">
@@ -830,7 +830,7 @@ const Dashboard = ({
           ))}
           {meals.length < 4 && (
             <button onClick={goToAddMeal} className="w-full h-16 rounded-[20px] border border-dashed border-white/20 flex items-center justify-center text-white/30 hover:bg-white/5 transition">
-              <Icons.Camera size={20} className="mr-2" /> {t.dashboard.logMeal}
+              <Icons.Camera size={20} className="mr-2 text-[#00D4AA]" /> {t.dashboard.logMeal}
             </button>
           )}
         </div>
@@ -943,7 +943,7 @@ const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string
 
           <div className={`${GLASS_PANEL} p-6 w-full mb-6 flex flex-col items-start text-left`}>
             <div className="flex items-center space-x-2 text-[#00D4AA] mb-3">
-              <Icons.Idea size={20} />
+              <Icons.Idea size={20} className="text-[#FFD700]" />
               <span className="font-bold uppercase tracking-widest text-xs">Daily Insight</span>
             </div>
             <p className="text-lg leading-relaxed">
@@ -1252,7 +1252,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
                 className={`w-full py-4 ${ACCENT_BUTTON} flex items-center justify-center space-x-2`}
               >
                 <span>{t.history.generateReview}</span>
-                <Icons.ArrowRight size={18} />
+                <Icons.ArrowRight size={18} className="text-[#00D4AA]" />
               </button>
             </div>
 
@@ -1379,7 +1379,7 @@ const SettingsScreen = ({
                 onClick={() => setShowProviders(true)}
                 className={`w-full p-4 ${GLASS_PANEL_LIGHT} flex items-center justify-center space-x-2 text-[#00D4AA]`}
               >
-                <Icons.Plus size={18} />
+                <Icons.Plus size={18} className="text-[#00D4AA]" />
                 <span className="font-medium">{t.settings.connectFitness}</span>
               </button>
             ) : (
