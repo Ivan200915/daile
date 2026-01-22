@@ -1061,7 +1061,7 @@ const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string
       <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-fade-in relative overflow-y-auto no-scrollbar">
         <div className="absolute inset-0 bg-gradient-to-t from-[#00D4AA]/20 to-transparent pointer-events-none" />
         <div className="z-10 w-full flex flex-col items-center">
-          <h2 className="text-3xl font-bold mb-2">Day Closed! ✨</h2>
+          <h2 className="text-3xl font-bold mb-2 flex items-center justify-center">Day Closed! <Icons.Star size={28} className="ml-2 text-yellow-400" /></h2>
           <p className="text-white/60 mb-8">See you tomorrow.</p>
 
           <div className={`${GLASS_PANEL} p-6 w-full mb-6 flex flex-col items-start text-left`}>
