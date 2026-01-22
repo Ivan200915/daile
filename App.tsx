@@ -635,7 +635,8 @@ const Dashboard = ({
   toggleHabit,
   goToAddMeal,
   closeDay,
-  onMetricUpdate
+  onMetricUpdate,
+  logs
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -789,6 +790,7 @@ const Dashboard = ({
       {/* Mood Predictor Widget */}
       {(() => {
         // Build mock history from logs
+        if (!logs) return null;
         const mockHistory = logs.slice(-7).map(log => ({
           date: log.date,
           mood: log.checkIn?.mood || 3,
