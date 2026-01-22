@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Icons } from './Icons';
 import IconBadge from './IconBadge';
 import { analyzeFace, FaceAnalysis } from '../services/umaxService';
+import { PremiumPaywall } from './PremiumPaywall';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
@@ -12,12 +13,42 @@ const OUTLINE_BUTTON = 'bg-transparent border border-white/20 text-white font-bo
 type FlowState = 'intro' | 'front_capture' | 'front_review' | 'side_capture' | 'side_review' | 'analyzing' | 'results_locked' | 'results_unlocked';
 
 export const UmaxScreen = () => {
+    // Inject animation styles
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @keyframes scan-y {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+          }
+          .animate-scan-y {
+            animation: scan-y 2s linear infinite;
+          }
+          @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+          }
+        `;
+        document.head.appendChild(style);
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
+
     const [state, setState] = useState<FlowState>('intro');
     const [frontImage, setFrontImage] = useState<string | null>(null);
     const [sideImage, setSideImage] = useState<string | null>(null);
     const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [invitesCount, setInvitesCount] = useState(0);
+    const [showPaywall, setShowPaywall] = useState(false);
+    const [scanProgress, setScanProgress] = useState(0); // 0-100
+    const [scanStep, setScanStep] = useState('');
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -100,14 +131,39 @@ export const UmaxScreen = () => {
 
     const processAnalysis = async () => {
         setState('analyzing');
+        setScanProgress(0);
+
+        // Mock Progress Steps
+        const steps = [
+            { p: 10, text: 'Initializing biometric scan...' },
+            { p: 30, text: 'Mapping facial landmarks...' },
+            { p: 50, text: 'Analyzing skin texture & quality...' },
+            { p: 70, text: 'Calculating golden ratio...' },
+            { p: 90, text: 'Finalizing aesthetic report...' },
+        ];
+
+        for (const step of steps) {
+            setScanStep(step.text);
+            setScanProgress(step.p);
+            await new Promise(r => setTimeout(r, 800)); // Simulate work
+        }
+
         const result = await analyzeFace(frontImage!);
         setAnalysis(result);
-        setTimeout(() => {
-            setState('results_locked');
-        }, 2500);
+        setScanProgress(100);
+        setState('results_locked');
     };
 
     const handleInviteShare = () => {
+        // Native Telegram Share
+        const botName = "DailyDisciplineBot"; // Replace with actual bot if known
+        const inviteLink = `https://t.me/${botName}?start=ref_${Math.random().toString(36).substring(7)}`;
+        const text = encodeURIComponent("👀 I just scanned my face with AI to see my potential. Check yours here!");
+        const url = `https://t.me/share/url?url=${inviteLink}&text=${text}`;
+
+        window.open(url, '_blank');
+
+        // Increment count for demo purposes (usually would wait for callback/webhook)
         const newCount = invitesCount + 1;
         setInvitesCount(newCount);
         if (newCount >= 3) {
@@ -207,13 +263,30 @@ export const UmaxScreen = () => {
 
     if (state === 'analyzing') {
         return (
-            <div className="h-full flex flex-col items-center justify-center bg-black relative">
-                <div className="w-24 h-24 border-4 border-[#00D4AA] border-t-transparent rounded-full animate-spin mb-8" />
-                <h2 className="text-2xl font-bold tracking-widest text-[#00D4AA] animate-pulse">ANALYZING</h2>
-                <div className="mt-4 space-y-2 text-center text-white/50 text-sm font-mono">
-                    <p>Scanning facial structure...</p>
-                    <p>Calculated symmetry...</p>
+            <div className="h-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+                {/* Background Image with Scanner Overlay */}
+                <div className="absolute inset-0 opacity-30">
+                    <img src={frontImage!} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-[#00D4AA]/10" />
                 </div>
+
+                {/* Scanning Line */}
+                <div className="absolute inset-0 z-10 animate-scan-y bg-gradient-to-b from-transparent via-[#00D4AA]/50 to-transparent h-[20%]" />
+
+                <div className="relative z-20 flex flex-col items-center">
+                    <div className="w-32 h-32 relative mb-8">
+                        {/* Spinning Rings */}
+                        <div className="absolute inset-0 border-4 border-[#00D4AA]/30 border-t-[#00D4AA] rounded-full animate-spin" />
+                        <div className="absolute inset-2 border-4 border-white/10 border-b-white rounded-full animate-spin-slow" />
+
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-2xl font-bold font-mono">{scanProgress}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 className="text-2xl font-bold tracking-widest text-[#00D4AA] animate-pulse mb-2">ANALYZING</h2>
+                <p className="text-white/70 font-mono text-sm">{scanStep}</p>
             </div>
         );
     }
@@ -223,6 +296,15 @@ export const UmaxScreen = () => {
 
         return (
             <div className="h-full flex flex-col bg-[#050505] text-white relative overflow-hidden">
+                {showPaywall && (
+                    <PremiumPaywall
+                        onClose={() => setShowPaywall(false)}
+                        onPurchase={() => {
+                            setShowPaywall(false);
+                            setState('results_unlocked');
+                        }}
+                    />
+                )}
                 <div className={`h-full overflow-y-auto no-scrollbar pb-40 ${isLocked ? 'overflow-hidden' : ''}`}>
 
                     {/* Header: Reveal Results - Only visible if locked, otherwise standard header */}
@@ -314,9 +396,10 @@ export const UmaxScreen = () => {
                 {isLocked && (
                     <div className="absolute bottom-0 left-0 right-0 p-6 pb-28 bg-gradient-to-t from-black via-black to-transparent z-40 space-y-3">
                         <button
-                            onClick={() => setState('results_unlocked')}
+                            onClick={() => setShowPaywall(true)}
                             className={`w-full py-4 bg-[#00D4AA] text-black font-bold rounded-2xl text-lg shadow-[0_0_20px_rgba(0,212,170,0.4)] flex items-center justify-center space-x-2`}
                         >
+                            <Icons.Crown size={20} />
                             <span>Get Premium</span>
                         </button>
                         <button

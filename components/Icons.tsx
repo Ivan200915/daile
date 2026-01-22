@@ -48,7 +48,8 @@ import {
   Play,
   Download,
   Sun,
-  Copy
+  Copy,
+  Crown
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -137,6 +138,7 @@ export const Icons = {
   Idea: Lightbulb,
   Gallery: ImageIcon,
   Copy,
+  Crown,
 };
 
 // Unified icon sizes
