@@ -1345,30 +1345,40 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
           </div>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { id: 'first_day', icon: '🎯', name: 'Первый день' },
-              { id: 'streak_3', icon: '🔥', name: '3 дня подряд' },
-              { id: 'streak_7', icon: '⚡', name: '7 дней подряд' },
-              { id: 'streak_14', icon: '💪', name: '14 дней силы' },
-              { id: 'streak_30', icon: '🏆', name: 'Мастер месяца' },
-              { id: 'streak_100', icon: '👑', name: 'Клуб сотни' },
-              { id: 'habits_10', icon: '✅', name: '10 привычек' },
-              { id: 'habits_50', icon: '🦸', name: '50 привычек' },
-              { id: 'habits_100', icon: '🌟', name: '100 привычек' },
-              { id: 'steps_10k', icon: '👟', name: 'Первые 10К' },
-              { id: 'steps_100k', icon: '🏃', name: 'Марафонец' },
-              { id: 'level_5', icon: '⭐', name: 'Уровень 5' },
-              { id: 'level_10', icon: '🎖️', name: 'Уровень 10' },
-              { id: 'first_meal', icon: '🍽️', name: 'Первая еда' },
+              { id: 'first_day', iconId: 'Target', name: 'Первый день', color: '#00D4AA' },
+              { id: 'streak_3', iconId: 'Flame', name: '3 дня подряд', color: '#FF6B00' },
+              { id: 'streak_7', iconId: 'Zap', name: '7 дней подряд', color: '#FFD700' },
+              { id: 'streak_14', iconId: 'Dumbbell', name: '14 дней силы', color: '#FF6B6B' },
+              { id: 'streak_30', iconId: 'Trophy', name: 'Мастер месяца', color: '#A855F7' },
+              { id: 'streak_100', iconId: 'Star', name: 'Клуб сотни', color: '#EC4899' },
+              { id: 'habits_10', iconId: 'CheckCircle', name: '10 привычек', color: '#10B981' },
+              { id: 'habits_50', iconId: 'Activity', name: '50 привычек', color: '#3B82F6' },
+              { id: 'habits_100', iconId: 'Star', name: '100 привычек', color: '#6366F1' },
+              { id: 'steps_10k', iconId: 'Steps', name: 'Первые 10К', color: '#14B8A6' },
+              { id: 'steps_100k', iconId: 'Footprints', name: 'Марафонец', color: '#0EA5E9' },
+              { id: 'level_5', iconId: 'Star', name: 'Уровень 5', color: '#F59E0B' },
+              { id: 'level_10', iconId: 'Trophy', name: 'Уровень 10', color: '#EF4444' },
+              { id: 'first_meal', iconId: 'Camera', name: 'Первая еда', color: '#8B5CF6' },
             ].map((achievement) => {
               const unlocked = loadGamificationData().unlockedAchievements.includes(achievement.id);
+              // @ts-ignore
+              const Icon = Icons[achievement.iconId] || Icons.Star;
+
               return (
                 <div
                   key={achievement.id}
-                  className={`${GLASS_PANEL_LIGHT} p-3 text-center ${unlocked ? '' : 'opacity-40 grayscale'}`}
+                  className={`${GLASS_PANEL_LIGHT} p-3 flex flex-col items-center justify-center space-y-2 text-center ${unlocked ? '' : 'opacity-40 grayscale'}`}
                 >
-                  <span className="text-2xl block mb-1">{achievement.icon}</span>
-                  <p className="text-xs font-medium">{achievement.name}</p>
-                  {unlocked && <span className="text-[8px] text-[#00D4AA]">✓</span>}
+                  <IconBadge
+                    icon={Icon}
+                    size="md"
+                    variant="circle"
+                    color={unlocked ? achievement.color : '#ffffff'}
+                    glowIntensity={unlocked ? 'medium' : 'none'}
+                    className={unlocked ? 'bg-white/10' : 'bg-transparent'}
+                  />
+                  <p className="text-xs font-medium leading-tight">{achievement.name}</p>
+                  {unlocked && <span className="text-[8px] text-[#00D4AA] font-bold">UNLOCKED</span>}
                 </div>
               );
             })}
