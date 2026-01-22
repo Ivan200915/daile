@@ -645,7 +645,8 @@ const Dashboard = ({
   toggleHabit: (id: string) => void,
   goToAddMeal: () => void,
   closeDay: () => void,
-  onMetricUpdate: (type: 'steps' | 'sleep' | 'active', value: number) => void
+  onMetricUpdate: (type: 'steps' | 'sleep' | 'active', value: number) => void,
+  logs: DailyLog[]
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
   const { t, language } = useLanguage();
@@ -700,7 +701,7 @@ const Dashboard = ({
       {/* Streak Banner */}
       {streak.currentStreak > 0 && (
         <div className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
-          <span className="text-2xl">🔥</span>
+          <IconBadge icon={Icons.Flame} size="md" color="#FF6B00" variant="circle" glowIntensity="high" />
           <div className="flex-1">
             <p className="font-semibold">{streak.currentStreak} {t.dashboard.dayStreak}</p>
             <p className="text-xs text-white/50">{streakMessage}</p>
@@ -1264,19 +1265,19 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             <h3 className="text-lg font-bold mb-3">📤 Поделиться успехами</h3>
             <div className="grid grid-cols-2 gap-3">
               <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
-                <span className="text-3xl">🔥</span>
+                <IconBadge icon={Icons.Flame} size="md" color="#FF6B00" variant="circle" />
                 <span className="text-xs">Стрик</span>
               </button>
               <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
-                <span className="text-3xl">📊</span>
+                <IconBadge icon={Icons.BarChart2} size="md" color="#3B82F6" variant="circle" />
                 <span className="text-xs">Неделя</span>
               </button>
               <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
-                <span className="text-3xl">✅</span>
+                <IconBadge icon={Icons.CheckCircle} size="md" color="#00D4AA" variant="circle" />
                 <span className="text-xs">100% день</span>
               </button>
               <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
-                <span className="text-3xl">🏆</span>
+                <IconBadge icon={Icons.Trophy} size="md" color="#FFD700" variant="circle" />
                 <span className="text-xs">Достижение</span>
               </button>
             </div>
@@ -1288,13 +1289,13 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             <div className={`${GLASS_PANEL} p-4 text-center`}>
               <p className="text-sm text-white/60 mb-4">Загрузи фото "до" и "после" чтобы отслеживать визуальную трансформацию</p>
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20`}>
-                  <Icons.Camera size={32} className="text-white/30 mb-2" />
-                  <span className="text-xs text-white/50">Фото "До"</span>
+                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:bg-white/5 transition cursor-pointer`}>
+                  <IconBadge icon={Icons.Camera} size="lg" color="rgba(255,255,255,0.3)" variant="circle" />
+                  <span className="text-xs text-white/50 mt-2">Фото "До"</span>
                 </div>
-                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20`}>
-                  <Icons.Camera size={32} className="text-white/30 mb-2" />
-                  <span className="text-xs text-white/50">Фото "После"</span>
+                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:bg-white/5 transition cursor-pointer`}>
+                  <IconBadge icon={Icons.Camera} size="lg" color="rgba(255,255,255,0.3)" variant="circle" />
+                  <span className="text-xs text-white/50 mt-2">Фото "После"</span>
                 </div>
               </div>
               <button className={`w-full py-3 ${ACCENT_BUTTON}`}>
@@ -1835,6 +1836,7 @@ function AppContent() {
             goToAddMeal={() => setScreen('ADD_MEAL')}
             closeDay={() => setScreen('CHECK_IN')}
             onMetricUpdate={handleMetricUpdate}
+            logs={logs}
           />
         )}
 
