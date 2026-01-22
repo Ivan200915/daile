@@ -977,7 +977,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
   streak: StreakData,
   onRequestWeeklyReview: () => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'Badges' | 'AI Coach'>('Calendar');
+  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'Badges' | 'Progress' | 'AI Coach'>('Calendar');
   const { t } = useLanguage();
 
   // Generate GitHub-style calendar (last 35 days, 5 weeks)
@@ -1043,7 +1043,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
 
       {/* Tab Switcher */}
       <div className={`p-1 rounded-xl bg-white/10 flex shrink-0`}>
-        {(['Calendar', 'Stats', 'Badges', 'AI Coach'] as const).map((tab) => (
+        {(['Calendar', 'Stats', 'Badges', 'Progress', 'AI Coach'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -1195,6 +1195,54 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             );
           })()}
         </>
+      )}
+
+      {activeTab === 'Progress' && (
+        <div className="space-y-4">
+          {/* Share Cards Section */}
+          <div>
+            <h3 className="text-lg font-bold mb-3">📤 Поделиться успехами</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
+                <span className="text-3xl">🔥</span>
+                <span className="text-xs">Стрик</span>
+              </button>
+              <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
+                <span className="text-3xl">📊</span>
+                <span className="text-xs">Неделя</span>
+              </button>
+              <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
+                <span className="text-3xl">✅</span>
+                <span className="text-xs">100% день</span>
+              </button>
+              <button className={`${GLASS_PANEL_LIGHT} p-4 flex flex-col items-center space-y-2 hover:bg-white/10 transition`}>
+                <span className="text-3xl">🏆</span>
+                <span className="text-xs">Достижение</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Before/After Photos */}
+          <div>
+            <h3 className="text-lg font-bold mb-3">📸 До/После</h3>
+            <div className={`${GLASS_PANEL} p-4 text-center`}>
+              <p className="text-sm text-white/60 mb-4">Загрузи фото "до" и "после" чтобы отслеживать визуальную трансформацию</p>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20`}>
+                  <Icons.Camera size={32} className="text-white/30 mb-2" />
+                  <span className="text-xs text-white/50">Фото "До"</span>
+                </div>
+                <div className={`${GLASS_PANEL_LIGHT} aspect-square rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-white/20`}>
+                  <Icons.Camera size={32} className="text-white/30 mb-2" />
+                  <span className="text-xs text-white/50">Фото "После"</span>
+                </div>
+              </div>
+              <button className={`w-full py-3 ${ACCENT_BUTTON}`}>
+                Загрузить фото
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {activeTab === 'Badges' && (
