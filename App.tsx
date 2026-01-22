@@ -1506,17 +1506,6 @@ const SettingsScreen = ({
           </>
         )}
 
-        <p className="text-xs text-white/40 text-center">
-          {t.settings.syncsAuto}
-        </p>
-      </div>
-
-      {/* Goals Section */}
-      <div className={`${GLASS_PANEL} p-5 space-y-4`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider">{t.settings.dailyGoals}</h3>
-
-        <div className="space-y-3">
-          <div className={`${GLASS_PANEL_LIGHT} p-4`}>
             <label className="text-sm text-white/50 block mb-2">{t.settings.caloriesGoal}</label>
             <input
               type="number"
@@ -1539,10 +1528,10 @@ const SettingsScreen = ({
         <button onClick={save} className={`w-full py-3 ${ACCENT_BUTTON}`}>
           {t.settings.saveGoals}
         </button>
-      </div>
+      </div >
 
-      {/* Subscription */}
-      <div className={`${GLASS_PANEL} p-5`}>
+  {/* Subscription */ }
+  < div className = {`${GLASS_PANEL} p-5`}>
         <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">{t.settings.subscription}</h3>
         <div className="flex items-center justify-between">
           <div>
@@ -1568,16 +1557,16 @@ const SettingsScreen = ({
             </button>
           )}
         </div>
-      </div>
+      </div >
 
-      {/* Goal */}
-      <div className={`${GLASS_PANEL_LIGHT} p-4`}>
+  {/* Goal */ }
+  < div className = {`${GLASS_PANEL_LIGHT} p-4`}>
         <p className="text-sm text-white/50">{t.settings.yourGoal}</p>
         <p className="font-semibold">{user.goal}</p>
-      </div>
+      </div >
 
-      {/* Notifications */}
-      <div className={`${GLASS_PANEL} p-5`}>
+  {/* Notifications */ }
+  < div className = {`${GLASS_PANEL} p-5`}>
         <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🔔 Уведомления</h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between">
@@ -1590,63 +1579,65 @@ const SettingsScreen = ({
           </label>
         </div>
         <p className="text-xs text-white/40 mt-3">Бот отправит напоминание в Telegram</p>
-      </div>
+      </div >
 
-      {/* Language Selector */}
-      {onLanguageChange && (
-        <div className={`${GLASS_PANEL} p-5`}>
-          <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Language / Язык</h3>
-          <div className="flex space-x-3">
-            {AVAILABLE_LANGUAGES.map((lang) => (
-              <button
-                key={lang}
-                onClick={() => onLanguageChange(lang)}
-                className={`flex-1 py-3 ${GLASS_BUTTON} flex items-center justify-center space-x-2 ${language === lang ? 'ring-2 ring-[#00D4AA]' : ''}`}
-              >
-                <span className="text-xl">{lang === 'en' ? '🇬🇧' : '🇷🇺'}</span>
-                <span className="font-medium">{LANGUAGE_NAMES[lang]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* Referral Program */}
-      <div className={`${GLASS_PANEL} p-5`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🎁 Пригласи друга</h3>
-        <p className="text-sm text-white/60 mb-4">Получи 7 дней Premium за каждого друга!</p>
-        <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
-          <code className="text-[#00D4AA] font-mono text-sm">t.me/DailyDisciplin_bot?start=ref_DD...</code>
+  {/* Language Selector */ }
+{
+  onLanguageChange && (
+    <div className={`${GLASS_PANEL} p-5`}>
+      <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Language / Язык</h3>
+      <div className="flex space-x-3">
+        {AVAILABLE_LANGUAGES.map((lang) => (
           <button
-            onClick={() => {
-              navigator.clipboard.writeText('https://t.me/DailyDisciplin_bot?start=ref_DD123');
-              alert('Ссылка скопирована!');
-            }}
-            className="text-xs bg-[#00D4AA]/20 text-[#00D4AA] px-3 py-1 rounded-lg"
+            key={lang}
+            onClick={() => onLanguageChange(lang)}
+            className={`flex-1 py-3 ${GLASS_BUTTON} flex items-center justify-center space-x-2 ${language === lang ? 'ring-2 ring-[#00D4AA]' : ''}`}
           >
-            📋 Copy
+            <span className="text-xl">{lang === 'en' ? '🇬🇧' : '🇷🇺'}</span>
+            <span className="font-medium">{LANGUAGE_NAMES[lang]}</span>
           </button>
-        </div>
-        <div className="flex justify-between mt-3 text-sm">
-          <span className="text-white/50">Приглашено: <strong className="text-white">0</strong></span>
-          <span className="text-white/50">Заработано: <strong className="text-[#00D4AA]">0 дней</strong></span>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
-        <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">{t.settings.dangerZone}</h3>
-        <button
-          onClick={() => {
-            if (confirm(t.settings.resetConfirm)) {
-              onReset();
-            }
-          }}
-          className="w-full py-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-400 font-medium"
-        >
-          {t.settings.resetAllData}
-        </button>
+        ))}
       </div>
     </div>
+  )
+}
+{/* Referral Program */ }
+<div className={`${GLASS_PANEL} p-5`}>
+  <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🎁 Пригласи друга</h3>
+  <p className="text-sm text-white/60 mb-4">Получи 7 дней Premium за каждого друга!</p>
+  <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
+    <code className="text-[#00D4AA] font-mono text-sm">t.me/DailyDisciplin_bot?start=ref_DD...</code>
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText('https://t.me/DailyDisciplin_bot?start=ref_DD123');
+        alert('Ссылка скопирована!');
+      }}
+      className="text-xs bg-[#00D4AA]/20 text-[#00D4AA] px-3 py-1 rounded-lg"
+    >
+      📋 Copy
+    </button>
+  </div>
+  <div className="flex justify-between mt-3 text-sm">
+    <span className="text-white/50">Приглашено: <strong className="text-white">0</strong></span>
+    <span className="text-white/50">Заработано: <strong className="text-[#00D4AA]">0 дней</strong></span>
+  </div>
+</div>
+
+{/* Danger Zone */ }
+<div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
+  <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">{t.settings.dangerZone}</h3>
+  <button
+    onClick={() => {
+      if (confirm(t.settings.resetConfirm)) {
+        onReset();
+      }
+    }}
+    className="w-full py-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-400 font-medium"
+  >
+    {t.settings.resetAllData}
+  </button>
+</div>
+    </div >
   );
 };
 
