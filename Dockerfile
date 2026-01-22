@@ -1,38 +1,25 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build Stage
+FROM node:20-alpine as build
 
 WORKDIR /app
 
-# Copy package files
+# Install dependencies (utilizing cache)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
+# Copy source and build
 COPY . .
-
-# Build argument for API key
-ARG API_KEY
-ENV API_KEY=$API_KEY
-
-# Build the app
 RUN npm run build
 
-# Production stage - Nginx
+# Serve Stage
 FROM nginx:alpine
 
-# Copy custom nginx config
+# Copy built assets from build stage
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port
 EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

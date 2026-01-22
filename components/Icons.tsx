@@ -41,7 +41,12 @@ import {
   Cat,
   Dog,
   Rabbit,
-  Bird
+  Bird,
+  Maximize2,
+  Pause,
+  Square,
+  Play,
+  Download
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -105,6 +110,11 @@ export const Icons = {
   Camera,
   Check,
   Close: X,
+  X,
+  Maximize2,
+  Pause,
+  Square,
+  Play,
   ArrowRight,
   ChevronRight,
 
@@ -118,6 +128,7 @@ export const Icons = {
   Gift,
   Bell,
   Share: Share2,
+  Download,
 
   // Misc
   Idea: Lightbulb,

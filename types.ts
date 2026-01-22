@@ -1,4 +1,4 @@
-export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SETTINGS';
+export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SETTINGS' | 'LOOKS';
 
 export interface MacroData {
   calories: number;

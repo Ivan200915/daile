@@ -12,6 +12,7 @@ import {
 import { Screen, Meal, Habit, UserSettings, DailyLog, StreakData } from './types';
 import { Icons } from './components/Icons';
 import IconBadge from './components/IconBadge';
+import HabitDNA from './components/HabitDNA';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview } from './services/geminiService';
 import {
   saveUserSettings,
@@ -52,6 +53,13 @@ import { CURRENT_SEASON, loadSeasonProgress, getSeasonDaysRemaining } from './se
 import { getShieldStatus, SHIELD_TIERS } from './services/streakShieldService';
 import { predictTomorrowMood, getMoodEmoji, getMoodLabel } from './services/moodPredictorService';
 import type { Language } from './locales';
+import FocusScreen from './components/FocusScreen';
+import YearlyHeatmap from './components/YearlyHeatmap';
+import CorrelationChart from './components/CorrelationChart';
+import WeeklyReport, { exportLogsToCSV } from './components/WeeklyReport';
+import SocialScreen from './components/SocialScreen';
+import UmaxScreen from './components/UmaxScreen';
+import AICoachScreen from './components/AICoachScreen';
 
 // --- Sub-Components ---
 
@@ -124,6 +132,7 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
   const tabs = [
     { key: 'DASHBOARD' as Screen, icon: Icons.Home, label: 'Today' },
     { key: 'HISTORY' as Screen, icon: Icons.Chart, label: 'History' },
+    { key: 'LOOKS' as Screen, icon: Icons.Camera, label: 'Looks' },
     { key: 'SETTINGS' as Screen, icon: Icons.Settings, label: 'Settings' },
   ];
 
@@ -646,7 +655,8 @@ const Dashboard = ({
   goToAddMeal,
   closeDay,
   onMetricUpdate,
-  logs
+  logs,
+  onOpenFocus
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -657,7 +667,8 @@ const Dashboard = ({
   goToAddMeal: () => void,
   closeDay: () => void,
   onMetricUpdate: (type: 'steps' | 'sleep' | 'active', value: number) => void,
-  logs: DailyLog[]
+  logs: DailyLog[],
+  onOpenFocus: () => void
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
   const { t, language } = useLanguage();
@@ -875,8 +886,24 @@ const Dashboard = ({
         </div>
       </div>
 
-      {/* Metrics Row - Editable */}
+      {/* Focus Mode & Metrics Row */}
       <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-2 shrink-0">
+        {/* Focus Widget */}
+        <button
+          onClick={() => onOpenFocus()}
+          className={`flex-none w-28 ${GLASS_PANEL_LIGHT} p-3 flex flex-col justify-between h-28 hover:bg-white/10 transition-all cursor-pointer active:scale-95 group relative overflow-hidden`}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-[#00D4AA]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <IconBadge icon={Icons.Zap} variant="circle" size="sm" color="#FFD700" glowIntensity="medium" />
+          <div>
+            <p className="text-lg font-bold">Focus</p>
+            <p className="text-xs text-white/50">Start Session</p>
+          </div>
+          <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mt-1">
+            <div className="h-full bg-[#FFD700] w-0 group-hover:w-full transition-all duration-700" />
+          </div>
+        </button>
+
         {[
           { type: 'steps' as const, icon: Icons.Steps, val: formatSteps(metrics.steps), label: 'Steps', progress: metrics.stepsProgress },
           { type: 'sleep' as const, icon: Icons.Sleep, val: formatSleep(metrics.sleepHours), label: 'Sleep', progress: metrics.sleepProgress },
@@ -1100,7 +1127,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
   streak: StreakData,
   onRequestWeeklyReview: () => void
 }) => {
-  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'Badges' | 'Progress' | 'AI Coach'>('Calendar');
+  const [activeTab, setActiveTab] = useState<'Calendar' | 'Stats' | 'Badges' | 'Progress' | 'AI Coach' | 'Analytics' | 'Social'>('Calendar');
   const { t } = useLanguage();
 
   // Generate GitHub-style calendar (last 35 days, 5 weeks)
@@ -1165,14 +1192,14 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
       </div>
 
       {/* Tab Switcher */}
-      <div className={`p-1 rounded-xl bg-white/10 flex shrink-0`}>
-        {(['Calendar', 'Stats', 'Badges', 'Progress', 'AI Coach'] as const).map((tab) => (
+      <div className={`p-1 rounded-xl bg-white/10 flex shrink-0 overflow-x-auto no-scrollbar`}>
+        {(['Calendar', 'Analytics', 'Social', 'Badges', 'AI Coach'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition ${activeTab === tab ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
+            className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition whitespace-nowrap ${activeTab === tab ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
           >
-            {tab === 'Progress' ? <><Icons.Camera size={14} className="inline mr-1" /> Progress</> : tab === 'AI Coach' ? <><Icons.Mic size={14} className="inline mr-1" /> Coach</> : tab}
+            {tab === 'Analytics' ? <><Icons.BarChart2 size={12} className="inline mr-1" />Аналитика</> : tab === 'AI Coach' ? <><Icons.Mic size={12} className="inline mr-1" />Coach</> : tab === 'Social' ? <><Icons.Users size={12} className="inline mr-1" />Друзья</> : tab}
           </button>
         ))}
       </div>
@@ -1275,6 +1302,15 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
                 <XAxis dataKey="name" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Habit DNA */}
+          <div className={`${GLASS_PANEL} p-4`}>
+            <h3 className="text-sm font-semibold text-white/70 mb-3 flex items-center">
+              <Icons.Activity size={14} className="mr-2 text-[#00D4AA]" />
+              Habit DNA
+            </h3>
+            <HabitDNA logs={logs} days={14} />
           </div>
 
           {/* AI Insights */}
@@ -1421,42 +1457,42 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
 
       {activeTab === 'AI Coach' && (
         <PremiumGate feature="AI-коуч">
-          <div className="space-y-4">
-            <div className={`${GLASS_PANEL} p-6 text-center`}>
-              <IconBadge icon={Icons.Mic} size="xl" color="#00D4AA" variant="circle" glowIntensity="medium" className="mb-4" />
-              <h3 className="text-xl font-bold mb-2">{t.history.weeklyAICoach}</h3>
-              <p className="text-sm text-white/60 mb-6">
-                {t.history.weeklyAICoachDesc}
-              </p>
-              <button
-                onClick={onRequestWeeklyReview}
-                className={`w-full py-4 ${ACCENT_BUTTON} flex items-center justify-center space-x-2`}
-              >
-                <span>{t.history.generateReview}</span>
-                <Icons.ArrowRight size={18} className="text-[#00D4AA]" />
-              </button>
-            </div>
+          <AICoachScreen logs={logs} streak={streak} />
+        </PremiumGate>
+      )}
 
-            {/* Sample Insights */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-white/70">{t.history.recentInsights}</h4>
-              {[
-                { iconName: 'Footprints', txt: "More steps = better sleep quality" },
-                { iconName: 'Leaf', txt: "High protein lunch reduced snacking" },
-                { iconName: 'Zap', txt: "Energy peaks after morning workouts" },
-              ].map((ins, i) => {
-                // @ts-ignore
-                const InsIcon = Icons[ins.iconName] || Icons.Star;
-                return (
-                  <div key={i} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
-                    <IconBadge icon={InsIcon} size="sm" color="#00D4AA" variant="circle" />
-                    <p className="text-sm font-medium">{ins.txt}</p>
-                  </div>
-                );
-              })}
-            </div>
+      {activeTab === 'Analytics' && (
+        <PremiumGate feature="Расширенная аналитика">
+          <div className="space-y-4">
+            {/* Yearly Heatmap */}
+            <YearlyHeatmap logs={logs} />
+
+            {/* Weekly Report */}
+            <WeeklyReport logs={logs} />
+
+            {/* Correlation Charts */}
+            <CorrelationChart logs={logs} xMetric="sleep" yMetric="mood" />
+            <CorrelationChart logs={logs} xMetric="steps" yMetric="energy" />
+
+            {/* Export Button */}
+            <button
+              onClick={() => exportLogsToCSV(logs)}
+              className={`w-full py-4 ${GLASS_BUTTON} flex items-center justify-center space-x-2`}
+            >
+              <Icons.Download size={18} className="text-[#00D4AA]" />
+              <span>Экспорт в CSV</span>
+            </button>
           </div>
         </PremiumGate>
+      )}
+
+      {activeTab === 'Social' && (
+        <SocialScreen
+          userId="current_user"
+          userName="Пользователь"
+          userStreak={streak.currentStreak}
+          userXp={0}
+        />
       )}
     </div>
   );
@@ -1734,6 +1770,7 @@ const SettingsScreen = ({
 // AppContent is the inner component with access to language context
 function AppContent() {
   const [screen, setScreen] = useState<Screen>('ONBOARDING');
+  const [isFocusOpen, setIsFocusOpen] = useState(false);
   const [user, setUser] = useState<UserSettings | null>(null);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [meals, setMeals] = useState<Meal[]>([]);
@@ -1914,6 +1951,7 @@ function AppContent() {
             closeDay={() => setScreen('CHECK_IN')}
             onMetricUpdate={handleMetricUpdate}
             logs={logs}
+            onOpenFocus={() => setIsFocusOpen(true)}
           />
         )}
 
@@ -1927,6 +1965,10 @@ function AppContent() {
 
         {screen === 'HISTORY' && (
           <HistoryScreen logs={logs} streak={streak} onRequestWeeklyReview={handleRequestWeeklyReview} />
+        )}
+
+        {screen === 'LOOKS' && (
+          <UmaxScreen />
         )}
 
         {/* Weekly Review Modal */}
@@ -1980,6 +2022,9 @@ function AppContent() {
           <TabBar current={screen} onChange={setScreen} />
         )}
       </div>
+
+      {/* Focus Mode Overlay */}
+      {isFocusOpen && <FocusScreen onBackendExit={() => setIsFocusOpen(false)} />}
     </div>
   );
 }
