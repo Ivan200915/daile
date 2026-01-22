@@ -119,7 +119,7 @@ const XpLevelBar = () => {
 // Tab Bar Component
 const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) => void }) => {
   const tabs = [
-    { key: 'DASHBOARD' as Screen, icon: Icons.Active, label: 'Today' },
+    { key: 'DASHBOARD' as Screen, icon: Icons.Home, label: 'Today' },
     { key: 'HISTORY' as Screen, icon: Icons.Chart, label: 'History' },
     { key: 'SETTINGS' as Screen, icon: Icons.Settings, label: 'Settings' },
   ];
