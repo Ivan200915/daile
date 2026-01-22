@@ -29,7 +29,8 @@ import {
   Share2,
   Home,
   Target,
-  Flame
+  Flame,
+  CheckCircle
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -46,8 +47,10 @@ export const Icons = {
   // Navigation
   Home,
   Chart: BarChart2,
+  BarChart2,
   Settings,
   Calendar,
+  CheckCircle,
 
   // Health metrics
   Steps: Footprints,
