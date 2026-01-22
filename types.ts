@@ -60,6 +60,7 @@ export interface UserSettings {
   targetProtein: number;
   height?: number; // cm
   weight?: number; // kg
+  gender?: 'male' | 'female';
   selectedHabits: string[]; // habit ids
   onboardingComplete: boolean;
   isPro?: boolean; // subscription status

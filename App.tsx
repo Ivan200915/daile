@@ -168,6 +168,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
   const [selectedHabits, setSelectedHabits] = useState<string[]>(['water', 'workout', 'no-sugar']);
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
 
   const next = () => setStep(p => p + 1);
   const back = () => setStep(p => Math.max(1, p - 1));
@@ -262,11 +263,29 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </div>
         )}
 
-        {step === 4 && (
+        {step === 5 && (
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-2 text-center">{t.onboarding.yourStats}</h2>
             <p className="text-white/50 text-sm mb-6 text-center">Helps calculate personalized calorie goals</p>
             <div className="space-y-4">
+              {/* Gender Selection */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <button
+                  onClick={() => setGender('male')}
+                  className={`p-4 rounded-xl border ${gender === 'male' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/60'}`}
+                >
+                  <span className="block text-2xl mb-2">♂️</span>
+                  <span className="font-bold">Male</span>
+                </button>
+                <button
+                  onClick={() => setGender('female')}
+                  className={`p-4 rounded-xl border ${gender === 'female' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/60'}`}
+                >
+                  <span className="block text-2xl mb-2">♀️</span>
+                  <span className="font-bold">Female</span>
+                </button>
+              </div>
+
               <div className={`${GLASS_PANEL_LIGHT} p-4`}>
                 <label className="text-sm text-white/50 block mb-2">{t.onboarding.height}</label>
                 <input
@@ -291,7 +310,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </div>
         )}
 
-        {step === 5 && (
+        {step === 6 && (
           <div className="w-full flex-1 flex flex-col items-center justify-center text-center">
             <h2 className="text-2xl font-bold mb-6">{t.onboarding.connectHealth}</h2>
             <div className={`${GLASS_PANEL} p-8 flex flex-col items-center space-y-4`}>
@@ -309,7 +328,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </button>
         )}
         <button
-          onClick={step === 5 ? () => {
+          onClick={step === 6 ? () => {
             const settings: UserSettings = {
               name: 'User',
               goal,
@@ -317,6 +336,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
               targetProtein: DEFAULT_TARGETS.protein,
               height: height ? parseFloat(height) : undefined,
               weight: weight ? parseFloat(weight) : undefined,
+              gender,
               selectedHabits,
               onboardingComplete: true
             };
@@ -330,7 +350,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           disabled={(step === 2 && !goal) || (step === 3 && selectedHabits.length < 3)}
           className={`w-full h-14 ${ACCENT_BUTTON} flex items-center justify-center text-lg disabled:opacity-50`}
         >
-          {step === 1 ? t.onboarding.start : step === 5 ? t.onboarding.connectFinish : t.common.next}
+          {step === 1 ? t.onboarding.start : step === 6 ? t.onboarding.connectFinish : t.common.next}
         </button>
       </div>
     </div>
@@ -1936,7 +1956,7 @@ function AppContent() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C1E] via-black to-[#0d0d0d] z-0" />
 
       {/* Content Container - max-width for desktop view constraint */}
-      <div className="relative z-10 w-full h-full max-w-md mx-auto bg-black/20 shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative z-10 w-full h-full max-w-md mx-auto bg-black/20 shadow-2xl overflow-hidden flex flex-col pt-14">
         {screen === 'ONBOARDING' && <OnboardingScreen onComplete={handleOnboardingComplete} />}
 
         {screen === 'DASHBOARD' && user && (

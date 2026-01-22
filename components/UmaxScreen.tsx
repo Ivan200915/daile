@@ -134,7 +134,7 @@ export const UmaxScreen = () => {
 
     if (state === 'intro') {
         return (
-            <div className="h-full flex flex-col relative overflow-hidden bg-black text-white p-6">
+            <div className="h-full flex flex-col relative overflow-hidden bg-black text-white p-6 pt-20">
                 <div className="flex-1 flex flex-col items-center justify-center text-center">
                     <div className="w-64 h-64 relative mb-8">
                         <div className="absolute inset-0 bg-[#00D4AA]/20 rounded-full blur-[50px] animate-pulse" />
@@ -317,7 +317,7 @@ export const UmaxScreen = () => {
                             onClick={() => setState('results_unlocked')}
                             className={`w-full py-4 bg-[#00D4AA] text-black font-bold rounded-2xl text-lg shadow-[0_0_20px_rgba(0,212,170,0.4)] flex items-center justify-center space-x-2`}
                         >
-                            <span>Get Umax Pro</span>
+                            <span>Get Premium</span>
                         </button>
                         <button
                             onClick={() => setShowInviteModal(true)}
