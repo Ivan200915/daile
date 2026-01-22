@@ -263,7 +263,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </div>
         )}
 
-        {step === 5 && (
+        {step === 4 && (
           <div className="w-full flex-1 flex flex-col">
             <h2 className="text-2xl font-bold mb-2 text-center">{t.onboarding.yourStats}</h2>
             <p className="text-white/50 text-sm mb-6 text-center">Helps calculate personalized calorie goals</p>
@@ -310,7 +310,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </div>
         )}
 
-        {step === 6 && (
+        {step === 5 && (
           <div className="w-full flex-1 flex flex-col items-center justify-center text-center">
             <h2 className="text-2xl font-bold mb-6">{t.onboarding.connectHealth}</h2>
             <div className={`${GLASS_PANEL} p-8 flex flex-col items-center space-y-4`}>
@@ -328,7 +328,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           </button>
         )}
         <button
-          onClick={step === 6 ? () => {
+          onClick={step === 5 ? () => {
             const settings: UserSettings = {
               name: 'User',
               goal,
@@ -350,7 +350,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
           disabled={(step === 2 && !goal) || (step === 3 && selectedHabits.length < 3)}
           className={`w-full h-14 ${ACCENT_BUTTON} flex items-center justify-center text-lg disabled:opacity-50`}
         >
-          {step === 1 ? t.onboarding.start : step === 6 ? t.onboarding.connectFinish : t.common.next}
+          {step === 1 ? t.onboarding.start : step === 5 ? t.onboarding.connectFinish : t.common.next}
         </button>
       </div>
     </div>
