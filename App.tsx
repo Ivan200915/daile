@@ -48,6 +48,8 @@ import { analyzeCorrelations, generateRecommendations, generateReportData } from
 import { hapticMedium, hapticSuccess, hapticLevelUp } from './services/feedbackService';
 import { loadPet, createPet, feedPet, getPetEmoji, getPetMood, getPetMessage } from './services/petService';
 import { CURRENT_SEASON, loadSeasonProgress, getSeasonDaysRemaining } from './services/seasonService';
+import { getShieldStatus, SHIELD_TIERS } from './services/streakShieldService';
+import { predictTomorrowMood, getMoodEmoji, getMoodLabel } from './services/moodPredictorService';
 import type { Language } from './locales';
 
 // --- Sub-Components ---
@@ -1047,9 +1049,9 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${activeTab === tab ? 'bg-white/20 shadow-sm' : 'text-white/50'}`}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition ${activeTab === tab ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
           >
-            {tab === 'Calendar' ? t.history.calendar : tab === 'Stats' ? t.history.stats : tab === 'Badges' ? '🏆' : t.history.aiCoach}
+            {tab === 'Progress' ? '📸 Progress' : tab === 'AI Coach' ? '🤖 Coach' : tab}
           </button>
         ))}
       </div>
