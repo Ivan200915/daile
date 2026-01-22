@@ -67,7 +67,7 @@ export const PremiumGate = ({
         <div className="relative">
             <div className="absolute inset-0 backdrop-blur-sm bg-black/40 rounded-xl flex items-center justify-center z-10">
                 <div className="text-center p-4">
-                    <span className="text-3xl mb-2 block">⭐</span>
+                    <span className="text-3xl mb-2 block text-yellow-400">★</span>
                     <p className="text-sm font-semibold mb-1">Premium</p>
                     <p className="text-xs text-white/60">Разблокируй {feature}</p>
                     <a

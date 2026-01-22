@@ -1152,7 +1152,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
         <h2 className="text-2xl font-bold">{t.history.title}</h2>
         {streak.freezesAvailable > 0 && (
           <div className="flex items-center space-x-1 bg-blue-500/20 px-3 py-1 rounded-full">
-            <span>❄️</span>
+            <Icons.Snowflake size={14} className="text-blue-300" />
             <span className="text-sm font-medium text-blue-300">{streak.freezesAvailable}</span>
           </div>
         )}
@@ -1166,7 +1166,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition ${activeTab === tab ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
           >
-            {tab === 'Progress' ? '📸 Progress' : tab === 'AI Coach' ? '🤖 Coach' : tab}
+            {tab === 'Progress' ? <><Icons.Camera size={14} className="inline mr-1" /> Progress</> : tab === 'AI Coach' ? <><Icons.Mic size={14} className="inline mr-1" /> Coach</> : tab}
           </button>
         ))}
       </div>
@@ -1207,7 +1207,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             <div className="flex justify-around">
               <div className="text-center">
                 <p className="text-2xl font-bold text-[#00D4AA]">{streak.currentStreak}</p>
-                <p className="text-xs text-white/50">{t.history.current} 🔥</p>
+                <p className="text-xs text-white/50 flex items-center"><Icons.Flame size={12} className="text-orange-500 mr-1" />{t.history.current}</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold">{streak.longestStreak}</p>
@@ -1215,7 +1215,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold">{streak.freezesAvailable}</p>
-                <p className="text-xs text-white/50">{t.history.freezes} ❄️</p>
+                <p className="text-xs text-white/50 flex items-center"><Icons.Snowflake size={12} className="text-blue-400 mr-1" />{t.history.freezes}</p>
               </div>
             </div>
 
@@ -1341,7 +1341,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
 
           {/* Before/After Photos */}
           <div>
-            <h3 className="text-lg font-bold mb-3">📸 До/После</h3>
+            <h3 className="text-lg font-bold mb-3 flex items-center"><IconBadge icon={Icons.Camera} size="sm" color="#00D4AA" variant="plain" className="mr-2" /> До/После</h3>
             <div className={`${GLASS_PANEL} p-4 text-center`}>
               <p className="text-sm text-white/60 mb-4">Загрузи фото "до" и "после" чтобы отслеживать визуальную трансформацию</p>
               <div className="grid grid-cols-2 gap-3 mb-4">
@@ -1417,7 +1417,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
         <PremiumGate feature="AI-коуч">
           <div className="space-y-4">
             <div className={`${GLASS_PANEL} p-6 text-center`}>
-              <span className="text-5xl mb-4 block">🤖</span>
+              <IconBadge icon={Icons.Mic} size="xl" color="#00D4AA" variant="circle" glowIntensity="medium" className="mb-4" />
               <h3 className="text-xl font-bold mb-2">{t.history.weeklyAICoach}</h3>
               <p className="text-sm text-white/60 mb-6">
                 {t.history.weeklyAICoachDesc}
@@ -1435,15 +1435,19 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: {
             <div className="space-y-3">
               <h4 className="text-sm font-semibold text-white/70">{t.history.recentInsights}</h4>
               {[
-                { icon: '🏃', txt: "More steps = better sleep quality" },
-                { icon: '🥗', txt: "High protein lunch reduced snacking" },
-                { icon: '⚡', txt: "Energy peaks after morning workouts" },
-              ].map((ins, i) => (
-                <div key={i} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
-                  <span className="text-2xl">{ins.icon}</span>
-                  <p className="text-sm font-medium">{ins.txt}</p>
-                </div>
-              ))}
+                { iconName: 'Footprints', txt: "More steps = better sleep quality" },
+                { iconName: 'Leaf', txt: "High protein lunch reduced snacking" },
+                { iconName: 'Zap', txt: "Energy peaks after morning workouts" },
+              ].map((ins, i) => {
+                // @ts-ignore
+                const InsIcon = Icons[ins.iconName] || Icons.Star;
+                return (
+                  <div key={i} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center space-x-3`}>
+                    <IconBadge icon={InsIcon} size="sm" color="#00D4AA" variant="circle" />
+                    <p className="text-sm font-medium">{ins.txt}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </PremiumGate>
@@ -1583,38 +1587,39 @@ const SettingsScreen = ({
           </>
         )}
 
-            <label className="text-sm text-white/50 block mb-2">{t.settings.caloriesGoal}</label>
-            <input
-              type="number"
-              value={calories}
-              onChange={(e) => setCalories(e.target.value)}
-              className="w-full bg-transparent text-xl font-semibold outline-none"
-            />
-          </div>
-          <div className={`${GLASS_PANEL_LIGHT} p-4`}>
-            <label className="text-sm text-white/50 block mb-2">{t.settings.proteinGoal}</label>
-            <input
-              type="number"
-              value={protein}
-              onChange={(e) => setProtein(e.target.value)}
-              className="w-full bg-transparent text-xl font-semibold outline-none"
-            />
-          </div>
+        <div className={`${GLASS_PANEL_LIGHT} p-4`}>
+          <label className="text-sm text-white/50 block mb-2">{t.settings.caloriesGoal}</label>
+          <input
+            type="number"
+            value={calories}
+            onChange={(e) => setCalories(e.target.value)}
+            className="w-full bg-transparent text-xl font-semibold outline-none"
+          />
         </div>
+        <div className={`${GLASS_PANEL_LIGHT} p-4`}>
+          <label className="text-sm text-white/50 block mb-2">{t.settings.proteinGoal}</label>
+          <input
+            type="number"
+            value={protein}
+            onChange={(e) => setProtein(e.target.value)}
+            className="w-full bg-transparent text-xl font-semibold outline-none"
+          />
+        </div>
+      </div>
 
-        <button onClick={save} className={`w-full py-3 ${ACCENT_BUTTON}`}>
-          {t.settings.saveGoals}
-        </button>
-      </div >
+      <button onClick={save} className={`w-full py-3 ${ACCENT_BUTTON}`}>
+        {t.settings.saveGoals}
+      </button>
 
-  {/* Subscription */ }
-  < div className = {`${GLASS_PANEL} p-5`}>
+
+      {/* Subscription */}
+      < div className={`${GLASS_PANEL} p-5`}>
         <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">{t.settings.subscription}</h3>
         <div className="flex items-center justify-between">
           <div>
             {isPremium ? (
               <>
-                <p className="font-semibold text-[#00D4AA]">⭐ Premium</p>
+                <p className="font-semibold text-[#00D4AA] flex items-center"><Icons.Star size={14} className="mr-1 text-yellow-400" /> Premium</p>
                 <p className="text-xs text-white/50">Все функции разблокированы</p>
               </>
             ) : (
@@ -1636,15 +1641,15 @@ const SettingsScreen = ({
         </div>
       </div >
 
-  {/* Goal */ }
-  < div className = {`${GLASS_PANEL_LIGHT} p-4`}>
+      {/* Goal */}
+      < div className={`${GLASS_PANEL_LIGHT} p-4`}>
         <p className="text-sm text-white/50">{t.settings.yourGoal}</p>
         <p className="font-semibold">{user.goal}</p>
       </div >
 
-  {/* Notifications */ }
-  < div className = {`${GLASS_PANEL} p-5`}>
-        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🔔 Уведомления</h3>
+      {/* Notifications */}
+      < div className={`${GLASS_PANEL} p-5`}>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3 flex items-center"><Icons.Bell size={14} className="mr-2 text-yellow-400" />Уведомления</h3>
         <div className="space-y-3">
           <label className="flex items-center justify-between">
             <span className="text-sm">Утреннее напоминание (9:00)</span>
@@ -1658,62 +1663,62 @@ const SettingsScreen = ({
         <p className="text-xs text-white/40 mt-3">Бот отправит напоминание в Telegram</p>
       </div >
 
-  {/* Language Selector */ }
-{
-  onLanguageChange && (
-    <div className={`${GLASS_PANEL} p-5`}>
-      <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Language / Язык</h3>
-      <div className="flex space-x-3">
-        {AVAILABLE_LANGUAGES.map((lang) => (
-          <button
-            key={lang}
-            onClick={() => onLanguageChange(lang)}
-            className={`flex-1 py-3 ${GLASS_BUTTON} flex items-center justify-center space-x-2 ${language === lang ? 'ring-2 ring-[#00D4AA]' : ''}`}
-          >
-            <span className="text-xl">{lang === 'en' ? '🇬🇧' : '🇷🇺'}</span>
-            <span className="font-medium">{LANGUAGE_NAMES[lang]}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-{/* Referral Program */ }
-<div className={`${GLASS_PANEL} p-5`}>
-  <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">🎁 Пригласи друга</h3>
-  <p className="text-sm text-white/60 mb-4">Получи 7 дней Premium за каждого друга!</p>
-  <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
-    <code className="text-[#00D4AA] font-mono text-sm">t.me/DailyDisciplin_bot?start=ref_DD...</code>
-    <button
-      onClick={() => {
-        navigator.clipboard.writeText('https://t.me/DailyDisciplin_bot?start=ref_DD123');
-        alert('Ссылка скопирована!');
-      }}
-      className="text-xs bg-[#00D4AA]/20 text-[#00D4AA] px-3 py-1 rounded-lg"
-    >
-      📋 Copy
-    </button>
-  </div>
-  <div className="flex justify-between mt-3 text-sm">
-    <span className="text-white/50">Приглашено: <strong className="text-white">0</strong></span>
-    <span className="text-white/50">Заработано: <strong className="text-[#00D4AA]">0 дней</strong></span>
-  </div>
-</div>
-
-{/* Danger Zone */ }
-<div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
-  <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">{t.settings.dangerZone}</h3>
-  <button
-    onClick={() => {
-      if (confirm(t.settings.resetConfirm)) {
-        onReset();
+      {/* Language Selector */}
+      {
+        onLanguageChange && (
+          <div className={`${GLASS_PANEL} p-5`}>
+            <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Language / Язык</h3>
+            <div className="flex space-x-3">
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => onLanguageChange(lang)}
+                  className={`flex-1 py-3 ${GLASS_BUTTON} flex items-center justify-center space-x-2 ${language === lang ? 'ring-2 ring-[#00D4AA]' : ''}`}
+                >
+                  <span className="text-xl">{lang === 'en' ? 'EN' : 'RU'}</span>
+                  <span className="font-medium">{LANGUAGE_NAMES[lang]}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
       }
-    }}
-    className="w-full py-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-400 font-medium"
-  >
-    {t.settings.resetAllData}
-  </button>
-</div>
+      {/* Referral Program */}
+      <div className={`${GLASS_PANEL} p-5`}>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3 flex items-center"><Icons.Gift size={14} className="mr-2 text-pink-400" />Пригласи друга</h3>
+        <p className="text-sm text-white/60 mb-4">Получи 7 дней Premium за каждого друга!</p>
+        <div className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
+          <code className="text-[#00D4AA] font-mono text-sm">t.me/DailyDisciplin_bot?start=ref_DD...</code>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText('https://t.me/DailyDisciplin_bot?start=ref_DD123');
+              alert('Ссылка скопирована!');
+            }}
+            className="text-xs bg-[#00D4AA]/20 text-[#00D4AA] px-3 py-1 rounded-lg"
+          >
+            <Icons.Share size={12} className="inline mr-1" /> Copy
+          </button>
+        </div>
+        <div className="flex justify-between mt-3 text-sm">
+          <span className="text-white/50">Приглашено: <strong className="text-white">0</strong></span>
+          <span className="text-white/50">Заработано: <strong className="text-[#00D4AA]">0 дней</strong></span>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className={`${GLASS_PANEL} p-5 border-red-500/30`}>
+        <h3 className="font-semibold text-red-400 text-sm uppercase tracking-wider mb-3">{t.settings.dangerZone}</h3>
+        <button
+          onClick={() => {
+            if (confirm(t.settings.resetConfirm)) {
+              onReset();
+            }
+          }}
+          className="w-full py-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-400 font-medium"
+        >
+          {t.settings.resetAllData}
+        </button>
+      </div>
     </div >
   );
 };
