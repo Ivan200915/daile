@@ -842,7 +842,7 @@ const Dashboard = ({
           <div className={`${GLASS_PANEL} p-4 bg-gradient-to-br from-purple-500/20 to-blue-500/20`}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
-                <span className="text-2xl">🔮</span>
+                <IconBadge icon={Icons.Idea} size="sm" color="#A855F7" variant="circle" glowIntensity="light" />
                 <div>
                   <p className="text-sm font-semibold">Прогноз на завтра</p>
                   <p className="text-xs text-white/50">{prediction.confidence}% уверенности</p>
@@ -850,7 +850,13 @@ const Dashboard = ({
               </div>
             </div>
             <div className="flex items-center space-x-3 mb-2">
-              <span className="text-4xl">{getMoodEmoji(prediction.predictedMood)}</span>
+              <IconBadge
+                icon={prediction.predictedMood >= 4 ? Icons.SmilePlus : prediction.predictedMood >= 3 ? Icons.Smile : prediction.predictedMood >= 2 ? Icons.Meh : Icons.Frown}
+                size="lg"
+                color={prediction.predictedMood >= 4 ? '#00D4AA' : prediction.predictedMood >= 3 ? '#FFD700' : prediction.predictedMood >= 2 ? '#FF9500' : '#FF3B30'}
+                variant="circle"
+                glowIntensity="medium"
+              />
               <div className="flex-1">
                 <p className="text-lg font-bold">{getMoodLabel(prediction.predictedMood).ru}</p>
                 <p className="text-xs text-white/60">{prediction.recommendationRu}</p>
