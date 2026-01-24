@@ -40,8 +40,28 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
     });
 
     if (!response.ok) {
-      console.error('Together AI Error:', response.status, await response.text());
-      return null;
+      const errorText = await response.text();
+      console.error('Together AI Error:', response.status, errorText);
+
+      let errorMessage = "API Error";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error?.message || errorText;
+      } catch (e) {
+        errorMessage = errorText;
+      }
+
+      // Return a valid analysis result describing the error
+      return JSON.stringify({
+        name: "API Error (See Details)",
+        total_calories: 0,
+        total_protein: 0,
+        total_fat: 0,
+        total_carbs: 0,
+        components: [],
+        confidence: 0,
+        insight: `Server Message: ${errorMessage.substring(0, 100)}...`
+      });
     }
 
     const data = await response.json();
