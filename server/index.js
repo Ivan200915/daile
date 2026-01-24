@@ -158,6 +158,40 @@ app.post('/api/webhook', async (req, res) => {
     res.sendStatus(200);
 });
 
+// 3. AI Food Analysis Proxy (Bypass CORS/ISP blocks)
+app.post('/api/analyze-food', async (req, res) => {
+    try {
+        const { model, messages } = req.body;
+
+        // Use hardcoded key for reliability if env var fails
+        const API_KEY = process.env.TOGETHER_API_KEY || '5dbbb3a9d05d4fa35ac759a18e99bee8d05c905ea56860f499dbe35e36496e71';
+
+        const response = await axios.post('https://api.together.ai/v1/chat/completions', {
+            model,
+            messages,
+            max_tokens: 1024,
+            temperature: 0.7
+        }, {
+            headers: {
+                'Authorization': `Bearer ${API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        res.json(response.data);
+
+    } catch (error) {
+        console.error('AI Proxy Error:', error.response?.data || error.message);
+
+        // Pass through the upstream error
+        if (error.response) {
+            res.status(error.response.status).json(error.response.data);
+        } else {
+            res.status(500).json({ error: { message: "Internal Server Error during AI proxy" } });
+        }
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => res.send('OK'));
 

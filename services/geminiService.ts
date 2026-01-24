@@ -27,17 +27,20 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
   if (!isApiConfigured) return null;
 
   try {
-    const response = await fetch(TOGETHER_API_URL, {
+    // Determine API URL (Local vs Production)
+    // In production, Nginx proxies /api to the backend. Locally we might need full URL if not proxied. 
+    // Assuming frontend is served relative to backend or proxy handles it.
+    const PROXY_URL = '/api/analyze-food';
+
+    const response = await fetch(PROXY_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
         'Content-Type': 'application/json',
+        // No Authorization header needed here, server handles it
       },
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: 1024,
-        temperature: 0.7,
       }),
     });
 
@@ -95,11 +98,11 @@ export interface FoodAnalysisResult {
 // Analyze food image to get name and macros with detailed breakdown
 export const analyzeFoodImage = async (base64Image: string, language: string = 'en'): Promise<FoodAnalysisResult | null> => {
   const fallback: FoodAnalysisResult = {
-    name: "Manual Entry (Hardcoded Key)",
+    name: "Manual Entry (Proxy Mode)",
     macros: { calories: 0, protein: 0, fat: 0, carbs: 0 },
     components: [],
     confidence: 0,
-    insight: "API call failed despite hardcoded key. Check console."
+    insight: "Proxy failed. Check server logs."
   };
 
   if (!isApiConfigured) {
