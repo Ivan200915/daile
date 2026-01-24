@@ -26,6 +26,8 @@ jobs:
         run: npm run build
         env:
           VITE_TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+          TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
 
       - name: Deploy Frontend to VPS
         uses: appleboy/scp-action@v0.1.7

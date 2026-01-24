@@ -12,6 +12,16 @@ const isApiConfigured = TOGETHER_API_KEY && TOGETHER_API_KEY !== 'no_key' && TOG
 
 // Helper to call Together AI API
 async function callTogetherAI(messages: any[], model: string): Promise<string | null> {
+  // Debug log to verify key status in production
+  if (process.env.NODE_ENV !== 'production' || !isApiConfigured) {
+    console.log('GeminiService Config:', {
+      hasKey: !!TOGETHER_API_KEY,
+      keyLength: TOGETHER_API_KEY?.length,
+      keyPreview: TOGETHER_API_KEY ? `${TOGETHER_API_KEY.substring(0, 4)}...` : 'NONE',
+      isConfigured: isApiConfigured
+    });
+  }
+
   if (!isApiConfigured) return null;
 
   try {
