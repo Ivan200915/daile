@@ -49,7 +49,11 @@ import {
   Download,
   Sun,
   Copy,
-  Crown
+  Crown,
+  RotateCcw,
+  Info,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 // Brand colors - exported for use elsewhere
@@ -133,12 +137,16 @@ export const Icons = {
   Share: Share2,
   Download,
   Sun,
+  Volume2,
+  VolumeX,
 
   // Misc
   Idea: Lightbulb,
   Gallery: ImageIcon,
   Copy,
   Crown,
+  RotateCcw,
+  Info,
 };
 
 // Unified icon sizes

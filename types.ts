@@ -1,4 +1,4 @@
-export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SETTINGS' | 'LOOKS';
+export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SOCIAL' | 'SETTINGS' | 'LOOKS';
 
 export interface MacroData {
   calories: number;
@@ -42,6 +42,7 @@ export interface DailyLog {
     steps: number;
     sleepHours: number;
     activeMinutes: number;
+    focusMinutes?: number;
   };
   checkIn?: {
     mood: number; // 1-5
@@ -50,6 +51,10 @@ export interface DailyLog {
     note: string;
   };
   insight?: string;
+  gamification?: {
+    xp: number;
+    challengesCompleted?: string[];
+  };
   closed: boolean;
 }
 
@@ -71,4 +76,14 @@ export interface AvailableHabit {
   label: string;
   icon: string;
   category: 'health' | 'fitness' | 'nutrition' | 'mindfulness';
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  xp: number;
+  completed: boolean;
+  type: 'water' | 'steps' | 'workout' | 'mindfulness' | 'social' | 'nutrition' | 'health';
+  target?: number; // e.g., 2000ml, 5000 steps
 }

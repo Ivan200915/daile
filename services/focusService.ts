@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: FocusSettings = {
 };
 
 // Hook for using the Focus Service
-export const useFocusTimer = () => {
+export const useFocusTimer = (onComplete?: (minutes: number) => void) => {
     const [session, setSession] = useState<FocusSession>({
         isActive: false,
         timeLeft: DEFAULT_SETTINGS.focusDuration * 60,
@@ -88,6 +88,24 @@ export const useFocusTimer = () => {
         }
     };
 
+    // Handle completion
+    const handleTimerComplete = () => {
+        setSession(prev => ({ ...prev, isActive: false }));
+
+        // Reward XP only for focus sessions
+        if (session.mode === 'focus') {
+            const minutesCompleted = Math.floor(session.totalTime / 60);
+            const xpEarned = Math.round(minutesCompleted * 0.5); // 0.5 XP per minute = 12-13 XP for 25m
+            addXp(xpEarned);
+
+            if (onComplete) {
+                onComplete(minutesCompleted);
+            }
+
+            console.log(`Focus session completed! Earned ${xpEarned} XP`);
+        }
+    };
+
     // Timer tick effect
     useEffect(() => {
         if (session.isActive && session.timeLeft > 0) {
@@ -103,22 +121,6 @@ export const useFocusTimer = () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
     }, [session.isActive, session.timeLeft]);
-
-    // Handle completion
-    const handleTimerComplete = () => {
-        setSession(prev => ({ ...prev, isActive: false }));
-
-        // Reward XP only for focus sessions
-        if (session.mode === 'focus') {
-            const minutesCompleted = Math.floor(session.totalTime / 60);
-            const xpEarned = Math.round(minutesCompleted * 0.5); // 0.5 XP per minute = 12-13 XP for 25m
-            addXp(xpEarned);
-
-            // Play sound here (can trigger via callback or context if needed)
-            // For now we just alert via console or return status
-            console.log(`Focus session completed! Earned ${xpEarned} XP`);
-        }
-    };
 
     // Format time (MM:SS)
     const formatTime = (seconds: number): string => {

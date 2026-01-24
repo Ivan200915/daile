@@ -77,3 +77,35 @@ export const analyzeFace = async (imageUri?: string): Promise<FaceAnalysis> => {
         recommendations: recs.slice(0, 4) // Limit to 4
     };
 };
+
+// --- History Storage ---
+
+const HISTORY_KEY = 'umax_scan_history';
+
+export interface ScanResult extends FaceAnalysis {
+    // FaceAnalysis already has id and date, so we just extend it
+}
+
+export const saveScanResult = (analysis: FaceAnalysis): ScanResult => {
+    const history = getScanHistory();
+    // Check if duplicate (simple check by ID or time close)
+    const exists = history.find(h => h.id === analysis.id);
+    if (exists) return exists;
+
+    const newResult: ScanResult = { ...analysis };
+
+    // Keep last 30 scans
+    const updatedHistory = [newResult, ...history].slice(0, 30);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+    return newResult;
+};
+
+export const getScanHistory = (): ScanResult[] => {
+    try {
+        const stored = localStorage.getItem(HISTORY_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error("Failed to load scan history", e);
+        return [];
+    }
+};

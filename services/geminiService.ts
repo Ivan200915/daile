@@ -42,14 +42,49 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
   }
 }
 
-// Analyze food image to get name and macros
-export const analyzeFoodImage = async (base64Image: string): Promise<{ name: string; macros: MacroData } | null> => {
-  const fallback = {
-    name: "Detected Meal (Demo)",
-    macros: { calories: 450, protein: 20, fat: 15, carbs: 55 }
+// Advanced Food Analysis Types
+export interface FoodComponent {
+  name: string;
+  amount: string; // e.g. "150g"
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export interface FoodAnalysisResult {
+  name: string;
+  macros: MacroData;
+  components: FoodComponent[];
+  confidence: number;
+  insight?: string;
+}
+
+// Analyze food image to get name and macros with detailed breakdown
+export const analyzeFoodImage = async (base64Image: string, language: string = 'en'): Promise<FoodAnalysisResult | null> => {
+  const fallback: FoodAnalysisResult = {
+    name: "Manual Entry Required (Network/Error)",
+    macros: { calories: 0, protein: 0, fat: 0, carbs: 0 },
+    components: [],
+    confidence: 0,
+    insight: "Could not analyze image."
   };
 
-  if (!isApiConfigured) return fallback;
+  if (!isApiConfigured) {
+    // Demo/Mock Data if no key
+    return {
+      name: language === 'ru' ? "Куриный салат (Демо)" : "Grilled Chicken Salad (Demo)",
+      macros: { calories: 450, protein: 42, fat: 18, carbs: 12 },
+      components: [
+        { name: language === 'ru' ? "Куриная грудка" : "Grilled Chicken Breast", amount: "150g", calories: 250, protein: 35, fat: 5, carbs: 0 },
+        { name: language === 'ru' ? "Зелень" : "Mixed Greens", amount: "2 cups", calories: 30, protein: 2, fat: 0, carbs: 5 },
+        { name: language === 'ru' ? "Авокадо" : "Avocado", amount: "1/2", calories: 120, protein: 1, fat: 10, carbs: 6 },
+        { name: language === 'ru' ? "Масло" : "Olive Oil Dressing", amount: "1 tbsp", calories: 50, protein: 0, fat: 5, carbs: 1 }
+      ],
+      confidence: 85,
+      insight: language === 'ru' ? "Богато белком, мало углеводов." : "High protein, low carb option."
+    };
+  }
 
   const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
 
@@ -65,12 +100,28 @@ export const analyzeFoodImage = async (base64Image: string): Promise<{ name: str
         },
         {
           type: 'text',
-          text: `Analyze this food image. Identify the dish and estimate its nutritional content for a standard serving.
+          text: `You are an expert AI Nutritionist. Analyze this food image with high precision.
+Identify the dish and breakdown its components/ingredients. Estimate the portion size and nutritional content for each component.
 
-Return ONLY valid JSON in this exact format (no other text):
-{"name": "dish name", "calories": 0, "protein": 0, "fat": 0, "carbs": 0}
+Context Language: ${language === 'ru' ? 'Russian (Русский)' : 'English'}.
+IMPORTANT: Output all names and insights in ${language === 'ru' ? 'Russian' : 'English'}.
 
-Where calories is total kcal, and protein/fat/carbs are in grams.`
+Return ONLY valid JSON in this exact format:
+{
+  "name": "Detailed Dish Name",
+  "total_calories": 0,
+  "total_protein": 0,
+  "total_fat": 0,
+  "total_carbs": 0,
+  "components": [
+    { "name": "Ingredient 1", "amount": "quantity estimation", "calories": 0, "protein": 0, "fat": 0, "carbs": 0 },
+    ...
+  ],
+  "confidence": 0-100,
+  "insight": "Brief 1-sentence nutritional insight"
+}
+
+Be realistic with portion sizes. Identify multiple items if present (e.g. steak + potatoes).`
         }
       ]
     }
@@ -89,11 +140,14 @@ Where calories is total kcal, and protein/fat/carbs are in grams.`
     return {
       name: parsed.name || "Unknown Dish",
       macros: {
-        calories: parsed.calories || 0,
-        protein: parsed.protein || 0,
-        fat: parsed.fat || 0,
-        carbs: parsed.carbs || 0
-      }
+        calories: parsed.total_calories || 0,
+        protein: parsed.total_protein || 0,
+        fat: parsed.total_fat || 0,
+        carbs: parsed.total_carbs || 0
+      },
+      components: parsed.components || [],
+      confidence: parsed.confidence || 0,
+      insight: parsed.insight
     };
   } catch (error) {
     console.error('JSON Parse Error:', error);
@@ -193,4 +247,19 @@ Return JSON:
     console.error('Weekly Review Parse Error:', error);
     return fallback;
   }
+};
+
+// General Chat Response
+export const generateChatResponse = async (
+  messages: { role: string; content: string }[],
+  systemPrompt: string
+): Promise<string | null> => {
+  if (!isApiConfigured) return null;
+
+  const payload = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map(m => ({ role: m.role, content: m.content }))
+  ];
+
+  return await callTogetherAI(payload, TEXT_MODEL);
 };

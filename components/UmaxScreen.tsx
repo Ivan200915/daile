@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Icons } from './Icons';
 import IconBadge from './IconBadge';
-import { analyzeFace, FaceAnalysis } from '../services/umaxService';
+import { analyzeFace, FaceAnalysis, saveScanResult, getScanHistory, ScanResult } from '../services/umaxService';
 import { PremiumPaywall } from './PremiumPaywall';
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { MewingTools } from './MewingTools';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
 const GLASS_PANEL_LIGHT = 'bg-white/5 backdrop-blur-sm rounded-xl';
@@ -49,6 +50,13 @@ export const UmaxScreen = () => {
     const [showPaywall, setShowPaywall] = useState(false);
     const [scanProgress, setScanProgress] = useState(0); // 0-100
     const [scanStep, setScanStep] = useState('');
+    const [history, setHistory] = useState<ScanResult[]>([]);
+    const [showHistory, setShowHistory] = useState(false);
+    const [activeTab, setActiveTab] = useState<'scan' | 'tools'>('scan');
+
+    useEffect(() => {
+        setHistory(getScanHistory());
+    }, []);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -149,7 +157,9 @@ export const UmaxScreen = () => {
         }
 
         const result = await analyzeFace(frontImage!);
-        setAnalysis(result);
+        const savedResult = saveScanResult(result);
+        setAnalysis(savedResult);
+        setHistory(prev => [savedResult, ...prev]);
         setScanProgress(100);
         setState('results_locked');
     };
@@ -172,8 +182,6 @@ export const UmaxScreen = () => {
         }
     };
 
-    // --- Render Helpers ---
-
     const renderOverlay = (type: 'front' | 'side') => (
         <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
             {type === 'front' ? (
@@ -190,26 +198,113 @@ export const UmaxScreen = () => {
 
     if (state === 'intro') {
         return (
-            <div className="h-full flex flex-col relative overflow-hidden bg-black text-white p-6 pt-20">
-                <div className="flex-1 flex flex-col items-center justify-center text-center">
-                    <div className="w-64 h-64 relative mb-8">
-                        <div className="absolute inset-0 bg-[#00D4AA]/20 rounded-full blur-[50px] animate-pulse" />
-                        <div className="relative z-10 w-full h-full border-2 border-white/10 rounded-full flex items-center justify-center">
-                            <Icons.Camera size={80} className="text-[#00D4AA]" />
-                        </div>
+            <div className="h-full flex flex-col relative overflow-hidden bg-black text-white">
+                {/* Tab Switcher */}
+                <div className="absolute top-0 left-0 right-0 z-50 flex justify-center pt-6 pointer-events-none">
+                    <div className="bg-white/10 backdrop-blur-md rounded-full p-1 flex pointer-events-auto">
+                        <button
+                            onClick={() => setActiveTab('scan')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition ${activeTab === 'scan' ? 'bg-[#00D4AA] text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            Scan
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('tools')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold transition ${activeTab === 'tools' ? 'bg-[#00D4AA] text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            Tools
+                        </button>
                     </div>
-
-                    <h2 className="text-3xl font-bold mb-4">Reveal Your Potential</h2>
-                    <p className="text-white/60 max-w-xs leading-relaxed">
-                        Upload a front and side selfie to get a detailed AI analysis of your facial aesthetics.
-                    </p>
                 </div>
 
-                <div className="pb-24">
-                    <button onClick={() => setState('front_capture')} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
-                        Start Analysis
-                    </button>
-                </div>
+                {activeTab === 'tools' ? (
+                    <MewingTools />
+                ) : (
+                    <div className="flex-1 flex flex-col p-6 pt-20">
+                        {showHistory ? (
+                            <div className="flex-1 flex flex-col">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl font-bold">Progress History</h3>
+                                    <button onClick={() => setShowHistory(false)} className="p-2 bg-white/10 rounded-full">
+                                        <Icons.X size={20} />
+                                    </button>
+                                </div>
+
+                                {history.length > 0 ? (
+                                    <div className="flex-1">
+                                        <div className={`${GLASS_PANEL} p-4 h-64 mb-6`}>
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <LineChart data={[...history].reverse()}>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                                                    <XAxis dataKey="date" tickFormatter={(d) => new Date(d).getDate() + '/' + (new Date(d).getMonth() + 1)} stroke="rgba(255,255,255,0.3)" tick={{ fontSize: 10 }} />
+                                                    <YAxis domain={[0, 100]} hide />
+                                                    <Tooltip
+                                                        contentStyle={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                                        itemStyle={{ color: '#fff' }}
+                                                        labelStyle={{ color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}
+                                                        labelFormatter={(l) => new Date(l).toLocaleDateString()}
+                                                    />
+                                                    <Line type="monotone" dataKey="overallScore" stroke="#00D4AA" strokeWidth={3} dot={{ r: 4, fill: '#00D4AA', strokeWidth: 0 }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }} />
+                                                </LineChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                        <div className="space-y-3 overflow-y-auto max-h-[40vh] no-scrollbar">
+                                            {history.map(scan => (
+                                                <div key={scan.id} className={`${GLASS_PANEL_LIGHT} p-4 flex items-center justify-between`}>
+                                                    <div>
+                                                        <p className="font-bold text-lg">{scan.overallScore}</p>
+                                                        <p className="text-xs text-white/50">{new Date(scan.date).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-xs text-[#00D4AA]">Potential: {scan.potentialScore}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-white/50">
+                                        <Icons.Chart size={48} className="mb-4 opacity-50" />
+                                        <p>No scans yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex-1 flex flex-col items-center justify-center text-center">
+                                    <div className="w-64 h-64 relative mb-8">
+                                        <div className="absolute inset-0 bg-[#00D4AA]/20 rounded-full blur-[50px] animate-pulse" />
+                                        <div className="relative z-10 w-full h-full border-2 border-white/10 rounded-full flex items-center justify-center">
+                                            <Icons.Camera size={80} className="text-[#00D4AA]" />
+                                        </div>
+                                    </div>
+
+                                    <h2 className="text-3xl font-bold mb-4">Reveal Your Potential</h2>
+                                    <p className="text-white/60 max-w-xs leading-relaxed mb-6">
+                                        Upload a front and side selfie to get a detailed AI analysis of your facial aesthetics.
+                                    </p>
+
+                                    {/* History Toggle */}
+                                    {history.length > 0 && (
+                                        <button
+                                            onClick={() => setShowHistory(true)}
+                                            className="flex items-center space-x-2 text-[#00D4AA] text-sm font-medium hover:text-white transition"
+                                        >
+                                            <Icons.BarChart2 size={16} />
+                                            <span>View History</span>
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="pb-24">
+                                    <button onClick={() => setState('front_capture')} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
+                                        Start Analysis
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
         );
     }

@@ -8,12 +8,59 @@ import { useFocusTimer, FocusMode } from '../services/focusService';
 
 interface FocusScreenProps {
     onBackendExit: () => void;
+    onComplete?: (minutes: number) => void;
 }
 
-const FocusScreen: React.FC<FocusScreenProps> = ({ onBackendExit }) => {
-    const { session, startTimer, pauseTimer, stopTimer, setMode, formatTime, progress } = useFocusTimer();
+const FocusScreen: React.FC<FocusScreenProps> = ({ onBackendExit, onComplete }) => {
+    const { session, startTimer, pauseTimer, stopTimer, setMode, formatTime, progress } = useFocusTimer(onComplete);
     const [taskInput, setTaskInput] = useState('');
     const [isZenMode, setIsZenMode] = useState(false);
+    const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+
+    // Audio Context for Brown Noise (Soundscape)
+    useEffect(() => {
+        let audioCtx: AudioContext | null = null;
+        let gainNode: GainNode | null = null;
+        let source: AudioBufferSourceNode | null = null;
+
+        if (isSoundEnabled) {
+            try {
+                const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+                audioCtx = new AudioContextClass();
+                const bufferSize = audioCtx.sampleRate * 2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+
+                // Brown Noise Generation
+                let lastOut = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    data[i] = (lastOut + (0.02 * white)) / 1.02;
+                    lastOut = data[i];
+                    data[i] *= 3.5;
+                }
+
+                source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+
+                gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0.05; // Gentle volume
+
+                source.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                source.start();
+            } catch (e) {
+                console.error("Audio API not supported", e);
+            }
+        }
+
+        return () => {
+            if (source) source.stop();
+            if (gainNode) gainNode.disconnect();
+            if (audioCtx) audioCtx.close();
+        };
+    }, [isSoundEnabled]);
 
     // Radial Progress Component
     const RadialProgress = ({ size = 300, strokeWidth = 12 }) => {
@@ -123,6 +170,14 @@ const FocusScreen: React.FC<FocusScreenProps> = ({ onBackendExit }) => {
                     title="Zen Mode"
                 >
                     <Icons.Maximize2 size={20} />
+                </button>
+
+                <button
+                    onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+                    className={`p-2 hover:bg-white/10 rounded-full transition ${isSoundEnabled ? 'text-[#00D4AA]' : 'text-white/60 hover:text-white'}`}
+                    title={isSoundEnabled ? "Turn Off Sound" : "Turn On Brown Noise"}
+                >
+                    {isSoundEnabled ? <Icons.Volume2 size={20} /> : <Icons.VolumeX size={20} />}
                 </button>
             </div>
 

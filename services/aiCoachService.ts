@@ -66,6 +66,8 @@ export const getRecommendedQuestions = (logs: DailyLog[]): string[] => {
     return questions;
 };
 
+import { generateChatResponse } from './geminiService';
+
 // Mock AI response generation
 export const generateCoachResponse = async (
     message: string,
@@ -75,21 +77,49 @@ export const generateCoachResponse = async (
         streak: StreakData;
     }
 ): Promise<string> => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const lowerMsg = message.toLowerCase();
+    // 1. Prepare Context Data
     const today = context.logs[context.logs.length - 1];
-
-    // 1. Analyze Context
     const incompleteHabits = today?.habits.filter(h => !h.completed).map(h => h.label) || [];
-    const completedCount = today?.habits.filter(h => h.completed).length || 0;
+    const completedHabits = today?.habits.filter(h => h.completed).map(h => h.label) || [];
     const sleep = today?.metrics.sleepHours || 0;
     const mood = today?.checkIn?.mood || 0;
     const streak = context.streak.currentStreak;
+    const totalXp = today?.gamification?.xp || 0;
 
-    // KEYWORD LOGIC
+    // 2. Build System Prompt with Context
+    const systemPrompt = `
+${COACH_PERSONA}
 
+CURRENT USER CONTEXT:
+- Date: ${new Date().toLocaleDateString()}
+- Current Streak: ${streak} days
+- Today's Progress:
+  - Sleep: ${sleep} hours
+  - Mood: ${mood}/5
+  - Completed Habits: ${completedHabits.join(', ') || 'None'}
+  - Pending Habits: ${incompleteHabits.join(', ') || 'All'}
+  - Total XP: ${totalXp}
+
+INSTRUCTIONS:
+- Use this data to give specific, tough love advice.
+- If streak < 3, tell them they are fragile.
+- If incomplete habits exist, tell them to go do ${incompleteHabits[0] || 'work'}.
+- Be short. Max 2-3 sentences.
+`;
+
+    // 3. Call Gemini (or fallback to basic rules if no key)
+    const geminiResponse = await generateChatResponse(
+        history.map(m => ({ role: m.role, content: m.content })),
+        systemPrompt
+    );
+
+    if (geminiResponse) return geminiResponse;
+
+    // ... (FALLBACK - Keep existing logic for offline/no-key usage) ...
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const lowerMsg = message.toLowerCase();
+
+    // KEYWORD LOGIC (Fallback)
     // PROGRESS / EVALUATION
     if (lowerMsg.includes('progress') || lowerMsg.includes('evaluate') || lowerMsg.includes('status')) {
         // Zero Streak / Low Streak
