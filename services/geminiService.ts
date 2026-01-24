@@ -5,7 +5,7 @@ const TOGETHER_API_KEY = (import.meta as any).env.VITE_TOGETHER_API_KEY || proce
 const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions';
 
 // Best vision model on Together AI for quality results
-const VISION_MODEL = 'meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo';
+const VISION_MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct';
 const TEXT_MODEL = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo';
 
 const isApiConfigured = TOGETHER_API_KEY && TOGETHER_API_KEY !== 'no_key' && TOGETHER_API_KEY !== 'dummy';
