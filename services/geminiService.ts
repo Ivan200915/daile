@@ -1,7 +1,7 @@
 import { MacroData } from '../types';
 
 // Together AI configuration
-const TOGETHER_API_KEY = process.env.API_KEY || '';
+const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY || process.env.API_KEY || '';
 const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions';
 
 // Best vision model on Together AI for quality results

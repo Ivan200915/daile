@@ -28,7 +28,7 @@ git push -u origin main
 | `VPS_USER` | Пользователь SSH (рекомендуется: `deploy`) |
 | `VPS_PORT` | Порт SSH (обычно `22`) |
 | `VPS_SSH_KEY` | Приватный ключ для деплоя (сгенерированный специально для этого) |
-| `GEMINI_API_KEY` | API ключ Google Gemini |
+| `TOGETHER_API_KEY` | API ключ Together AI (для AI функций) |
 
 ---
 
