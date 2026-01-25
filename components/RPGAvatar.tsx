@@ -292,10 +292,22 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                             </p>
                         </div>
 
+                        {/* Premium Upsell in Modal */}
+                        {!isPremium && (
+                            <button
+                                onClick={() => { setShowModal(false); openPaywall(); }}
+                                className="w-full mt-4 py-4 px-4 rounded-2xl bg-gradient-to-r from-[#FFD700] to-[#FF6B00] text-black font-bold flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg"
+                            >
+                                <Icons.Star size={20} />
+                                <span>{isRu ? 'Разблокировать все ранги' : 'Unlock All Ranks'}</span>
+                                <Icons.ChevronRight size={18} />
+                            </button>
+                        )}
+
                         {/* Close Button */}
                         <button
                             onClick={() => setShowModal(false)}
-                            className="w-full mt-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/50 font-medium hover:bg-white/10 transition-colors"
+                            className="w-full mt-3 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/50 font-medium hover:bg-white/10 transition-colors"
                         >
                             {isRu ? 'Закрыть' : 'Close'}
                         </button>
