@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Icons } from './Icons';
 import { useLanguage } from '../locales/LanguageContext';
+import { usePremium } from '../services/PremiumContext';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
 
@@ -42,12 +43,19 @@ const getRank = (level: number, ranks: typeof RANKS_MALE) => {
 
 export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabits, streak, gender = 'male' }: RPGAvatarProps) => {
     const { language } = useLanguage();
+    const { isPremium, openPaywall } = usePremium();
     const isRu = language === 'ru';
     const RANKS = gender === 'female' ? RANKS_FEMALE : RANKS_MALE;
     const [showModal, setShowModal] = useState(false);
-    const rank = getRank(level, RANKS);
+
+    // Free users capped at level 9 (rank 1), premium unlocks all
+    const effectiveLevel = isPremium ? level : Math.min(level, 9);
+    const rank = getRank(effectiveLevel, RANKS);
     const xpPercent = Math.min(100, Math.round((xp / xpToNextLevel) * 100));
-    const totalXp = rank.xpRequired + xp; // Approximate total XP
+    const isLevelCapped = !isPremium && level > 9;
+
+    // Glow color: green for premium, grey for free
+    const glowColor = isPremium ? '#00D4AA' : '#6B7280';
 
     return (
         <>
@@ -75,20 +83,20 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                     className={`${GLASS_PANEL} p-4 relative overflow-hidden cursor-pointer transition-all duration-300 hover:bg-white/15 active:scale-[0.98]`}
                     onClick={() => setShowModal(true)}
                 >
-                    {/* Background glow - APP COLOR */}
+                    {/* Background glow - conditional on premium */}
                     <div
                         className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[60px] opacity-40 animate-pulse"
-                        style={{ backgroundColor: '#00D4AA' }}
+                        style={{ backgroundColor: glowColor }}
                     />
 
                     <div className="flex items-center gap-4 relative z-10">
                         {/* 3D Avatar Container */}
                         <div className="relative shrink-0">
-                            {/* Subtle inner glow - contained */}
+                            {/* Subtle inner glow - conditional on premium */}
                             <div
                                 className="absolute inset-0 rounded-full animate-pulse opacity-40"
                                 style={{
-                                    boxShadow: '0 0 20px #00D4AA, inset 0 0 10px rgba(0, 212, 170, 0.3)'
+                                    boxShadow: `0 0 20px ${glowColor}, inset 0 0 10px ${glowColor}40`
                                 }}
                             />
 
@@ -96,8 +104,8 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                             <div
                                 className="relative w-20 h-20 rounded-full overflow-hidden border-2 shadow-lg"
                                 style={{
-                                    borderColor: '#00D4AA',
-                                    boxShadow: '0 0 15px rgba(0, 212, 170, 0.4)'
+                                    borderColor: glowColor,
+                                    boxShadow: `0 0 15px ${glowColor}60`
                                 }}
                             >
                                 <img
@@ -165,6 +173,24 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                             <span className="text-sm font-bold">{xpPercent}%</span>
                         </div>
                     </div>
+
+                    {/* Premium Upsell Banner */}
+                    {!isPremium && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); openPaywall(); }}
+                            className="w-full mt-3 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#FFD700]/20 to-[#FF6B00]/20 border border-[#FFD700]/30 flex items-center justify-between hover:from-[#FFD700]/30 hover:to-[#FF6B00]/30 transition-all"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Icons.Star size={16} className="text-[#FFD700]" />
+                                <span className="text-xs font-bold text-white">
+                                    {isRu ? 'Разблокируй все ранги' : 'Unlock all ranks'}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-bold text-[#FFD700] bg-[#FFD700]/20 px-2 py-0.5 rounded-full">
+                                PREMIUM
+                            </span>
+                        </button>
+                    )}
 
                     {/* Tap hint */}
                     <p className="text-center text-[10px] text-white/20 mt-2">
@@ -275,7 +301,8 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                         </button>
                     </div>
                 </div>
-            )}
+            )
+            }
         </>
     );
 };
