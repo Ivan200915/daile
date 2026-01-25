@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Icons } from './Icons';
 import { useLanguage } from '../locales/LanguageContext';
 import { usePremium } from '../services/PremiumContext';
+import { playSound } from '../services/soundService';
+import { triggerHaptic } from '../services/hapticService';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
 
@@ -81,7 +83,11 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                 {/* Main Card - Clickable */}
                 <div
                     className={`${GLASS_PANEL} p-4 relative overflow-hidden cursor-pointer transition-all duration-300 hover:bg-white/15 active:scale-[0.98]`}
-                    onClick={() => setShowModal(true)}
+                    onClick={() => {
+                        playSound('click');
+                        triggerHaptic('soft');
+                        setShowModal(true);
+                    }}
                 >
                     {/* Background glow - conditional on premium */}
                     <div
@@ -295,7 +301,12 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                         {/* Premium Upsell in Modal */}
                         {!isPremium && (
                             <button
-                                onClick={() => { setShowModal(false); openPaywall(); }}
+                                onClick={() => {
+                                    setShowModal(false);
+                                    triggerHaptic('medium');
+                                    playSound('click');
+                                    openPaywall();
+                                }}
                                 className="w-full mt-4 py-4 px-4 rounded-2xl bg-gradient-to-r from-[#FFD700] to-[#FF6B00] text-black font-bold flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg"
                             >
                                 <Icons.Star size={20} />
@@ -306,7 +317,11 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
 
                         {/* Close Button */}
                         <button
-                            onClick={() => setShowModal(false)}
+                            onClick={() => {
+                                playSound('click');
+                                triggerHaptic('light');
+                                setShowModal(false);
+                            }}
                             className="w-full mt-3 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/50 font-medium hover:bg-white/10 transition-colors"
                         >
                             {isRu ? 'Закрыть' : 'Close'}

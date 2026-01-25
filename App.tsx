@@ -9,6 +9,8 @@ import {
   AVAILABLE_HABITS,
   DEFAULT_TARGETS
 } from './constants';
+import { playSound } from './services/soundService';
+import { triggerHaptic } from './services/hapticService';
 import { Screen, Meal, Habit, UserSettings, DailyLog, StreakData } from './types';
 import { Icons } from './components/Icons';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -159,7 +161,11 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
       {tabs.map(tab => (
         <button
           key={tab.key}
-          onClick={() => onChange(tab.key)}
+          onClick={() => {
+            playSound('click');
+            triggerHaptic('selection');
+            onChange(tab.key);
+          }}
           className={`flex flex-col items-center space-y-1 transition-all min-h-[44px] ${current === tab.key ? 'text-white' : 'text-white/40'}`}
         >
           <IconBadge
@@ -173,7 +179,7 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
           <span className={`text-xs font-medium ${current === tab.key ? 'text-[#00D4AA]' : ''}`}>{tab.label}</span>
         </button>
       ))}
-    </div>
+    </div >
   );
 };
 

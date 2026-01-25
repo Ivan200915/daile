@@ -4,6 +4,8 @@ import { Habit } from '../types';
 import { Icons } from './Icons';
 import IconBadge from './IconBadge';
 import { AVAILABLE_HABITS } from '../constants';
+import { playSound } from '../services/soundService';
+import { triggerHaptic } from '../services/hapticService';
 import { useLanguage } from '../locales/LanguageContext';
 
 const GLASS_PANEL_LIGHT = 'bg-white/5 backdrop-blur-sm rounded-xl border border-white/15';
@@ -44,6 +46,8 @@ export const HabitCard = ({ habit, onToggle, onUpdate }: HabitCardProps) => {
                     if (newVal >= targetSeconds) {
                         setTimerActive(false);
                         onUpdate(habit.id, { current: target, completed: true });
+                        playSound('success');
+                        triggerHaptic('success');
                         return targetSeconds;
                     }
                     return newVal;
@@ -58,16 +62,41 @@ export const HabitCard = ({ habit, onToggle, onUpdate }: HabitCardProps) => {
     const handleCounterIncrement = () => {
         const newCurrent = Math.min(current + 1, target);
         const completed = newCurrent >= target;
+        playSound('click');
+        triggerHaptic('medium');
+        if (completed) {
+            playSound('success');
+            triggerHaptic('success');
+        }
         onUpdate(habit.id, { current: newCurrent, completed });
     };
 
     const handleCounterDecrement = () => {
         const newCurrent = Math.max(current - 1, 0);
+        playSound('click');
+        triggerHaptic('light');
         onUpdate(habit.id, { current: newCurrent, completed: false });
     };
 
     const handleTimerToggle = () => {
+        if (!timerActive) {
+            playSound('toggle_on');
+            triggerHaptic('medium');
+        } else {
+            playSound('toggle_off');
+            triggerHaptic('light');
+        }
         setTimerActive(!timerActive);
+    };
+
+    const handleBooleanToggle = () => {
+        if (!habit.completed) {
+            playSound('success');
+            triggerHaptic('success');
+        } else {
+            triggerHaptic('light'); // Unchecking is less celebratory
+        }
+        onToggle(habit.id);
     };
 
     const formatTime = (seconds: number) => {

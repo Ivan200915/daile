@@ -7,6 +7,8 @@ import { getConnectedDevice, disconnectDevice, simulateConnection, TERRA_PROVIDE
 import { saveUserSettings } from '../services/storageService';
 import { usePremium } from '../services/PremiumContext';
 import { getPremiumStatus } from '../services/premiumService';
+import { playSound } from '../services/soundService';
+import { triggerHaptic } from '../services/hapticService';
 import { GLASS_PANEL, GLASS_PANEL_LIGHT, GLASS_BUTTON, ACCENT_BUTTON, DEFAULT_TARGETS } from '../constants';
 
 interface SettingsScreenProps {
@@ -52,6 +54,8 @@ export const SettingsScreen = ({
         };
         saveUserSettings(updated);
         onUpdate(updated);
+        playSound('success');
+        triggerHaptic('success');
         alert(language === 'ru' ? 'Настройки сохранены' : 'Settings saved');
     };
 
@@ -100,14 +104,22 @@ export const SettingsScreen = ({
                 {/* Gender Toggle */}
                 <div className="grid grid-cols-2 gap-3">
                     <button
-                        onClick={() => setGender('male')}
+                        onClick={() => {
+                            setGender('male');
+                            playSound('click');
+                            triggerHaptic('selection');
+                        }}
                         className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${gender === 'male' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
                     >
                         <span className="text-xl">♂️</span>
                         <span className="font-bold text-sm">{language === 'ru' ? 'Мужской' : 'Male'}</span>
                     </button>
                     <button
-                        onClick={() => setGender('female')}
+                        onClick={() => {
+                            setGender('female');
+                            playSound('click');
+                            triggerHaptic('selection');
+                        }}
                         className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${gender === 'female' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'}`}
                     >
                         <span className="text-xl">♀️</span>
