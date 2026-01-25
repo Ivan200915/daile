@@ -58,7 +58,8 @@ import {
   Minus,
   Coffee,
   Sparkles,
-  Octagon
+  Octagon,
+  Lock
 } from 'lucide-react';
 
 
@@ -159,6 +160,7 @@ export const Icons = {
   Coffee,
   Sparkles,
   Octagon,
+  Lock,
 };
 
 // Unified icon sizes
