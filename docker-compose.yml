@@ -2,6 +2,19 @@ services:
   web:
     build: .
     ports:
-      - "80:80"
+      - "8090:80"
     restart: always
-    container_name: daily-discipline
+    container_name: daily-discipline-web
+    depends_on:
+      - server
+
+  server:
+    build: ./server
+    ports:
+      - "3002:3002"
+    restart: always
+    container_name: daily-discipline-server
+    env_file:
+      - .env
+
+

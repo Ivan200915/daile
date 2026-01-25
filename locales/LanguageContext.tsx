@@ -28,7 +28,7 @@ const detectTelegramLanguage = (): Language | null => {
             return 'en'; // All other languages → English
         }
     } catch (e) {
-        console.log('Not running in Telegram Mini App');
+        // console.log('Not running in Telegram Mini App');
     }
     return null;
 };

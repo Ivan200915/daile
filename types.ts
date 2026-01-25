@@ -16,9 +16,17 @@ export interface Meal {
   timestamp: Date;
 }
 
+export type HabitType = 'boolean' | 'counter' | 'timer';
+
 export interface Habit {
   id: string;
   label: string;
+  labelRu?: string;
+  type?: HabitType; // default: boolean
+  target?: number; // for counter (e.g., 8 glasses) or timer (e.g., 20 minutes)
+  current?: number; // current progress
+  unit?: string; // e.g., "glasses", "min"
+  unitRu?: string; // Russian unit
   completed: boolean;
   icon?: string;
 }
@@ -32,6 +40,9 @@ export interface StreakData {
   freezesAvailable: number; // 0-3 max
   freezesUsed: number; // total used ever
   lastFreezeEarned: string | null; // ISO date when last earned
+  // Vacation mode
+  vacationModeActive?: boolean;
+  vacationStartDate?: string | null; // ISO date
 }
 
 export interface DailyLog {

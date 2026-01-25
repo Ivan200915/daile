@@ -5,6 +5,7 @@ import { analyzeFace, FaceAnalysis, saveScanResult, getScanHistory, ScanResult }
 import { PremiumPaywall } from './PremiumPaywall';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { MewingTools } from './MewingTools';
+import { useLanguage } from '../locales/LanguageContext';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
 const GLASS_PANEL_LIGHT = 'bg-white/5 backdrop-blur-sm rounded-xl';
@@ -53,6 +54,8 @@ export const UmaxScreen = () => {
     const [history, setHistory] = useState<ScanResult[]>([]);
     const [showHistory, setShowHistory] = useState(false);
     const [activeTab, setActiveTab] = useState<'scan' | 'tools'>('scan');
+    const { language } = useLanguage();
+    const isRu = language === 'ru';
 
     useEffect(() => {
         setHistory(getScanHistory());
@@ -142,7 +145,13 @@ export const UmaxScreen = () => {
         setScanProgress(0);
 
         // Mock Progress Steps
-        const steps = [
+        const steps = isRu ? [
+            { p: 10, text: 'Инициализация биометрического скана...' },
+            { p: 30, text: 'Картирование точек лица...' },
+            { p: 50, text: 'Анализ текстуры и качества кожи...' },
+            { p: 70, text: 'Расчёт золотого сечения...' },
+            { p: 90, text: 'Финализация отчёта...' },
+        ] : [
             { p: 10, text: 'Initializing biometric scan...' },
             { p: 30, text: 'Mapping facial landmarks...' },
             { p: 50, text: 'Analyzing skin texture & quality...' },
@@ -206,13 +215,13 @@ export const UmaxScreen = () => {
                             onClick={() => setActiveTab('scan')}
                             className={`px-4 py-2 rounded-full text-xs font-bold transition ${activeTab === 'scan' ? 'bg-[#00D4AA] text-black' : 'text-white/60 hover:text-white'}`}
                         >
-                            Scan
+                            {isRu ? 'Скан' : 'Scan'}
                         </button>
                         <button
                             onClick={() => setActiveTab('tools')}
                             className={`px-4 py-2 rounded-full text-xs font-bold transition ${activeTab === 'tools' ? 'bg-[#00D4AA] text-black' : 'text-white/60 hover:text-white'}`}
                         >
-                            Tools
+                            {isRu ? 'Инструменты' : 'Tools'}
                         </button>
                     </div>
                 </div>
@@ -224,7 +233,7 @@ export const UmaxScreen = () => {
                         {showHistory ? (
                             <div className="flex-1 flex flex-col">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-bold">Progress History</h3>
+                                    <h3 className="text-xl font-bold">{isRu ? 'История прогресса' : 'Progress History'}</h3>
                                     <button onClick={() => setShowHistory(false)} className="p-2 bg-white/10 rounded-full">
                                         <Icons.X size={20} />
                                     </button>
@@ -265,7 +274,7 @@ export const UmaxScreen = () => {
                                 ) : (
                                     <div className="flex-1 flex flex-col items-center justify-center text-white/50">
                                         <Icons.Chart size={48} className="mb-4 opacity-50" />
-                                        <p>No scans yet</p>
+                                        <p>{isRu ? 'Сканов пока нет' : 'No scans yet'}</p>
                                     </div>
                                 )}
                             </div>
@@ -279,9 +288,12 @@ export const UmaxScreen = () => {
                                         </div>
                                     </div>
 
-                                    <h2 className="text-3xl font-bold mb-4">Reveal Your Potential</h2>
+                                    <h2 className="text-3xl font-bold mb-4">{isRu ? 'Раскрой свой потенциал' : 'Reveal Your Potential'}</h2>
                                     <p className="text-white/60 max-w-xs leading-relaxed mb-6">
-                                        Upload a front and side selfie to get a detailed AI analysis of your facial aesthetics.
+                                        {isRu
+                                            ? 'Загрузи фото спереди и сбоку для AI-анализа внешности.'
+                                            : 'Upload a front and side selfie to get a detailed AI analysis of your facial aesthetics.'
+                                        }
                                     </p>
 
                                     {/* History Toggle */}
@@ -291,14 +303,14 @@ export const UmaxScreen = () => {
                                             className="flex items-center space-x-2 text-[#00D4AA] text-sm font-medium hover:text-white transition"
                                         >
                                             <Icons.BarChart2 size={16} />
-                                            <span>View History</span>
+                                            <span>{isRu ? 'История' : 'View History'}</span>
                                         </button>
                                     )}
                                 </div>
 
                                 <div className="pb-24">
                                     <button onClick={() => setState('front_capture')} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
-                                        Start Analysis
+                                        {isRu ? 'Начать анализ' : 'Start Analysis'}
                                     </button>
                                 </div>
                             </>
@@ -318,7 +330,10 @@ export const UmaxScreen = () => {
                         <Icons.ArrowRight className="rotate-180" size={24} />
                     </button>
                     <h2 className="flex-1 text-center font-bold text-lg mr-10">
-                        {isFront ? 'Upload a front selfie' : 'Upload a side selfie'}
+                        {isFront
+                            ? (isRu ? 'Загрузи фото спереди' : 'Upload a front selfie')
+                            : (isRu ? 'Загрузи фото сбоку' : 'Upload a side selfie')
+                        }
                     </h2>
                 </div>
                 <div className="flex-1 relative overflow-hidden">
@@ -327,9 +342,11 @@ export const UmaxScreen = () => {
                     {renderOverlay(isFront ? 'front' : 'side')}
                 </div>
                 <div className="p-8 pb-32 bg-black flex flex-col items-center space-y-4">
-                    <button onClick={capture} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>Take a selfie</button>
+                    <button onClick={capture} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
+                        {isRu ? 'Сделать селфи' : 'Take a selfie'}
+                    </button>
                     <label className="text-sm font-medium text-white/60 cursor-pointer hover:text-white transition">
-                        <span>Upload from gallery</span>
+                        <span>{isRu ? 'Загрузить из галереи' : 'Upload from gallery'}</span>
                         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                     </label>
                 </div>
@@ -349,8 +366,12 @@ export const UmaxScreen = () => {
                     <img src={img!} className="w-full h-full object-cover" alt="Review" />
                 </div>
                 <div className="pb-24 space-y-4">
-                    <button onClick={() => isFront ? setState('side_capture') : processAnalysis()} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>Continue</button>
-                    <button onClick={() => setState(isFront ? 'front_capture' : 'side_capture')} className={`w-full py-4 ${OUTLINE_BUTTON} text-lg`}>Use Another</button>
+                    <button onClick={() => isFront ? setState('side_capture') : processAnalysis()} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
+                        {isRu ? 'Продолжить' : 'Continue'}
+                    </button>
+                    <button onClick={() => setState(isFront ? 'front_capture' : 'side_capture')} className={`w-full py-4 ${OUTLINE_BUTTON} text-lg`}>
+                        {isRu ? 'Выбрать другое' : 'Use Another'}
+                    </button>
                 </div>
             </div>
         );
@@ -380,7 +401,9 @@ export const UmaxScreen = () => {
                     </div>
                 </div>
 
-                <h2 className="text-2xl font-bold tracking-widest text-[#00D4AA] animate-pulse mb-2">ANALYZING</h2>
+                <h2 className="text-2xl font-bold tracking-widest text-[#00D4AA] animate-pulse mb-2">
+                    {isRu ? 'АНАЛИЗИРУЕМ' : 'ANALYZING'}
+                </h2>
                 <p className="text-white/70 font-mono text-sm">{scanStep}</p>
             </div>
         );
@@ -400,17 +423,20 @@ export const UmaxScreen = () => {
                         }}
                     />
                 )}
-                <div className={`h-full overflow-y-auto no-scrollbar pb-40 ${isLocked ? 'overflow-hidden' : ''}`}>
+                <div className={`h-full overflow-y-auto no-scrollbar pb-40`}>
 
                     {/* Header: Reveal Results - Only visible if locked, otherwise standard header */}
                     {isLocked ? (
                         <div className="pt-16 pb-12 text-center relative z-20">
                             <div className="flex items-center justify-center space-x-2 mb-2">
                                 <span className="text-3xl">👀</span>
-                                <h1 className="text-3xl font-bold">Reveal your results</h1>
+                                <h1 className="text-3xl font-bold">{isRu ? 'Раскрой результаты' : 'Reveal your results'}</h1>
                             </div>
                             <p className="text-white/60 text-sm max-w-xs mx-auto">
-                                Invite 3 friends or get Umax Pro to view your results
+                                {isRu
+                                    ? 'Пригласи 3 друзей или получи Премиум для просмотра'
+                                    : 'Invite 3 friends or get Premium to view your results'
+                                }
                             </p>
                         </div>
                     ) : (
@@ -422,7 +448,7 @@ export const UmaxScreen = () => {
                             <div className="absolute bottom-6 left-6">
                                 <h1 className="text-5xl font-bold mb-2">{analysis?.overallScore}</h1>
                                 <div className="px-3 py-1 bg-[#00D4AA] text-black font-bold rounded-full w-fit text-sm">
-                                    MASTERPIECE
+                                    {isRu ? 'ПРЕВОСХОДНО' : 'MASTERPIECE'}
                                 </div>
                             </div>
                         </div>
@@ -440,18 +466,18 @@ export const UmaxScreen = () => {
                         )}
 
                         {/* Card */}
-                        <div className={`bg-[#1A1A1A] rounded-[32px] ${isLocked ? 'pt-16' : 'pt-6'} pb-8 px-6 border border-white/5 shadow-2xl relative overflow-hidden`}>
+                        <div className={`bg-[#1A1A1A] rounded-[32px] ${isLocked ? 'pt-16' : 'pt-6'} pb-10 px-6 border border-white/5 shadow-2xl relative overflow-visible`}>
                             {isLocked && <div className="absolute inset-0 bg-transparent z-10" />} {/* Transparent overlay if needed */}
 
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-6 relative z-0">
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-5 relative z-0">
                                 {/* Blurred Bars Content */}
                                 {[
-                                    { label: 'Overall', val: analysis?.overallScore },
-                                    { label: 'Potential', val: analysis?.potentialScore },
-                                    { label: 'Masculinity', val: analysis?.categories.masculinity },
-                                    { label: 'Skin quality', val: analysis?.categories.skinQuality },
-                                    { label: 'Jawline', val: analysis?.categories.jawline },
-                                    { label: 'Cheekbones', val: analysis?.categories.cheekbones },
+                                    { label: isRu ? 'Общий балл' : 'Overall', val: analysis?.overallScore },
+                                    { label: isRu ? 'Потенциал' : 'Potential', val: analysis?.potentialScore },
+                                    { label: isRu ? 'Маскулинность' : 'Masculinity', val: analysis?.categories.masculinity },
+                                    { label: isRu ? 'Качество кожи' : 'Skin quality', val: analysis?.categories.skinQuality },
+                                    { label: isRu ? 'Линия челюсти' : 'Jawline', val: analysis?.categories.jawline },
+                                    { label: isRu ? 'Скулы' : 'Cheekbones', val: analysis?.categories.cheekbones },
                                 ].map((item, i) => (
                                     <div key={i} className="space-y-2">
                                         <p className="text-white/80 text-sm font-medium">{item.label}</p>
@@ -476,7 +502,7 @@ export const UmaxScreen = () => {
                     {/* Recommendations (Unlocked only) */}
                     {!isLocked && (
                         <div className="px-5 mt-6 pb-20">
-                            <h3 className="text-lg font-bold mb-4">Your Plan</h3>
+                            <h3 className="text-lg font-bold mb-4">{isRu ? 'Твой план' : 'Your Plan'}</h3>
                             {analysis?.recommendations.map(rec => (
                                 <div key={rec.id} className={`${GLASS_PANEL} p-5 mb-3 border-l-4 ${rec.impact === 'High' ? 'border-l-[#00D4AA]' : 'border-l-yellow-500'}`}>
                                     <h4 className="font-bold">{rec.title}</h4>
@@ -495,13 +521,13 @@ export const UmaxScreen = () => {
                             className={`w-full py-4 bg-[#00D4AA] text-black font-bold rounded-2xl text-lg shadow-[0_0_20px_rgba(0,212,170,0.4)] flex items-center justify-center space-x-2`}
                         >
                             <Icons.Crown size={20} />
-                            <span>Get Premium</span>
+                            <span>{isRu ? 'Получить Премиум' : 'Get Premium'}</span>
                         </button>
                         <button
                             onClick={() => setShowInviteModal(true)}
                             className={`w-full py-4 bg-black border border-white/20 text-white font-bold rounded-2xl text-lg`}
                         >
-                            Invite 3 Friends
+                            {isRu ? 'Пригласить 3 друзей' : 'Invite 3 Friends'}
                         </button>
                     </div>
                 )}
@@ -511,8 +537,8 @@ export const UmaxScreen = () => {
                     <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4 pb-20 sm:pb-4 animate-fade-in" onClick={() => setShowInviteModal(false)}>
                         <div className={`${GLASS_PANEL} w-full max-w-sm p-6 bg-[#1A1A1A] border-white/10 relative`} onClick={e => e.stopPropagation()}>
                             <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-6" />
-                            <h3 className="text-xl font-bold mb-1">Share invite code</h3>
-                            <p className="text-white/50 text-sm mb-6">Invite 3 friends to reveal your results</p>
+                            <h3 className="text-xl font-bold mb-1">{isRu ? 'Поделись кодом' : 'Share invite code'}</h3>
+                            <p className="text-white/50 text-sm mb-6">{isRu ? 'Пригласи 3 друзей для просмотра результатов' : 'Invite 3 friends to reveal your results'}</p>
 
                             <div className="bg-black/40 rounded-xl p-4 flex justify-between items-center mb-6 border border-white/5">
                                 <span className="text-2xl font-mono font-bold tracking-wider">WNDQRL</span>
@@ -523,9 +549,11 @@ export const UmaxScreen = () => {
                                 onClick={handleInviteShare}
                                 className={`w-full py-4 bg-[#00D4AA] text-black font-bold rounded-2xl text-lg shadow-[0_0_20px_rgba(0,212,170,0.3)] mb-4`}
                             >
-                                Share Link ({invitesCount}/3)
+                                {isRu ? `Поделиться (${invitesCount}/3)` : `Share Link (${invitesCount}/3)`}
                             </button>
-                            <button onClick={() => setShowInviteModal(false)} className="w-full text-center text-white/50">Close</button>
+                            <button onClick={() => setShowInviteModal(false)} className="w-full text-center text-white/50">
+                                {isRu ? 'Закрыть' : 'Close'}
+                            </button>
                         </div>
                     </div>
                 )}

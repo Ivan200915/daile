@@ -24,8 +24,8 @@ export const checkPremiumStatus = async (): Promise<PremiumStatus> => {
     }
 
     try {
-        // Call your existing backend at app.s7ven.ru
-        const response = await fetch(`https://app.s7ven.ru/api/premium/check?telegram_id=${userId}`);
+        // Call your backend relative to the current origin (proxied in dev)
+        const response = await fetch(`/api/premium/check?telegram_id=${userId}`);
 
         if (!response.ok) {
             return { isPremium: false };

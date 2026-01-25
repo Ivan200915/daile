@@ -37,6 +37,8 @@ export interface Translations {
         connectHealth: string;
         connectHealthSubtitle: string;
         connectFinish: string;
+        male: string;
+        female: string;
     };
 
     // Dashboard
@@ -50,6 +52,8 @@ export interface Translations {
         sleep: string;
         active: string;
         dayStreak: string;
+        focus: string;
+        startSession: string;
     };
 
     // Add Meal
@@ -74,6 +78,18 @@ export interface Translations {
             dinner: string;
             snack: string;
         };
+        // New food scanning strings
+        capture: string;
+        photo: string;
+        barcode: string;
+        find: string;
+        breakdown: string;
+        match: string;
+        aiEstimate: string;
+        enterBarcode: string;
+        productNotFound: string;
+        adjustPortion: string;
+        ofDetected: string;
     };
 
     // Check-in
@@ -194,6 +210,8 @@ export const translations: Record<Language, Translations> = {
             connectHealth: 'Connect Health',
             connectHealthSubtitle: 'Sync your steps, sleep, and activity',
             connectFinish: 'Connect & Finish',
+            male: 'Male',
+            female: 'Female',
         },
         dashboard: {
             greeting: 'Hello',
@@ -205,6 +223,8 @@ export const translations: Record<Language, Translations> = {
             sleep: 'Sleep',
             active: 'Active',
             dayStreak: 'day streak',
+            focus: 'Focus',
+            startSession: 'Start Session',
         },
         addMeal: {
             title: 'Add Meal',
@@ -227,6 +247,17 @@ export const translations: Record<Language, Translations> = {
                 dinner: 'Dinner',
                 snack: 'Snack',
             },
+            capture: 'Capture your',
+            photo: 'Photo',
+            barcode: 'Barcode',
+            find: 'Find',
+            breakdown: 'Breakdown',
+            match: 'Match',
+            aiEstimate: 'AI estimate',
+            enterBarcode: 'Enter barcode number',
+            productNotFound: 'Product not found',
+            adjustPortion: 'Adjust portion as needed',
+            ofDetected: 'of detected',
         },
         checkIn: {
             howWasYourDay: 'How was your day?',
@@ -336,6 +367,8 @@ export const translations: Record<Language, Translations> = {
             connectHealth: 'Подключить здоровье',
             connectHealthSubtitle: 'Синхронизируй шаги, сон и активность',
             connectFinish: 'Подключить и завершить',
+            male: 'Мужской',
+            female: 'Женский',
         },
         dashboard: {
             greeting: 'Привет',
@@ -347,6 +380,8 @@ export const translations: Record<Language, Translations> = {
             sleep: 'Сон',
             active: 'Активность',
             dayStreak: 'дней подряд',
+            focus: 'Фокус',
+            startSession: 'Начать сессию',
         },
         addMeal: {
             title: 'Добавить еду',
@@ -369,6 +404,17 @@ export const translations: Record<Language, Translations> = {
                 dinner: 'Ужин',
                 snack: 'Перекус',
             },
+            capture: 'Сфотографируй',
+            photo: 'Фото',
+            barcode: 'Штрих-код',
+            find: 'Найти',
+            breakdown: 'Состав',
+            match: 'Совпадение',
+            aiEstimate: 'Оценка AI',
+            enterBarcode: 'Введите номер штрих-кода',
+            productNotFound: 'Продукт не найден',
+            adjustPortion: 'Укажите размер порции',
+            ofDetected: 'от определённого',
         },
         checkIn: {
             howWasYourDay: 'Как прошёл день?',

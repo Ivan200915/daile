@@ -3,34 +3,63 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Daily Discipline</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Telegram Mini App Viewport Handling
+    (function () {
+      function setViewportHeight() {
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+          // Use Telegram viewport height
+          const vh = tg.viewportHeight || window.innerHeight;
+          const svh = tg.viewportStableHeight || vh;
+          document.documentElement.style.setProperty('--tg-viewport-height', vh + 'px');
+          document.documentElement.style.setProperty('--tg-viewport-stable-height', svh + 'px');
+
+          // Expand to full screen if available
+          if (tg.expand) tg.expand();
+
+          // Set header color
+          if (tg.setHeaderColor) tg.setHeaderColor('#000000');
+          if (tg.setBackgroundColor) tg.setBackgroundColor('#000000');
+        } else {
+          // Fallback for browser
+          document.documentElement.style.setProperty('--tg-viewport-height', window.innerHeight + 'px');
+          document.documentElement.style.setProperty('--tg-viewport-stable-height', window.innerHeight + 'px');
+        }
+      }
+
+      // Set on load and resize
+      setViewportHeight();
+      window.addEventListener('resize', setViewportHeight);
+
+      // Telegram viewport change event
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.onEvent('viewportChanged', setViewportHeight);
+        window.Telegram.WebApp.ready();
+      }
+    })();
+  </script>
   <style>
+    /* Moved to index.css - keeping minimal inline for critical path */
     body {
       font-family: 'Inter', sans-serif;
       background-color: #000000;
       color: #ffffff;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-    }
-
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      /* IE and Edge */
-      scrollbar-width: none;
-      /* Firefox */
+      overscroll-behavior: none;
     }
   </style>
   <script>

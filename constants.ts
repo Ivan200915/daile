@@ -47,16 +47,16 @@ export const TEXT_GRADIENT = "bg-clip-text text-transparent bg-gradient-to-r fro
 // Available habits for user selection during onboarding
 // Available habits for user selection during onboarding
 export const AVAILABLE_HABITS = [
-  { id: 'water', label: '2L Water', category: 'health', iconId: 'Droplets' },
-  { id: 'workout', label: 'Workout', category: 'fitness', iconId: 'Dumbbell' },
-  { id: 'no-sugar', label: 'No Sugar', category: 'nutrition', iconId: 'Ban' },
-  { id: 'meditation', label: 'Meditation', category: 'mindfulness', iconId: 'Moon' },
-  { id: 'steps', label: '10K Steps', category: 'fitness', iconId: 'Footprints' },
-  { id: 'sleep', label: '7+ Hours Sleep', category: 'health', iconId: 'Moon' },
-  { id: 'vegetables', label: 'Eat Vegetables', category: 'nutrition', iconId: 'Leaf' },
-  { id: 'no-alcohol', label: 'No Alcohol', category: 'health', iconId: 'Ban' },
-  { id: 'journaling', label: 'Journaling', category: 'mindfulness', iconId: 'Edit' },
-  { id: 'stretch', label: 'Stretching', category: 'fitness', iconId: 'Activity' },
+  { id: 'water', label: '2L Water', labelRu: '2 литра воды', category: 'health', iconId: 'Droplets', type: 'counter' as const, target: 8, unit: 'glasses', unitRu: 'стаканов' },
+  { id: 'workout', label: 'Workout', labelRu: 'Тренировка', category: 'fitness', iconId: 'Dumbbell', type: 'boolean' as const },
+  { id: 'no-sugar', label: 'No Sugar', labelRu: 'Без сахара', category: 'nutrition', iconId: 'Ban', type: 'boolean' as const },
+  { id: 'meditation', label: 'Meditation', labelRu: 'Медитация', category: 'mindfulness', iconId: 'Moon', type: 'timer' as const, target: 10, unit: 'min', unitRu: 'мин' },
+  { id: 'steps', label: '10K Steps', labelRu: '10 000 шагов', category: 'fitness', iconId: 'Footprints', type: 'counter' as const, target: 10000, unit: 'steps', unitRu: 'шагов' },
+  { id: 'sleep', label: '7+ Hours Sleep', labelRu: '7+ часов сна', category: 'health', iconId: 'Moon', type: 'boolean' as const },
+  { id: 'vegetables', label: 'Eat Vegetables', labelRu: 'Есть овощи', category: 'nutrition', iconId: 'Leaf', type: 'boolean' as const },
+  { id: 'no-alcohol', label: 'No Alcohol', labelRu: 'Без алкоголя', category: 'health', iconId: 'Ban', type: 'boolean' as const },
+  { id: 'journaling', label: 'Journaling', labelRu: 'Дневник', category: 'mindfulness', iconId: 'Edit', type: 'boolean' as const },
+  { id: 'stretch', label: 'Stretching', labelRu: 'Растяжка', category: 'fitness', iconId: 'Activity', type: 'timer' as const, target: 15, unit: 'min', unitRu: 'мин' },
 ] as const;
 
 // Default targets
@@ -67,7 +67,7 @@ export const DEFAULT_TARGETS = {
 
 // Default habits for quick start (first 3)
 export const MOCK_HABITS = [
-  { id: 'water', label: '2L Water', completed: false },
-  { id: 'workout', label: 'Workout', completed: false },
-  { id: 'no-sugar', label: 'No Sugar', completed: false },
+  { id: 'water', label: '2L Water', labelRu: '2 литра воды', completed: false },
+  { id: 'workout', label: 'Workout', labelRu: 'Тренировка', completed: false },
+  { id: 'no-sugar', label: 'No Sugar', labelRu: 'Без сахара', completed: false },
 ];

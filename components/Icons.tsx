@@ -53,8 +53,15 @@ import {
   RotateCcw,
   Info,
   Volume2,
-  VolumeX
+  VolumeX,
+  AlertTriangle,
+  Minus,
+  Coffee,
+  Sparkles,
+  Octagon
 } from 'lucide-react';
+
+
 
 // Brand colors - exported for use elsewhere
 export const BRAND_COLORS = {
@@ -114,6 +121,7 @@ export const Icons = {
 
   // Actions
   Plus,
+  Minus,
   Camera,
   Check,
   Close: X,
@@ -147,6 +155,10 @@ export const Icons = {
   Crown,
   RotateCcw,
   Info,
+  AlertTriangle,
+  Coffee,
+  Sparkles,
+  Octagon,
 };
 
 // Unified icon sizes

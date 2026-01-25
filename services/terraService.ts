@@ -67,7 +67,7 @@ export const generateWidgetSession = async (userId: string): Promise<string | nu
     const credentials = getTerraCredentials();
 
     if (!credentials) {
-        console.log('Terra: No credentials configured, using demo mode');
+        // console.log('Terra: No credentials configured, using demo mode');
         // Return demo URL for testing
         return null;
     }

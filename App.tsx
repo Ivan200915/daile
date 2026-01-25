@@ -11,7 +11,16 @@ import {
 } from './constants';
 import { Screen, Meal, Habit, UserSettings, DailyLog, StreakData } from './types';
 import { Icons } from './components/Icons';
+import ErrorBoundary from './components/ErrorBoundary';
+import { Skeleton } from './components/Skeleton';
 import IconBadge from './components/IconBadge';
+import HabitCard from './components/HabitCard';
+import AddHabitModal from './components/AddHabitModal';
+import MoodTracker from './components/MoodTracker';
+import HabitScore from './components/HabitScore';
+import LiveChallenges from './components/LiveChallenges';
+import AIInsightsDashboard from './components/AIInsightsDashboard';
+import RPGAvatar from './components/RPGAvatar';
 import HabitDNA from './components/HabitDNA';
 import { updateGroupMemberStats, loadGroups } from './services/socialService';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview, FoodAnalysisResult, FoodComponent } from './services/geminiService';
@@ -131,21 +140,27 @@ const XpLevelBar = () => {
 
 // Tab Bar Component
 const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) => void }) => {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+
   const tabs = [
-    { key: 'DASHBOARD' as Screen, icon: Icons.Home, label: 'Today' },
-    { key: 'HISTORY' as Screen, icon: Icons.Chart, label: 'History' },
-    { key: 'SOCIAL' as Screen, icon: Icons.Users, label: 'Social' },
-    { key: 'LOOKS' as Screen, icon: Icons.Camera, label: 'Looks' },
-    { key: 'SETTINGS' as Screen, icon: Icons.Settings, label: 'Settings' },
+    { key: 'DASHBOARD' as Screen, icon: Icons.Home, label: isRu ? 'Сегодня' : 'Today' },
+    { key: 'HISTORY' as Screen, icon: Icons.Chart, label: isRu ? 'История' : 'History' },
+    { key: 'SOCIAL' as Screen, icon: Icons.Users, label: isRu ? 'Друзья' : 'Social' },
+    { key: 'LOOKS' as Screen, icon: Icons.Camera, label: isRu ? 'Внешность' : 'Looks' },
+    { key: 'SETTINGS' as Screen, icon: Icons.Settings, label: isRu ? 'Настройки' : 'Settings' },
   ];
 
   return (
-    <div className={`${GLASS_PANEL} rounded-t-[24px] rounded-b-none border-b-0 px-4 py-3 pb-8 flex justify-around items-center`}>
+    <div
+      className="fixed bottom-0 left-0 right-0 glass-strong rounded-t-[24px] px-4 pt-3 flex justify-around items-start z-50"
+      style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 12px)' }}
+    >
       {tabs.map(tab => (
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
-          className={`flex flex-col items-center space-y-1 transition-all ${current === tab.key ? 'text-white' : 'text-white/40'}`}
+          className={`flex flex-col items-center space-y-1 transition-all min-h-[44px] ${current === tab.key ? 'text-white' : 'text-white/40'}`}
         >
           <IconBadge
             icon={tab.icon}
@@ -165,7 +180,7 @@ const TabBar = ({ current, onChange }: { current: Screen, onChange: (s: Screen) 
 // --- Screens ---
 
 const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings) => void }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState('');
   const [selectedHabits, setSelectedHabits] = useState<string[]>(['water', 'workout', 'no-sugar']);
@@ -196,7 +211,13 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
   };
 
   return (
-    <div className="h-full flex flex-col px-5 pt-24 pb-10 relative">
+    <div
+      className="h-full flex flex-col px-5 relative"
+      style={{
+        paddingTop: 'calc(var(--safe-area-top, 0px) + 24px)',
+        paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 16px)'
+      }}
+    >
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] bg-[#00D4AA]/20 blur-[100px] rounded-full pointer-events-none" />
 
@@ -258,7 +279,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
                       color={selectedHabits.includes(habit.id) ? '#00D4AA' : 'currentColor'}
                       className={selectedHabits.includes(habit.id) ? 'bg-[#00D4AA]/20' : 'bg-white/10'}
                     />
-                    <span className="text-sm font-medium">{habit.label}</span>
+                    <span className="text-sm font-medium">
+                      {language === 'ru' ? habit.labelRu : habit.label}
+                    </span>
                   </button>
                 );
               })}
@@ -278,14 +301,14 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
                   className={`p-4 rounded-xl border ${gender === 'male' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/60'}`}
                 >
                   <span className="block text-2xl mb-2">♂️</span>
-                  <span className="font-bold">Male</span>
+                  <span className="font-bold">{t.onboarding.male}</span>
                 </button>
                 <button
                   onClick={() => setGender('female')}
                   className={`p-4 rounded-xl border ${gender === 'female' ? 'bg-[#00D4AA]/20 border-[#00D4AA] text-[#00D4AA]' : 'bg-white/5 border-white/10 text-white/60'}`}
                 >
                   <span className="block text-2xl mb-2">♀️</span>
-                  <span className="font-bold">Female</span>
+                  <span className="font-bold">{t.onboarding.female}</span>
                 </button>
               </div>
 
@@ -361,7 +384,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
 };
 
 const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onCancel: () => void }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [image, setImage] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<FoodAnalysisResult | null>(null);
@@ -370,6 +393,8 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [streamActive, setStreamActive] = useState(false);
+  const [scanMode, setScanMode] = useState<'photo' | 'barcode'>('photo');
+  const [barcodeInput, setBarcodeInput] = useState('');
 
   // Start Camera
   useEffect(() => {
@@ -467,35 +492,105 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
 
             {/* Type Selector Overlay */}
             <div className="absolute top-6 left-0 right-0 flex justify-center space-x-2 px-4 z-20">
-              {(['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const).map(t => (
+              {(['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const).map(type => (
                 <button
-                  key={t}
-                  onClick={() => setMealType(t)}
-                  className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-medium border transition-all ${mealType === t ? 'bg-[#00D4AA] border-[#00D4AA] text-black' : 'bg-black/40 border-white/10'}`}
+                  key={type}
+                  onClick={() => setMealType(type)}
+                  className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-medium border transition-all ${mealType === type ? 'bg-[#00D4AA] border-[#00D4AA] text-black' : 'bg-black/40 border-white/10'}`}
                 >
-                  {t}
+                  {t.addMeal.types[type.toLowerCase() as 'breakfast' | 'lunch' | 'dinner' | 'snack']}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Controls */}
-          <div className="h-[200px] glass-panel-bottom relative flex flex-col items-center justify-center pb-8 pt-4 z-10 bg-black">
-            <p className="text-white/60 mb-6 font-medium">Capture your {mealType.toLowerCase()}</p>
-            <div className="flex items-center justify-between w-full px-10">
-              <label className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition cursor-pointer">
-                <Icons.Gallery size={24} className="text-[#00D4AA]" />
-                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-              </label>
-
-              <button onClick={capture} className="w-20 h-20 rounded-full border-4 border-white/30 p-1">
-                <div className="w-full h-full bg-white rounded-full" />
+          <div className="h-[220px] glass-panel-bottom relative flex flex-col items-center justify-center pb-8 pt-4 z-10 bg-black">
+            {/* Mode Toggle */}
+            <div className="flex p-1 rounded-xl bg-white/10 mb-4">
+              <button
+                onClick={() => setScanMode('photo')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 ${scanMode === 'photo' ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
+              >
+                <Icons.Camera size={16} />
+                <span>{t.addMeal.photo}</span>
               </button>
-
-              <button onClick={onCancel} className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition">
-                <Icons.Close size={24} className="text-white/60" />
+              <button
+                onClick={() => setScanMode('barcode')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 ${scanMode === 'barcode' ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
+              >
+                <Icons.BarChart2 size={16} />
+                <span>{t.addMeal.barcode}</span>
               </button>
             </div>
+
+            {scanMode === 'photo' ? (
+              <>
+                <p className="text-white/60 mb-4 font-medium text-sm">{t.addMeal.capture} {t.addMeal.types[mealType.toLowerCase() as 'breakfast' | 'lunch' | 'dinner' | 'snack'].toLowerCase()}</p>
+                <div className="flex items-center justify-between w-full px-10">
+                  <label className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition cursor-pointer">
+                    <Icons.Gallery size={24} className="text-[#00D4AA]" />
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                  </label>
+
+                  <button onClick={capture} className="w-20 h-20 rounded-full border-4 border-white/30 p-1">
+                    <div className="w-full h-full bg-white rounded-full" />
+                  </button>
+
+                  <button onClick={onCancel} className="p-3 rounded-full bg-white/10 backdrop-blur active:scale-95 transition">
+                    <Icons.Close size={24} className="text-white/60" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Barcode Input Mode */
+              <div className="w-full px-6 space-y-4">
+                <p className="text-white/60 text-sm text-center">{t.addMeal.enterBarcode}</p>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={barcodeInput}
+                    onChange={(e) => setBarcodeInput(e.target.value)}
+                    placeholder="e.g. 5901234123457"
+                    className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 outline-none focus:border-[#00D4AA]"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!barcodeInput) return;
+                      setAnalyzing(true);
+                      const { scanBarcode } = await import('./services/barcodeService');
+                      const res = await scanBarcode(barcodeInput);
+                      if (res.success && res.product) {
+                        setResult({
+                          name: res.product.name + (res.product.brand ? ` (${res.product.brand})` : ''),
+                          macros: {
+                            calories: res.product.caloriesPer100g,
+                            protein: res.product.proteinPer100g,
+                            fat: res.product.fatPer100g,
+                            carbs: res.product.carbsPer100g
+                          },
+                          portionGrams: res.product.servingSize || 100,
+                          components: [],
+                          confidence: res.product.isComplete ? 95 : 70,
+                          insight: t.addMeal.adjustPortion
+                        });
+                        setImage(res.product.imageUrl || 'barcode');
+                      } else {
+                        alert(res.error || t.addMeal.productNotFound);
+                      }
+                      setAnalyzing(false);
+                    }}
+                    disabled={!barcodeInput || analyzing}
+                    className="px-4 py-3 bg-[#00D4AA] rounded-xl text-black font-semibold disabled:opacity-50"
+                  >
+                    {analyzing ? '...' : t.addMeal.find}
+                  </button>
+                </div>
+                <button onClick={onCancel} className="w-full py-2 text-white/50 text-sm">
+                  {t.common.cancel}
+                </button>
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -512,7 +607,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
             {analyzing ? (
               <div className="flex-1 flex flex-col items-center justify-center space-y-4">
                 <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full" />
-                <p>Analyzing with Gemini AI...</p>
+                <p>{t.addMeal.analyzing}</p>
               </div>
             ) : result ? (
               <>
@@ -530,15 +625,15 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
                     </div>
                     {/* Confidence Badge */}
                     <div className={`px-2 py-1 rounded-md text-xs font-bold border ${result.confidence > 80 ? 'bg-green-500/10 border-green-500 text-green-400' : 'bg-yellow-500/10 border-yellow-500 text-yellow-400'}`}>
-                      {result.confidence}% Match
+                      {result.confidence}% {t.addMeal.match}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-3 mb-6">
                     {[
-                      { l: 'Protein', v: getAdjustedMacros()?.protein + 'g' },
-                      { l: 'Fat', v: getAdjustedMacros()?.fat + 'g' },
-                      { l: 'Carbs', v: getAdjustedMacros()?.carbs + 'g' }
+                      { l: t.addMeal.protein, v: getAdjustedMacros()?.protein + 'g' },
+                      { l: t.addMeal.fat, v: getAdjustedMacros()?.fat + 'g' },
+                      { l: t.addMeal.carbs, v: getAdjustedMacros()?.carbs + 'g' }
                     ].map((m) => (
                       <div key={m.l} className={`${GLASS_PANEL_LIGHT} p-3 flex flex-col items-center`}>
                         <span className="text-xs text-white/50">{m.l}</span>
@@ -550,7 +645,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
                   {/* Components Breakdown */}
                   {result.components && result.components.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-sm font-semibold text-white/50 mb-3 uppercase tracking-wider">Breakdown</h4>
+                      <h4 className="text-sm font-semibold text-white/50 mb-3 uppercase tracking-wider">{t.addMeal.breakdown}</h4>
                       <div className="space-y-2">
                         {result.components.map((comp, i) => (
                           <div key={i} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between`}>
@@ -565,22 +660,61 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <p className="text-sm text-white/50 mb-2">Portion Size</p>
+                  {/* Enhanced Portion Selector */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-white/50">{t.addMeal.portionSize}</p>
+                      {result.portionGrams > 0 && (
+                        <span className="text-xs text-[#00D4AA]">
+                          {t.addMeal.aiEstimate}: ~{result.portionGrams}g
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Quick Size Buttons */}
                     <div className="flex p-1 rounded-xl bg-white/5 border border-white/10">
                       {[
-                        { label: 'Small', mult: 0.7 },
-                        { label: 'Medium', mult: 1 },
-                        { label: 'Large', mult: 1.3 }
+                        { label: 'S', mult: 0.7, grams: result.portionGrams ? Math.round(result.portionGrams * 0.7) : 150 },
+                        { label: 'M', mult: 1, grams: result.portionGrams || 250 },
+                        { label: 'L', mult: 1.3, grams: result.portionGrams ? Math.round(result.portionGrams * 1.3) : 400 }
                       ].map(s => (
                         <button
                           key={s.label}
                           onClick={() => setPortionMultiplier(s.mult)}
-                          className={`flex-1 py-2 rounded-lg text-sm font-medium transition ${portionMultiplier === s.mult ? 'bg-white/20' : 'text-white/50'}`}
+                          className={`flex-1 py-2 rounded-lg text-center transition ${portionMultiplier === s.mult ? 'bg-[#00D4AA]/20 ring-1 ring-[#00D4AA]' : 'text-white/50 hover:bg-white/5'}`}
                         >
-                          {s.label}
+                          <span className="block text-sm font-bold">{s.label}</span>
+                          <span className="block text-[10px] text-white/40">{s.grams}g</span>
                         </button>
                       ))}
+                    </div>
+
+                    {/* Gram Slider */}
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xs text-white/40 w-10">50g</span>
+                      <input
+                        type="range"
+                        min="0.2"
+                        max="2"
+                        step="0.1"
+                        value={portionMultiplier}
+                        onChange={(e) => setPortionMultiplier(parseFloat(e.target.value))}
+                        className="flex-1 h-2 rounded-full appearance-none bg-white/10 cursor-pointer accent-[#00D4AA]"
+                        style={{
+                          background: `linear-gradient(to right, #00D4AA ${(portionMultiplier - 0.2) / 1.8 * 100}%, rgba(255,255,255,0.1) ${(portionMultiplier - 0.2) / 1.8 * 100}%)`
+                        }}
+                      />
+                      <span className="text-xs text-white/40 w-12">500g</span>
+                    </div>
+
+                    {/* Current Selection Display */}
+                    <div className="text-center py-2 bg-white/5 rounded-lg border border-white/10">
+                      <span className="text-2xl font-bold text-[#00D4AA]">
+                        {result.portionGrams ? Math.round(result.portionGrams * portionMultiplier) : Math.round(250 * portionMultiplier)}g
+                      </span>
+                      <span className="text-sm text-white/50 ml-2">
+                        ({Math.round(portionMultiplier * 100)}% {t.addMeal.ofDetected})
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -603,7 +737,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
                     }}
                     className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}
                   >
-                    Add Meal
+                    {t.addMeal.saveMeal}
                   </button>
                 </div>
               </>
@@ -695,12 +829,17 @@ const Dashboard = ({
   streak,
   healthMetrics,
   toggleHabit,
+  updateHabit,
+  onAddHabit,
+  todayMood,
+  onMoodChange,
   goToAddMeal,
   closeDay,
   onMetricUpdate,
   logs,
   onOpenFocus,
-  onRefreshXp
+  onRefreshXp,
+  userXp
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -708,14 +847,20 @@ const Dashboard = ({
   streak: StreakData,
   healthMetrics: HealthMetrics | null,
   toggleHabit: (id: string) => void,
+  updateHabit: (id: string, updates: Partial<Habit>) => void,
+  onAddHabit: (habit: Habit) => void,
+  todayMood: number | null,
+  onMoodChange: (mood: number) => void,
   goToAddMeal: () => void,
   closeDay: () => void,
   onMetricUpdate: (type: 'steps' | 'sleep' | 'active', value: number) => void,
   logs: DailyLog[],
   onOpenFocus: () => void,
-  onRefreshXp: () => void
+  onRefreshXp: () => void,
+  userXp: number
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
+  const [showAddHabit, setShowAddHabit] = useState(false);
   const { t, language } = useLanguage();
 
   const totalCals = meals.reduce((acc, m) => acc + m.macros.calories, 0);
@@ -745,7 +890,13 @@ const Dashboard = ({
   };
 
   return (
-    <div className="h-full flex flex-col px-5 pt-24 space-y-5 overflow-y-auto no-scrollbar pb-28">
+    <div
+      className="h-full flex flex-col px-5 space-y-5 overflow-y-auto no-scrollbar scroll-container"
+      style={{
+        paddingTop: 'calc(var(--safe-area-top, 0px) + 24px)',
+        paddingBottom: '200px'
+      }}
+    >
       {editingMetric && (
         <EditMetricModal
           metric={editingMetric}
@@ -784,8 +935,27 @@ const Dashboard = ({
         </div>
       )}
 
-      {/* XP & Level Progress */}
-      <XpLevelBar />
+      {/* RPG Avatar (replaces XP Level Bar) */}
+      <RPGAvatar
+        level={Math.floor(userXp / 100) + 1}
+        xp={userXp % 100}
+        xpToNextLevel={100}
+        habitsCompleted={habits.filter(h => h.completed).length}
+        totalHabits={habits.length}
+        streak={streak.currentStreak}
+      />
+
+      {/* Mood Tracker */}
+      <MoodTracker currentMood={todayMood} onMoodSelect={onMoodChange} />
+
+      {/* Habit Score */}
+      <HabitScore logs={logs} />
+
+      {/* Live Challenges */}
+      <LiveChallenges />
+
+      {/* AI Insights Dashboard */}
+      <AIInsightsDashboard logs={logs} currentMood={todayMood} />
 
       {/* Daily Challenges */}
       {/* Daily Challenges Widget */}
@@ -847,6 +1017,8 @@ const Dashboard = ({
           </div>
         );
       })()}
+
+      <div className="h-96" /> {/* Massive spacer to prevent cutoff */}
 
       {/* Season Banner */}
       {(() => {
@@ -945,8 +1117,8 @@ const Dashboard = ({
           <div className="absolute inset-0 bg-gradient-to-br from-[#00D4AA]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <IconBadge icon={Icons.Zap} variant="circle" size="sm" color="#FFD700" glowIntensity="medium" />
           <div>
-            <p className="text-lg font-bold">Focus</p>
-            <p className="text-xs text-white/50">Start Session</p>
+            <p className="text-lg font-bold">{t.dashboard.focus}</p>
+            <p className="text-xs text-white/50">{t.dashboard.startSession}</p>
           </div>
           <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mt-1">
             <div className="h-full bg-[#FFD700] w-0 group-hover:w-full transition-all duration-700" />
@@ -954,9 +1126,9 @@ const Dashboard = ({
         </button>
 
         {[
-          { type: 'steps' as const, icon: Icons.Steps, val: formatSteps(metrics.steps), label: 'Steps', progress: metrics.stepsProgress },
-          { type: 'sleep' as const, icon: Icons.Sleep, val: formatSleep(metrics.sleepHours), label: 'Sleep', progress: metrics.sleepProgress },
-          { type: 'active' as const, icon: Icons.Active, val: formatActive(metrics.activeMinutes), label: 'Active', progress: metrics.activeProgress },
+          { type: 'steps' as const, icon: Icons.Steps, val: formatSteps(metrics.steps), label: t.dashboard.steps, progress: metrics.stepsProgress },
+          { type: 'sleep' as const, icon: Icons.Sleep, val: formatSleep(metrics.sleepHours), label: t.dashboard.sleep, progress: metrics.sleepProgress },
+          { type: 'active' as const, icon: Icons.Active, val: formatActive(metrics.activeMinutes), label: t.dashboard.active, progress: metrics.activeProgress },
         ].map((m, i) => (
           <button
             key={i}
@@ -964,12 +1136,25 @@ const Dashboard = ({
             className={`flex-none w-28 ${GLASS_PANEL_LIGHT} p-3 flex flex-col justify-between h-28 hover:bg-white/10 transition-all cursor-pointer active:scale-95`}
           >
             <IconBadge icon={m.icon} variant="circle" size="sm" color="#00D4AA" />
-            <div>
-              <p className="text-lg font-bold">{m.val}</p>
-              <p className="text-xs text-white/50">{m.label}</p>
+            <div className="w-full">
+              {healthMetrics ? (
+                <>
+                  <p className="text-lg font-bold">{m.val}</p>
+                  <p className="text-xs text-white/50">{m.label}</p>
+                </>
+              ) : (
+                <div className="space-y-2 mt-1">
+                  <Skeleton width="60%" height={24} className="bg-white/10" />
+                  <Skeleton width="40%" height={12} className="bg-white/10" />
+                </div>
+              )}
             </div>
             <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mt-1">
-              <div className="h-full bg-[#00D4AA] transition-all duration-500" style={{ width: `${m.progress}%` }} />
+              {healthMetrics ? (
+                <div className="h-full bg-[#00D4AA] transition-all duration-500" style={{ width: `${m.progress}%` }} />
+              ) : (
+                <Skeleton width="100%" height="100%" className="bg-white/10" />
+              )}
             </div>
           </button>
         ))}
@@ -1009,36 +1194,36 @@ const Dashboard = ({
 
       {/* Habits */}
       <div className="shrink-0">
-        <h3 className="text-xl font-bold mb-3">{t.dashboard.habits}</h3>
-        <div className="grid grid-cols-1 gap-3">
-          {habits.map(habit => {
-            const habitDef = AVAILABLE_HABITS.find(h => h.id === habit.id);
-            // @ts-ignore
-            const Icon = habitDef && habitDef.iconId && Icons[habitDef.iconId] ? Icons[habitDef.iconId] : Icons.Star;
-
-            return (
-              <button
-                key={habit.id}
-                onClick={() => toggleHabit(habit.id)}
-                className={`w-full p-4 rounded-2xl border flex items-center justify-between transition-all duration-300 ${habit.completed ? 'bg-[#00D4AA] border-[#00D4AA] shadow-[0_0_15px_rgba(0,212,170,0.3)]' : 'bg-white/5 border-white/10'}`}
-              >
-                <div className="flex items-center space-x-3">
-                  <IconBadge
-                    icon={Icon}
-                    size="sm"
-                    variant="circle"
-                    color={habit.completed ? '#000000' : '#00D4AA'}
-                    className={habit.completed ? 'bg-black/10' : 'bg-white/10'}
-                  />
-                  <span className={`font-medium ${habit.completed ? 'text-black' : 'text-white'}`}>{habit.label}</span>
-                </div>
-                <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${habit.completed ? 'border-black/20 bg-black/10' : 'border-white/30'}`}>
-                  {habit.completed && <Icons.Check size={14} className="text-black" />}
-                </div>
-              </button>
-            )
-          })}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xl font-bold">{t.dashboard.habits}</h3>
+          <button
+            onClick={() => setShowAddHabit(true)}
+            className="p-2 bg-[#00D4AA] rounded-full text-black hover:bg-[#00D4AA]/80 transition-all shadow-lg shadow-[#00D4AA]/20"
+          >
+            <Icons.Plus size={18} />
+          </button>
         </div>
+        <div className="grid grid-cols-1 gap-3">
+          {habits.map(habit => (
+            <HabitCard
+              key={habit.id}
+              habit={habit}
+              onToggle={toggleHabit}
+              onUpdate={updateHabit}
+            />
+          ))}
+        </div>
+
+        {/* Add Habit Modal */}
+        {showAddHabit && (
+          <AddHabitModal
+            onClose={() => setShowAddHabit(false)}
+            onAdd={(habit) => {
+              onAddHabit(habit);
+              setShowAddHabit(false);
+            }}
+          />
+        )}
       </div>
 
       <button onClick={closeDay} className={`w-full py-4 ${GLASS_PANEL} border-[#00D4AA]/30 text-[#00D4AA] font-semibold mt-4 shadow-lg hover:shadow-[0_0_20px_rgba(0,212,170,0.2)] transition shrink-0`}>
@@ -1179,20 +1364,25 @@ const SettingsScreen = ({
   onReset,
   onDeviceChange,
   language,
-  onLanguageChange
+  onLanguageChange,
+  streak,
+  onStreakUpdate
 }: {
   user: UserSettings,
   onUpdate: (u: UserSettings) => void,
   onReset: () => void,
   onDeviceChange: () => void,
   language?: Language,
-  onLanguageChange?: (lang: Language) => void
+  onLanguageChange?: (lang: Language) => void,
+  streak: StreakData,
+  onStreakUpdate: (s: StreakData) => void
 }) => {
   const { t } = useLanguage();
   const [calories, setCalories] = useState(user.targetCalories.toString());
   const [protein, setProtein] = useState(user.targetProtein.toString());
   const [connectedDevice, setConnectedDevice] = useState<TerraUser | null>(getConnectedDevice());
   const [showProviders, setShowProviders] = useState(false);
+  const [vacationMode, setVacationMode] = useState(streak.vacationModeActive || false);
 
   const save = () => {
     const updated = {
@@ -1352,6 +1542,26 @@ const SettingsScreen = ({
         </div>
       </div >
 
+      {/* App Install */}
+      <div className={`${GLASS_PANEL} p-5`}>
+        <h3 className="font-semibold text-white/70 text-sm uppercase tracking-wider mb-3">Приложение</h3>
+        <button
+          onClick={() => {
+            // @ts-ignore
+            const tg = window.Telegram?.WebApp;
+            if (tg?.addToHomeScreen) {
+              tg.addToHomeScreen();
+            } else {
+              alert("Чтобы установить приложение:\n1. Нажмите 'Поделиться' в браузере\n2. Выберите 'На экран Домой'");
+            }
+          }}
+          className={`w-full py-3 ${GLASS_BUTTON} flex items-center justify-center space-x-2`}
+        >
+          <Icons.Download size={18} className="text-[#00D4AA]" />
+          <span className="font-medium">Добавить на главный экран</span>
+        </button>
+      </div>
+
       {/* Goal */}
       < div className={`${GLASS_PANEL_LIGHT} p-4`}>
         <p className="text-sm text-white/50">{t.settings.yourGoal}</p>
@@ -1373,6 +1583,43 @@ const SettingsScreen = ({
         </div>
         <p className="text-xs text-white/40 mt-3">Бот отправит напоминание в Telegram</p>
       </div >
+
+      {/* Vacation Mode */}
+      <div className={`${GLASS_PANEL} p-5`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold flex items-center">
+              <Icons.Sun size={16} className="mr-2 text-yellow-400" />
+              {language === 'ru' ? 'Режим отпуска' : 'Vacation Mode'}
+            </h3>
+            <p className="text-xs text-white/50 mt-1">
+              {language === 'ru' ? 'Streak не сбросится во время отдыха' : 'Streak won\'t reset while resting'}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              const newValue = !vacationMode;
+              setVacationMode(newValue);
+              onStreakUpdate({
+                ...streak,
+                vacationModeActive: newValue,
+                vacationStartDate: newValue ? new Date().toISOString().split('T')[0] : null
+              });
+            }}
+            className={`w-14 h-8 rounded-full transition-all relative ${vacationMode ? 'bg-[#00D4AA]' : 'bg-white/20'}`}
+          >
+            <div className={`w-6 h-6 rounded-full bg-white absolute top-1 transition-all ${vacationMode ? 'right-1' : 'left-1'}`} />
+          </button>
+        </div>
+        {vacationMode && (
+          <div className="mt-3 p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
+            <p className="text-xs text-yellow-400 flex items-center">
+              <Icons.AlertTriangle size={12} className="mr-1" />
+              {language === 'ru' ? 'Режим активен. Привычки не отслеживаются.' : 'Mode active. Habits not tracking.'}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Language Selector */}
       {
@@ -1450,6 +1697,7 @@ function AppContent() {
   const [showWeeklyReview, setShowWeeklyReview] = useState(false);
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
   const [userXp, setUserXp] = useState(0);
+  const [todayMood, setTodayMood] = useState<number | null>(null);
 
   // Language from context
   const { language, setLanguage, t } = useLanguage();
@@ -1479,7 +1727,7 @@ function AppContent() {
       // Get or create today's log
       const selectedHabitLabels = savedUser.selectedHabits.map(id => {
         const habit = AVAILABLE_HABITS.find(h => h.id === id);
-        return { id, label: habit ? habit.label : id, completed: false };
+        return { id, label: habit ? habit.label : id, labelRu: habit ? habit.labelRu : id, completed: false };
       });
       const todayLog = getOrCreateTodayLog(selectedHabitLabels.length > 0 ? selectedHabitLabels : MOCK_HABITS);
       setHabits(todayLog.habits);
@@ -1577,7 +1825,7 @@ function AppContent() {
     // Initialize habits from selected
     const selectedHabitLabels = settings.selectedHabits.map(id => {
       const habit = AVAILABLE_HABITS.find(h => h.id === id);
-      return { id, label: habit ? habit.label : id, completed: false };
+      return { id, label: habit ? habit.label : id, labelRu: habit ? habit.labelRu : id, completed: false };
     });
     setHabits(selectedHabitLabels);
 
@@ -1592,6 +1840,14 @@ function AppContent() {
   const toggleHabit = (id: string) => {
     hapticMedium(); // Vibrate on habit toggle
     setHabits(habits.map(h => h.id === id ? { ...h, completed: !h.completed } : h));
+  };
+
+  const updateHabit = (id: string, updates: Partial<Habit>) => {
+    setHabits(habits.map(h => h.id === id ? { ...h, ...updates } : h));
+  };
+
+  const addHabit = (habit: Habit) => {
+    setHabits([...habits, habit]);
   };
 
   const handleCheckInFinish = (insight: string) => {
@@ -1645,7 +1901,7 @@ function AppContent() {
                 onClick={() => !user.isPro && openPaywall()}
                 className={`backdrop-blur-md px-3 py-1 rounded-full border text-xs font-mono transition ${user.isPro ? 'bg-black/40 border-[#00D4AA]/30 text-[#00D4AA]' : 'bg-black/40 border-white/10 text-white/50 hover:bg-white/10'}`}
               >
-                {user.isPro ? 'PRO ACCESS' : 'FREE PLAN'}
+                {user.isPro ? (language === 'ru' ? 'ПРЕМИУМ' : 'PRO ACCESS') : (language === 'ru' ? 'БЕСПЛАТНО' : 'FREE PLAN')}
               </button>
             </div>
           </div>
@@ -1661,6 +1917,10 @@ function AppContent() {
             streak={streak}
             healthMetrics={healthMetrics}
             toggleHabit={toggleHabit}
+            updateHabit={updateHabit}
+            onAddHabit={addHabit}
+            todayMood={todayMood}
+            onMoodChange={setTodayMood}
             goToAddMeal={() => setScreen('ADD_MEAL')}
             closeDay={() => setScreen('CHECK_IN')}
             onMetricUpdate={handleMetricUpdate}
@@ -1668,6 +1928,7 @@ function AppContent() {
 
             onOpenFocus={() => setIsFocusOpen(true)}
             onRefreshXp={() => setUserXp(loadGamificationData().xp)}
+            userXp={userXp}
           />
         )}
 
@@ -1739,6 +2000,8 @@ function AppContent() {
             onDeviceChange={loadHealthMetrics}
             language={language}
             onLanguageChange={setLanguage}
+            streak={streak}
+            onStreakUpdate={setStreak}
           />
         )}
 
@@ -1757,10 +2020,10 @@ function AppContent() {
 // Wrapped export with LanguageProvider
 export default function App() {
   return (
-    <PremiumProvider>
-      <LanguageProvider>
+    <LanguageProvider>
+      <PremiumProvider>
         <AppContent />
-      </LanguageProvider>
-    </PremiumProvider>
+      </PremiumProvider>
+    </LanguageProvider>
   );
 }

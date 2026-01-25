@@ -7,7 +7,7 @@ import crypto from 'crypto';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const PAYMENTS_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN; // Tribute or other
 
@@ -189,6 +189,25 @@ app.post('/api/analyze-food', async (req, res) => {
         } else {
             res.status(500).json({ error: { message: "Internal Server Error during AI proxy" } });
         }
+    }
+});
+
+// 4. Premium Status Check
+app.get('/api/premium/check', async (req, res) => {
+    try {
+        const { telegram_id } = req.query;
+
+        // TODO: Check against database
+        // For now, return false or check against a hardcoded list if needed
+        const isPremium = false;
+
+        res.json({
+            is_premium: isPremium,
+            plan: isPremium ? 'premium' : 'free'
+        });
+    } catch (error) {
+        console.error('Premium Check Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

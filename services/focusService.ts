@@ -102,7 +102,7 @@ export const useFocusTimer = (onComplete?: (minutes: number) => void) => {
                 onComplete(minutesCompleted);
             }
 
-            console.log(`Focus session completed! Earned ${xpEarned} XP`);
+            // console.log(`Focus session completed! Earned ${xpEarned} XP`);
         }
     };
 

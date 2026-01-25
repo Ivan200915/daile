@@ -14,16 +14,6 @@ const isApiConfigured = true;
 
 // Helper to call Together AI API
 async function callTogetherAI(messages: any[], model: string): Promise<string | null> {
-  // Debug log to verify key status in production
-  if (process.env.NODE_ENV !== 'production' || !isApiConfigured) {
-    console.log('GeminiService Config:', {
-      hasKey: !!TOGETHER_API_KEY,
-      keyLength: TOGETHER_API_KEY?.length,
-      keyPreview: TOGETHER_API_KEY ? `${TOGETHER_API_KEY.substring(0, 4)}...` : 'NONE',
-      isConfigured: isApiConfigured
-    });
-  }
-
   if (!isApiConfigured) return null;
 
   try {
@@ -80,7 +70,7 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
 // Advanced Food Analysis Types
 export interface FoodComponent {
   name: string;
-  amount: string; // e.g. "150g"
+  grams: number;
   calories: number;
   protein: number;
   fat: number;
@@ -90,6 +80,7 @@ export interface FoodComponent {
 export interface FoodAnalysisResult {
   name: string;
   macros: MacroData;
+  portionGrams: number;
   components: FoodComponent[];
   confidence: number;
   insight?: string;
@@ -100,6 +91,7 @@ export const analyzeFoodImage = async (base64Image: string, language: string = '
   const fallback: FoodAnalysisResult = {
     name: "Manual Entry (Proxy Mode)",
     macros: { calories: 0, protein: 0, fat: 0, carbs: 0 },
+    portionGrams: 0,
     components: [],
     confidence: 0,
     insight: "Proxy failed. Check server logs."
@@ -110,11 +102,12 @@ export const analyzeFoodImage = async (base64Image: string, language: string = '
     return {
       name: language === 'ru' ? "Куриный салат (Демо)" : "Grilled Chicken Salad (Demo)",
       macros: { calories: 450, protein: 42, fat: 18, carbs: 12 },
+      portionGrams: 350,
       components: [
-        { name: language === 'ru' ? "Куриная грудка" : "Grilled Chicken Breast", amount: "150g", calories: 250, protein: 35, fat: 5, carbs: 0 },
-        { name: language === 'ru' ? "Зелень" : "Mixed Greens", amount: "2 cups", calories: 30, protein: 2, fat: 0, carbs: 5 },
-        { name: language === 'ru' ? "Авокадо" : "Avocado", amount: "1/2", calories: 120, protein: 1, fat: 10, carbs: 6 },
-        { name: language === 'ru' ? "Масло" : "Olive Oil Dressing", amount: "1 tbsp", calories: 50, protein: 0, fat: 5, carbs: 1 }
+        { name: language === 'ru' ? "Куриная грудка" : "Grilled Chicken Breast", grams: 150, calories: 250, protein: 35, fat: 5, carbs: 0 },
+        { name: language === 'ru' ? "Зелень" : "Mixed Greens", grams: 100, calories: 30, protein: 2, fat: 0, carbs: 5 },
+        { name: language === 'ru' ? "Авокадо" : "Avocado", grams: 75, calories: 120, protein: 1, fat: 10, carbs: 6 },
+        { name: language === 'ru' ? "Масло" : "Olive Oil Dressing", grams: 14, calories: 50, protein: 0, fat: 5, carbs: 1 }
       ],
       confidence: 85,
       insight: language === 'ru' ? "Богато белком, мало углеводов." : "High protein, low carb option."
@@ -135,28 +128,46 @@ export const analyzeFoodImage = async (base64Image: string, language: string = '
         },
         {
           type: 'text',
-          text: `You are an expert AI Nutritionist. Analyze this food image with high precision.
-Identify the dish and breakdown its components/ingredients. Estimate the portion size and nutritional content for each component.
+          text: `You are a professional nutritionist with 15 years of experience analyzing food portions.
 
-Context Language: ${language === 'ru' ? 'Russian (Русский)' : 'English'}.
-IMPORTANT: Output all names and insights in ${language === 'ru' ? 'Russian' : 'English'}.
+TASK: Analyze this food image and provide ACCURATE nutritional breakdown.
 
-Return ONLY valid JSON in this exact format:
+ESTIMATION GUIDELINES:
+1. PORTION SIZE: Estimate the actual portion weight in grams. Use these references:
+   - Standard dinner plate diameter: ~25cm
+   - Tablespoon: ~15g, Teaspoon: ~5g
+   - Palm-sized meat: ~100g
+   - Fist-sized portion: ~150g
+   - Cup of rice/pasta (cooked): ~180g
+
+2. CALORIE ACCURACY: Use these standard values per 100g:
+   - Rice (cooked): 130 kcal, 2.7g protein, 0.3g fat, 28g carbs
+   - Meat (beef): 250 kcal, 26g protein, 15g fat, 0g carbs
+   - Chicken breast: 165 kcal, 31g protein, 3.6g fat, 0g carbs
+   - Vegetables: 25-50 kcal average
+   - Oil/butter: 900 kcal per 100g (1 tbsp = ~14g = 126 kcal)
+
+3. COMMON DISHES (use these as reference):
+   - Плов/Pilaf (300g): ~450 kcal, 18g P, 18g F, 54g C
+   - Борщ/Borscht (350ml): ~170 kcal, 10g P, 9g F, 13g C
+   - Pasta with sauce (350g): ~500-600 kcal
+
+Language: ${language === 'ru' ? 'Russian (Русский) - output names in Russian' : 'English'}.
+
+Return ONLY valid JSON:
 {
-  "name": "Detailed Dish Name",
+  "name": "Dish Name",
+  "portion_grams": 0,
   "total_calories": 0,
   "total_protein": 0,
   "total_fat": 0,
   "total_carbs": 0,
   "components": [
-    { "name": "Ingredient 1", "amount": "quantity estimation", "calories": 0, "protein": 0, "fat": 0, "carbs": 0 },
-    ...
+    {"name": "Ingredient", "grams": 0, "calories": 0, "protein": 0, "fat": 0, "carbs": 0}
   ],
   "confidence": 0-100,
-  "insight": "Brief 1-sentence nutritional insight"
-}
-
-Be realistic with portion sizes. Identify multiple items if present (e.g. steak + potatoes).`
+  "insight": "Brief nutrition tip"
+}`
         }
       ]
     }
@@ -168,10 +179,31 @@ Be realistic with portion sizes. Identify multiple items if present (e.g. steak 
 
   try {
     // Extract JSON from response (may have extra text)
-    const jsonMatch = response.match(/\{[\s\S]*?\}/);
+    // Use greedy match to capture entire nested JSON object
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return fallback;
 
-    const parsed = JSON.parse(jsonMatch[0]);
+    // Try to parse, if it fails due to extra text after JSON, try to find valid JSON
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      // If greedy match grabbed too much, try to find balanced braces
+      const startIndex = response.indexOf('{');
+      if (startIndex === -1) return fallback;
+
+      let braceCount = 0;
+      let endIndex = startIndex;
+      for (let i = startIndex; i < response.length; i++) {
+        if (response[i] === '{') braceCount++;
+        if (response[i] === '}') braceCount--;
+        if (braceCount === 0) {
+          endIndex = i + 1;
+          break;
+        }
+      }
+      parsed = JSON.parse(response.substring(startIndex, endIndex));
+    }
     return {
       name: parsed.name || "Unknown Dish",
       macros: {
@@ -180,6 +212,7 @@ Be realistic with portion sizes. Identify multiple items if present (e.g. steak 
         fat: parsed.total_fat || 0,
         carbs: parsed.total_carbs || 0
       },
+      portionGrams: parsed.portion_grams || 0,
       components: parsed.components || [],
       confidence: parsed.confidence || 0,
       insight: parsed.insight

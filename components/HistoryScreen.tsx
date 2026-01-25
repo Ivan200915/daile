@@ -78,7 +78,13 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: HistoryScreenPro
     };
 
     return (
-        <div className="flex-1 px-5 pt-20 flex flex-col space-y-5 overflow-y-auto no-scrollbar pb-28">
+        <div
+            className="flex-1 px-5 flex flex-col space-y-5 overflow-y-auto no-scrollbar scroll-container"
+            style={{
+                paddingTop: 'calc(var(--safe-area-top, 0px) + 20px)',
+                paddingBottom: 'calc(var(--tab-bar-height, 90px) + 16px)'
+            }}
+        >
             <div className="flex justify-between items-center shrink-0">
                 <h2 className="text-2xl font-bold">{t.history.title}</h2>
                 {streak.freezesAvailable > 0 && (

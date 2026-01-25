@@ -3,6 +3,7 @@ import { Icons } from './Icons';
 import { Challenge } from '../types';
 import { getDailyChallenges, completeChallenge } from '../services/challengeService';
 import { addXp } from '../services/gamificationService';
+import { useLanguage } from '../locales/LanguageContext';
 
 const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
 
@@ -12,6 +13,8 @@ interface DailyChallengesWidgetProps {
 
 export const DailyChallengesWidget = ({ onChallengeComplete }: DailyChallengesWidgetProps) => {
     const [challenges, setChallenges] = useState<Challenge[]>([]);
+    const { language } = useLanguage();
+    const isRu = language === 'ru';
 
     useEffect(() => {
         setChallenges(getDailyChallenges());
@@ -33,10 +36,12 @@ export const DailyChallengesWidget = ({ onChallengeComplete }: DailyChallengesWi
             <div className="flex items-center justify-between mb-3 px-1">
                 <h3 className="font-bold text-lg flex items-center">
                     <Icons.Target size={20} className="mr-2 text-[#FFD700]" />
-                    Daily Quests
+                    {isRu ? 'Дневные задачи' : 'Daily Quests'}
                 </h3>
                 {allCompleted && (
-                    <span className="text-xs text-[#00D4AA] font-bold bg-[#00D4AA]/10 px-2 py-1 rounded-full border border-[#00D4AA]/20">ALL CLEARED</span>
+                    <span className="text-xs text-[#00D4AA] font-bold bg-[#00D4AA]/10 px-2 py-1 rounded-full border border-[#00D4AA]/20">
+                        {isRu ? 'ВСЁ ВЫПОЛНЕНО' : 'ALL CLEARED'}
+                    </span>
                 )}
             </div>
 
