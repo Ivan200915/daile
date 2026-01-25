@@ -45,6 +45,36 @@ export const DailyChallengesWidget = ({ onChallengeComplete }: DailyChallengesWi
                 )}
             </div>
 
+            {/* Community Goal */}
+            <div className={`${GLASS_PANEL} p-4 mb-4 relative overflow-hidden bg-gradient-to-br from-[#3B82F6]/20 to-transparent border border-[#3B82F6]/30`}>
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                    <h4 className="font-bold text-sm text-[#3B82F6] flex items-center">
+                        <Icons.Globe size={16} className="mr-2" />
+                        {isRu ? 'Мировая Цель' : 'Global Goal'}
+                    </h4>
+                    <span className="text-[10px] text-white/60 bg-black/20 px-2 py-0.5 rounded-full">
+                        {isRu ? '24ч осталось' : '24h left'}
+                    </span>
+                </div>
+                <div className="relative z-10">
+                    <p className="text-lg font-bold text-white mb-1">
+                        {isRu ? 'Выпить 100,000 Л воды' : 'Drink 100,000 L Water'}
+                    </p>
+                    <div className="h-3 bg-black/30 rounded-full overflow-hidden border border-[#3B82F6]/20 mb-1">
+                        <div className="h-full bg-[#3B82F6] w-[75%] relative">
+                            <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        </div>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-white/50">
+                        <span>75,432 / 100,000</span>
+                        <span>{isRu ? '75% выполнено' : '75% done'}</span>
+                    </div>
+                </div>
+                <div className="absolute -right-5 -bottom-5 text-[#3B82F6]/10">
+                    <Icons.Droplets size={100} />
+                </div>
+            </div>
+
             <div className="space-y-3">
                 {challenges.map(challenge => (
                     <div

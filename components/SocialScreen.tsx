@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import IconBadge from './IconBadge';
+import { Leaderboard } from './Leaderboard';
+import { DailyChallengesWidget } from './DailyChallengesWidget';
 import {
     loadGroups,
     createGroup,
@@ -21,6 +23,7 @@ interface SocialScreenProps {
     userName: string;
     userStreak: number;
     userXp: number;
+    onChallengeComplete: (xp: number) => void;
 }
 
 // Add Friend/Group Modal
@@ -109,8 +112,16 @@ const AddGroupModal = ({
     );
 };
 
-// Leaderboard Component
-const Leaderboard = ({ members, currentUserId }: { members: GroupMember[]; currentUserId: string }) => {
+// Internal Leaderboard moved to separate component
+const GroupLeaderboard = ({ members, currentUserId }: { members: GroupMember[]; currentUserId: string }) => {
+    // ... (This acts as a fallback or specific group view if needed, but we will mostly use the new global one)
+    // For now, let's keep the group-specific one simple or reuse logic if possible.
+    // Actually, let's just keep the group-specific rendering here as it differs slightly (GroupMember vs Global).
+    // Or we can adapt the new Leaderboard to handle both?
+    // For simplicity/speed, I will keep a lightweight version here for groups and use the big one for Global.
+
+    // Re-implementing getRankIcon locally or importing?
+    // Let's just keep the previous implementation for Group Context.
     const getRankIcon = (rank: number) => {
         if (rank === 1) return <span className="text-lg">🥇</span>;
         if (rank === 2) return <span className="text-lg">🥈</span>;
@@ -195,7 +206,8 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({
     userId,
     userName,
     userStreak,
-    userXp
+    userXp,
+    onChallengeComplete
 }) => {
     const [groups, setGroups] = useState<Group[]>([]);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -264,7 +276,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({
                         <Icons.Trophy size={16} className="mr-2 text-[#FFD700]" />
                         Таблица лидеров
                     </h3>
-                    <Leaderboard members={leaderboard} currentUserId={userId} />
+                    <GroupLeaderboard members={leaderboard} currentUserId={userId} />
                 </div>
             </div>
         );

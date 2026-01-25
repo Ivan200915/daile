@@ -60,7 +60,8 @@ import {
   Sparkles,
   Octagon,
   Lock,
-  User
+  User,
+  Globe
 } from 'lucide-react';
 
 
@@ -163,6 +164,7 @@ export const Icons = {
   Sparkles,
   Octagon,
   Lock,
+  Globe,
 };
 
 // Unified icon sizes

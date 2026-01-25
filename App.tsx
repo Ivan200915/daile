@@ -1635,7 +1635,8 @@ function AppContent() {
             userId={user.name}
             userName={user.name}
             userStreak={streak.currentStreak}
-            userXp={userXp}
+            userXp={user.xp}
+            onChallengeComplete={addXp}
           />
         )}
 
