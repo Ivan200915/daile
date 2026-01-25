@@ -112,31 +112,21 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
 
                     <div className="flex items-center gap-4 relative z-10">
                         {/* 3D Avatar Container */}
-                        <div className="relative shrink-0" style={{ perspective: '500px' }}>
-                            {/* Rotating glow ring - APP COLOR with stronger animation */}
+                        <div className="relative shrink-0">
+                            {/* Subtle inner glow - contained */}
                             <div
-                                className="absolute -inset-3 rounded-full animate-spin-slow opacity-70"
+                                className="absolute inset-0 rounded-full animate-pulse opacity-40"
                                 style={{
-                                    background: `conic-gradient(from 0deg, #00D4AA, transparent 40%, #00D4AA 60%, transparent)`,
-                                    filter: 'blur(4px)'
-                                }}
-                            />
-
-                            {/* Pulsing outer ring */}
-                            <div
-                                className="absolute -inset-2 rounded-full animate-pulse-strong"
-                                style={{
-                                    border: '2px solid #00D4AA',
-                                    boxShadow: '0 0 15px #00D4AA'
+                                    boxShadow: '0 0 20px #00D4AA, inset 0 0 10px rgba(0, 212, 170, 0.3)'
                                 }}
                             />
 
                             {/* Avatar image */}
                             <div
-                                className="relative w-20 h-20 rounded-full overflow-hidden border-2 shadow-2xl"
+                                className="relative w-20 h-20 rounded-full overflow-hidden border-2 shadow-lg"
                                 style={{
                                     borderColor: '#00D4AA',
-                                    boxShadow: '0 0 25px rgba(0, 212, 170, 0.5)'
+                                    boxShadow: '0 0 15px rgba(0, 212, 170, 0.4)'
                                 }}
                             >
                                 <img
@@ -242,10 +232,10 @@ export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabi
                                     <div
                                         key={i}
                                         className={`flex items-center gap-4 p-3 rounded-2xl border transition-all duration-500 ${isCurrent
-                                                ? 'bg-[#00D4AA]/10 border-[#00D4AA]/40 scale-[1.02]'
-                                                : isUnlocked
-                                                    ? 'bg-white/5 border-white/10'
-                                                    : 'bg-black/20 border-white/5 opacity-50'
+                                            ? 'bg-[#00D4AA]/10 border-[#00D4AA]/40 scale-[1.02]'
+                                            : isUnlocked
+                                                ? 'bg-white/5 border-white/10'
+                                                : 'bg-black/20 border-white/5 opacity-50'
                                             }`}
                                         style={{
                                             animationDelay: `${i * 100}ms`,
