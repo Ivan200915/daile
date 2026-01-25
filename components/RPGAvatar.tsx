@@ -12,69 +12,40 @@ interface RPGAvatarProps {
     habitsCompleted: number;
     totalHabits: number;
     streak: number;
+    gender?: 'male' | 'female';
 }
 
-// All 5 ranks with XP requirements
-const RANKS = [
-    {
-        minLevel: 1, maxLevel: 9,
-        name: 'Невольник', nameEn: 'Captive',
-        image: '/ranks/rank1.png',
-        color: '#6B7280',
-        motto: 'Вырвись из рутины',
-        mottoEn: 'Break Free',
-        xpRequired: 0
-    },
-    {
-        minLevel: 10, maxLevel: 19,
-        name: 'Воин', nameEn: 'Warrior',
-        image: '/ranks/rank2.png',
-        color: '#CD7F32',
-        motto: 'Битва за себя',
-        mottoEn: 'Fight For Yourself',
-        xpRequired: 1000
-    },
-    {
-        minLevel: 20, maxLevel: 29,
-        name: 'Полководец', nameEn: 'Commander',
-        image: '/ranks/rank3.png',
-        color: '#FFD700',
-        motto: 'Командуй привычками',
-        mottoEn: 'Command Your Habits',
-        xpRequired: 3000
-    },
-    {
-        minLevel: 30, maxLevel: 49,
-        name: 'Император', nameEn: 'Emperor',
-        image: '/ranks/rank4.png',
-        color: '#9B59B6',
-        motto: 'Власть над собой',
-        mottoEn: 'Master Yourself',
-        xpRequired: 7000
-    },
-    {
-        minLevel: 50, maxLevel: 100,
-        name: 'Бог', nameEn: 'God',
-        image: '/ranks/rank5.png',
-        color: '#00D4AA',
-        motto: 'Бессмертие дисциплины',
-        mottoEn: 'Immortal Discipline',
-        xpRequired: 15000
-    },
+// Male ranks (Невольник → Бог)
+const RANKS_MALE = [
+    { minLevel: 1, maxLevel: 9, name: 'Невольник', nameEn: 'Captive', image: '/ranks/rank1.png', color: '#6B7280', motto: 'Вырвись из рутины', mottoEn: 'Break Free', xpRequired: 0 },
+    { minLevel: 10, maxLevel: 19, name: 'Воин', nameEn: 'Warrior', image: '/ranks/rank2.png', color: '#CD7F32', motto: 'Битва за себя', mottoEn: 'Fight For Yourself', xpRequired: 1000 },
+    { minLevel: 20, maxLevel: 29, name: 'Полководец', nameEn: 'Commander', image: '/ranks/rank3.png', color: '#FFD700', motto: 'Командуй привычками', mottoEn: 'Command Your Habits', xpRequired: 3000 },
+    { minLevel: 30, maxLevel: 49, name: 'Император', nameEn: 'Emperor', image: '/ranks/rank4.png', color: '#9B59B6', motto: 'Власть над собой', mottoEn: 'Master Yourself', xpRequired: 7000 },
+    { minLevel: 50, maxLevel: 100, name: 'Бог', nameEn: 'God', image: '/ranks/rank5.png', color: '#00D4AA', motto: 'Бессмертие дисциплины', mottoEn: 'Immortal Discipline', xpRequired: 15000 },
 ];
 
-const getRank = (level: number) => {
-    for (let i = RANKS.length - 1; i >= 0; i--) {
-        if (level >= RANKS[i].minLevel) return { ...RANKS[i], index: i };
+// Female ranks (Невольница → Богиня)
+const RANKS_FEMALE = [
+    { minLevel: 1, maxLevel: 9, name: 'Невольница', nameEn: 'Captive', image: '/ranks/female/rank1.png', color: '#6B7280', motto: 'Вырвись из рутины', mottoEn: 'Break Free', xpRequired: 0 },
+    { minLevel: 10, maxLevel: 19, name: 'Танцовщица', nameEn: 'Dancer', image: '/ranks/female/rank2.png', color: '#CD7F32', motto: 'Грация и сила', mottoEn: 'Grace and Strength', xpRequired: 1000 },
+    { minLevel: 20, maxLevel: 29, name: 'Жрица', nameEn: 'Priestess', image: '/ranks/female/rank3.png', color: '#FFD700', motto: 'Мудрость ведёт', mottoEn: 'Wisdom Leads', xpRequired: 3000 },
+    { minLevel: 30, maxLevel: 49, name: 'Царица', nameEn: 'Queen', image: '/ranks/female/rank4.png', color: '#9B59B6', motto: 'Власть над собой', mottoEn: 'Master Yourself', xpRequired: 7000 },
+    { minLevel: 50, maxLevel: 100, name: 'Богиня', nameEn: 'Goddess', image: '/ranks/female/rank5.png', color: '#00D4AA', motto: 'Бессмертие красоты', mottoEn: 'Immortal Beauty', xpRequired: 15000 },
+];
+
+const getRank = (level: number, ranks: typeof RANKS_MALE) => {
+    for (let i = ranks.length - 1; i >= 0; i--) {
+        if (level >= ranks[i].minLevel) return { ...ranks[i], index: i };
     }
-    return { ...RANKS[0], index: 0 };
+    return { ...ranks[0], index: 0 };
 };
 
-export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabits, streak }: RPGAvatarProps) => {
+export const RPGAvatar = ({ level, xp, xpToNextLevel, habitsCompleted, totalHabits, streak, gender = 'male' }: RPGAvatarProps) => {
     const { language } = useLanguage();
     const isRu = language === 'ru';
+    const RANKS = gender === 'female' ? RANKS_FEMALE : RANKS_MALE;
     const [showModal, setShowModal] = useState(false);
-    const rank = getRank(level);
+    const rank = getRank(level, RANKS);
     const xpPercent = Math.min(100, Math.round((xp / xpToNextLevel) * 100));
     const totalXp = rank.xpRequired + xp; // Approximate total XP
 
