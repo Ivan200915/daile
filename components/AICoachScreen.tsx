@@ -129,7 +129,7 @@ export const AICoachScreen = ({ logs, streak }: AICoachScreenProps) => {
             )}
 
             {/* Input Area */}
-            <div className="p-4 pt-2 shrink-0">
+            <div className="p-4 pt-2 shrink-0" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 16px)' }}>
                 <div className={`${GLASS_PANEL} p-2 flex items-center space-x-2`}>
                     <input
                         type="text"

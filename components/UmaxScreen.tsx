@@ -209,7 +209,7 @@ export const UmaxScreen = () => {
         return (
             <div className="h-full flex flex-col relative overflow-hidden bg-black text-white">
                 {/* Tab Switcher */}
-                <div className="absolute top-0 left-0 right-0 z-50 flex justify-center pt-6 pointer-events-none">
+                <div className="absolute top-0 left-0 right-0 z-50 flex justify-center pointer-events-none" style={{ paddingTop: 'calc(var(--safe-area-top, 0px) + 24px)' }}>
                     <div className="bg-white/10 backdrop-blur-md rounded-full p-1 flex pointer-events-auto">
                         <button
                             onClick={() => setActiveTab('scan')}
@@ -308,7 +308,7 @@ export const UmaxScreen = () => {
                                     )}
                                 </div>
 
-                                <div className="pb-24">
+                                <div style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 96px)' }}>
                                     <button onClick={() => setState('front_capture')} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
                                         {isRu ? 'Начать анализ' : 'Start Analysis'}
                                     </button>
@@ -341,7 +341,7 @@ export const UmaxScreen = () => {
                     <canvas ref={canvasRef} className="hidden" />
                     {renderOverlay(isFront ? 'front' : 'side')}
                 </div>
-                <div className="p-8 pb-32 bg-black flex flex-col items-center space-y-4">
+                <div className="p-8 bg-black flex flex-col items-center space-y-4" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 100px)' }}>
                     <button onClick={capture} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
                         {isRu ? 'Сделать селфи' : 'Take a selfie'}
                     </button>
@@ -365,7 +365,7 @@ export const UmaxScreen = () => {
                 <div className="flex-1 relative rounded-2xl overflow-hidden mb-8 border border-white/10">
                     <img src={img!} className="w-full h-full object-cover" alt="Review" />
                 </div>
-                <div className="pb-24 space-y-4">
+                <div className="space-y-4" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 96px)' }}>
                     <button onClick={() => isFront ? setState('side_capture') : processAnalysis()} className={`w-full py-4 ${ACCENT_BUTTON} text-lg`}>
                         {isRu ? 'Продолжить' : 'Continue'}
                     </button>
@@ -515,7 +515,7 @@ export const UmaxScreen = () => {
 
                 {/* Sticky Action Buttons (Locked) */}
                 {isLocked && (
-                    <div className="absolute bottom-0 left-0 right-0 p-6 pb-28 bg-gradient-to-t from-black via-black to-transparent z-40 space-y-3">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black to-transparent z-40 space-y-3" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 100px)' }}>
                         <button
                             onClick={() => setShowPaywall(true)}
                             className={`w-full py-4 bg-[#00D4AA] text-black font-bold rounded-2xl text-lg shadow-[0_0_20px_rgba(0,212,170,0.4)] flex items-center justify-center space-x-2`}
