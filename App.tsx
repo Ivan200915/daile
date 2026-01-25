@@ -24,6 +24,7 @@ import LiveChallenges from './components/LiveChallenges';
 import AIInsightsDashboard from './components/AIInsightsDashboard';
 import RPGAvatar from './components/RPGAvatar';
 import HabitDNA from './components/HabitDNA';
+import { InstallPrompt } from './components/InstallPrompt';
 import { updateGroupMemberStats, loadGroups } from './services/socialService';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview, FoodAnalysisResult, FoodComponent } from './services/geminiService';
 import {
@@ -1694,6 +1695,7 @@ function AppContent() {
         {showTabBar && (
           <TabBar current={screen} onChange={setScreen} />
         )}
+        <InstallPrompt />
       </div>
 
       {/* Focus Mode Overlay */}
