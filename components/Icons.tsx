@@ -59,7 +59,8 @@ import {
   Coffee,
   Sparkles,
   Octagon,
-  Lock
+  Lock,
+  User
 } from 'lucide-react';
 
 
@@ -136,6 +137,7 @@ export const Icons = {
 
   // Features
   Mic,
+  User,
   Users,
   Trophy,
   MessageCircle,
