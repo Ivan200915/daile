@@ -283,6 +283,20 @@ a,
     animation: pulse-strong 1.5s ease-in-out infinite;
 }
 
+@keyframes shine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}
+
+.animate-shine {
+    animation: shine 2s ease-in-out infinite;
+}
+
 /* Improved button states */
 .btn-primary {
     background: linear-gradient(135deg, var(--accent) 0%, #00B894 100%);
