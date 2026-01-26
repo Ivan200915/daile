@@ -27,14 +27,15 @@ export const playSound = (type: 'click' | 'toggle_on' | 'toggle_off' | 'success'
 
         switch (type) {
             case 'click':
-                // High pitch short tick
+                // Apple-style subtle "thock"
+                // Very short, lower frequency, rapid decay
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, now);
-                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.03);
+                gain.gain.setValueAtTime(0.03, now); // Very quiet
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
                 osc.start(now);
-                osc.stop(now + 0.05);
+                osc.stop(now + 0.03);
                 break;
 
             case 'pop':
