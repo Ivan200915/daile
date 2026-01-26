@@ -965,6 +965,21 @@ const Dashboard = ({
         streak={streak.currentStreak}
       />
 
+      {/* Daily Motivation (NotebookLM) */}
+      <div className="mb-6 animate-fade-in">
+        <div className={`${GLASS_PANEL_LIGHT} p-4 flex items-start space-x-3`}>
+          <span className="text-2xl">☀️</span>
+          <div>
+            <p className="text-sm font-medium italic text-white/80">
+              "{getRandomNotification('morning').ru}"
+            </p>
+            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">
+              Daily Discipline • Morning Prime
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Mood Tracker */}
       <MoodTracker currentMood={todayMood} onMoodSelect={onMoodChange} />
 
