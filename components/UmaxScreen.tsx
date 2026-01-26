@@ -196,8 +196,26 @@ export const UmaxScreen = () => {
             {type === 'front' ? (
                 <div className="w-[280px] h-[380px] border-2 border-white/30 rounded-[50%] bg-transparent shadow-[0_0_0_999px_rgba(0,0,0,0.5)]" />
             ) : (
-                <div className="relative w-[300px] h-[400px]">
-                    <div className="absolute top-0 right-0 bottom-0 w-1/2 border-l-2 border-white/30 rounded-l-[100px] shadow-[0_0_0_999px_rgba(0,0,0,0.5)]" />
+                <div className="relative w-[300px] h-[400px] opacity-70">
+                    <svg viewBox="0 0 200 300" className="w-full h-full drop-shadow-lg">
+                        {/* Profile Silhouette Path - Right facing */}
+                        <path
+                            d="M90,20 C80,20 60,30 50,60 C45,75 45,90 48,100 C48,100 40,105 35,108 C30,111 30,120 35,125 C38,128 45,128 48,128 C48,128 48,135 48,140 C48,140 35,145 35,155 C35,165 48,165 55,160 C55,160 52,180 55,190 C58,200 70,220 90,230 C90,230 90,280 90,280 L180,280 L180,20 L90,20"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeDasharray="4 2"
+                        />
+                        {/* Masking the outside (Shadow) */}
+                        <path
+                            d="M0,0 L200,0 L200,300 L0,300 L0,0 M90,20 C80,20 60,30 50,60 C45,75 45,90 48,100 C48,100 40,105 35,108 C30,111 30,120 35,125 C38,128 45,128 48,128 C48,128 48,135 48,140 C48,140 35,145 35,155 C35,165 48,165 55,160 C55,160 52,180 55,190 C58,200 70,220 90,230 C90,230 90,280 90,280 L180,280 L180,20 L90,20"
+                            fill="rgba(0,0,0,0.6)"
+                            fillRule="evenodd"
+                        />
+                    </svg>
+                    <div className="absolute top-1/2 left-4 -translate-y-1/2 text-white/50 text-xs -rotate-90">
+                        Align Nose & Chin
+                    </div>
                 </div>
             )}
         </div>

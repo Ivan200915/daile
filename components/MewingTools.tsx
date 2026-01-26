@@ -42,7 +42,7 @@ export const MewingTools = () => {
     };
 
     return (
-        <div className="flex-1 flex flex-col p-6 pt-20 overflow-y-auto no-scrollbar" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 96px)' }}>
+        <div className="flex-1 flex flex-col p-6 pt-32 overflow-y-auto no-scrollbar" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 96px)' }}>
             <h2 className="text-3xl font-bold mb-6 text-center">
                 {isRu ? 'Инструменты для лица' : 'Jawline Tools'}
             </h2>
