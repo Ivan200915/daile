@@ -1,155 +1,187 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Icons } from './Icons';
-import IconBadge from './IconBadge';
-import { generateCoachResponse, getInitialGreeting, getRecommendedQuestions, ChatMessage } from '../services/aiCoachService';
-import { DailyLog, StreakData } from '../types';
+import { generateCoachResponse, CoachContext } from '../services/geminiService';
+import { UserSettings, StreakData, DailyLog } from '../types';
+import { playSound } from '../services/soundService';
+import { triggerHaptic } from '../services/hapticService';
+import { getWeeklySummary } from '../services/storageService';
 
-const GLASS_PANEL = 'bg-white/10 backdrop-blur-md rounded-2xl border border-white/20';
-const USER_BUBBLE = 'bg-[#00D4AA] text-black rounded-tr-none';
-const AI_BUBBLE = 'bg-white/10 text-white rounded-tl-none border border-white/10';
+const GLASS_PANEL = 'bg-white/10 backdrop-blur-md border border-white/10';
 
-interface AICoachScreenProps {
-    logs: DailyLog[];
-    streak: StreakData;
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    text: string;
+    timestamp: Date;
 }
 
-export const AICoachScreen = ({ logs, streak }: AICoachScreenProps) => {
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            id: '1',
-            role: 'assistant',
-            content: getInitialGreeting(),
-            timestamp: new Date().toISOString()
-        }
-    ]);
+interface AICoachScreenProps {
+    user: UserSettings;
+    streak: StreakData;
+    logs: DailyLog[];
+    onClose: () => void;
+}
+
+export const AICoachScreen = ({ user, streak, logs, onClose }: AICoachScreenProps) => {
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+    // Initial Greeting
     useEffect(() => {
-        scrollToBottom();
+        if (messages.length === 0) {
+            triggerGreeting();
+        }
+    }, []);
+
+    // Auto-scroll
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
     }, [messages, isTyping]);
 
-    const handleSend = async (text: string) => {
-        if (!text.trim()) return;
+    const buildContext = (): CoachContext => {
+        const summary = getWeeklySummary(logs);
+        const last7 = logs.slice(-7).map(l =>
+            `${l.date}: ${l.closed ? '✅' : '❌'} (Mood: ${l.checkIn?.mood || '?'})`
+        ).join('\n');
 
-        const userMsg: ChatMessage = {
-            id: Date.now().toString(),
-            role: 'user',
-            content: text,
-            timestamp: new Date().toISOString()
+        return {
+            userName: user.name,
+            goal: user.goal,
+            streak: streak.currentStreak,
+            completionRate: summary.habitCompletionRate,
+            last7DaysStats: `Avg Steps: ${summary.avgSteps}, Avg Sleep: ${summary.avgSleep}h`,
+            recentLogsSummary: last7
         };
+    };
 
-        setMessages(prev => [...prev, userMsg]);
-        setInput('');
+    const triggerGreeting = async () => {
         setIsTyping(true);
+        const context = buildContext();
+        // Simulate "thinking"
+        setTimeout(async () => {
+            const greeting = await generateCoachResponse([], context, "Start conversation. Analyze my recent stats and greet me.");
+            addMessage('assistant', greeting);
+            setIsTyping(false);
+            playSound('pop');
+        }, 1500);
+    };
 
-        // Get AI response
-        const responseText = await generateCoachResponse(text, messages, { logs, streak });
+    const handleSend = async () => {
+        if (!input.trim()) return;
 
-        setIsTyping(false);
+        const userText = input.trim();
+        setInput('');
+        addMessage('user', userText);
+
+        setIsTyping(true);
+        triggerHaptic('light');
+
+        try {
+            const context = buildContext();
+            const history = messages.map(m => ({ role: m.role, content: m.text }));
+            const reply = await generateCoachResponse(history, context, userText);
+
+            addMessage('assistant', reply);
+            playSound('pop');
+            triggerHaptic('medium');
+        } catch (e) {
+            console.error(e);
+            addMessage('assistant', "Connection lost. I'm training offline right now.");
+        } finally {
+            setIsTyping(false);
+        }
+    };
+
+    const addMessage = (role: 'user' | 'assistant', text: string) => {
         setMessages(prev => [...prev, {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: responseText,
-            timestamp: new Date().toISOString()
+            id: Date.now().toString(),
+            role,
+            text,
+            timestamp: new Date()
         }]);
     };
 
-    const suggestions = getRecommendedQuestions(logs);
-
     return (
-        <div className="h-full flex flex-col bg-black/20 w-full overflow-hidden">
+        <div className="flex flex-col h-full bg-[#0d0d0d] relative overflow-hidden">
             {/* Header */}
-            <div className={`${GLASS_PANEL} p-4 m-4 mb-2 flex items-center space-x-3 shrink-0`}>
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#00D4AA] to-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,212,170,0.3)]">
-                    <Icons.Mic size={24} className="text-black" />
+            <div className={`${GLASS_PANEL} p-4 pt-safe flex items-center justify-between z-10 shrink-0`}>
+                <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00D4AA] to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(0,212,170,0.5)]">
+                        <Icons.Brain size={20} className="text-white" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-base">AI Coach</h3>
+                        <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 rounded-full bg-[#00D4AA] animate-pulse" />
+                            <span className="text-xs text-white/50">Online</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="font-bold text-lg">AI Discipline Coach</h2>
-                    <p className="text-xs text-white/50 flex items-center">
-                        <span className="w-2 h-2 rounded-full bg-[#00D4AA] mr-2 animate-pulse" />
-                        Online & Watching
-                    </p>
-                </div>
+                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition">
+                    <Icons.X size={24} className="text-white/70" />
+                </button>
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-4 no-scrollbar">
-                {messages.map((msg) => (
+            {/* Chat Area */}
+            <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"
+                style={{ scrollBehavior: 'smooth' }}
+            >
+                {messages.map(m => (
                     <div
-                        key={msg.id}
-                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+                        key={m.id}
+                        className={`flex w-full ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                        {msg.role === 'assistant' && (
-                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 shrink-0 mt-1">
-                                <Icons.Mic size={14} />
-                            </div>
-                        )}
                         <div
-                            className={`max-w-[80%] p-3 px-4 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user' ? USER_BUBBLE : AI_BUBBLE}`}
+                            className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed animate-scale-in ${m.role === 'user'
+                                    ? 'bg-[#00D4AA] text-black rounded-tr-none font-medium'
+                                    : 'bg-[#1C1C1E] border border-white/10 text-white rounded-tl-none'
+                                }`}
                         >
-                            {msg.content}
+                            {m.text}
                         </div>
                     </div>
                 ))}
 
                 {isTyping && (
-                    <div className="flex justify-start animate-fade-in">
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-2 shrink-0">
-                            <Icons.Mic size={14} />
-                        </div>
-                        <div className={`${AI_BUBBLE} p-4 rounded-2xl flex space-x-1 items-center h-10`}>
-                            <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="flex justify-start w-full">
+                        <div className="bg-[#1C1C1E] border border-white/10 p-4 rounded-2xl rounded-tl-none flex space-x-1 items-center">
+                            <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                     </div>
                 )}
-                <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Suggestions (if clean slate or idle) */}
-            {!isTyping && (
-                <div className="px-4 py-2 flex space-x-2 overflow-x-auto no-scrollbar shrink-0">
-                    {suggestions.map(q => (
-                        <button
-                            key={q}
-                            onClick={() => handleSend(q)}
-                            className="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs hover:bg-white/10 transition active:scale-95"
-                        >
-                            {q}
-                        </button>
-                    ))}
-                </div>
-            )}
-
             {/* Input Area */}
-            <div className="p-4 pt-2 shrink-0" style={{ paddingBottom: 'calc(var(--safe-area-bottom, 0px) + 16px)' }}>
-                <div className={`${GLASS_PANEL} p-2 flex items-center space-x-2`}>
+            <div className={`p-4 pb-safe ${GLASS_PANEL} border-none shrink-0`}>
+                <div className="flex items-center space-x-2">
                     <input
                         type="text"
                         value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSend(input)}
-                        placeholder="Ask your coach..."
-                        className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/30 text-sm px-2"
+                        onChange={e => setInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleSend()}
+                        placeholder="Ask for advice..."
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00D4AA]/50 text-white placeholder:text-white/20 transition-all"
                     />
                     <button
-                        onClick={() => handleSend(input)}
-                        disabled={!input.trim() || isTyping}
-                        className={`p-2 rounded-xl transition ${input.trim() ? 'bg-[#00D4AA] text-black hover:bg-[#00D4AA]/90' : 'bg-white/5 text-white/20'}`}
+                        onClick={handleSend}
+                        disabled={!input.trim()}
+                        className={`p-3 rounded-xl transition-all ${input.trim()
+                                ? 'bg-[#00D4AA] text-black hover:bg-[#00D4AA]/80 shadow-[0_0_15px_rgba(0,212,170,0.3)]'
+                                : 'bg-white/5 text-white/20'
+                            }`}
                     >
-                        <Icons.ArrowRight size={20} />
+                        <Icons.Send size={20} />
                     </button>
                 </div>
             </div>
         </div>
     );
 };
-
-export default AICoachScreen;

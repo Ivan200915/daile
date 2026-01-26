@@ -317,17 +317,53 @@ Return JSON:
   }
 };
 
-// General Chat Response
-export const generateChatResponse = async (
-  messages: { role: string; content: string }[],
-  systemPrompt: string
-): Promise<string | null> => {
-  if (!isApiConfigured) return null;
+// AI Coach Context Types
+export interface CoachContext {
+  userName: string;
+  goal: string;
+  streak: number;
+  completionRate: number; // 0-100
+  last7DaysStats: string; // Summary string
+  recentLogsSummary: string;
+}
 
-  const payload = [
-    { role: 'system', content: systemPrompt },
-    ...messages.map(m => ({ role: m.role, content: m.content }))
+// Generate Coach Response
+export const generateCoachResponse = async (
+  history: { role: string; content: string }[],
+  context: CoachContext,
+  userMessage: string
+): Promise<string> => {
+  const fallback = "Stay disciplined! I'm having trouble connecting to my brain right now.";
+  if (!isApiConfigured) return fallback;
+
+  const SYSTEM_PROMPT = `
+You are a tough but fair Discipline Coach for ${context.userName}.
+Your Goal: Help them achieve "${context.goal}".
+
+CURRENT STATUS:
+- Streak: ${context.streak} days
+- Recent Consistency: ${context.completionRate}%
+- Recent Activity: ${context.last7DaysStats}
+
+STYLE:
+- Short, punchy sentences.
+- Use emojis sparingly but effectively (🔥, 💪, 🛑).
+- Be direct. Call out excuses. Praise consistency.
+- If they are doing well, push them harder.
+- If they are failing, ask "Why?" and demand a plan.
+
+Do not be a generic AI. Be a specific, context-aware mentor.
+    `.trim();
+
+  // Limit history to last 10 messages to save context window
+  const recentHistory = history.slice(-10).map(m => ({ role: m.role, content: m.content }));
+
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...recentHistory,
+    { role: 'user', content: userMessage }
   ];
 
-  return await callTogetherAI(payload, TEXT_MODEL);
+  const response = await callTogetherAI(messages, TEXT_MODEL);
+  return response || fallback;
 };

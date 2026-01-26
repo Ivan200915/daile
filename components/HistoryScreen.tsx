@@ -9,7 +9,6 @@ import CorrelationChart from './CorrelationChart';
 import YearlyHeatmap from './YearlyHeatmap';
 import WeeklyReport from './WeeklyReport';
 import { PremiumGate } from '../services/PremiumContext';
-import AICoachScreen from './AICoachScreen';
 import SocialScreen from './SocialScreen';
 import { exportLogsToCSV } from '../services/exportService';
 import HabitDNA from './HabitDNA';
@@ -97,13 +96,13 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: HistoryScreenPro
 
             {/* Tab Switcher */}
             <div className={`p-1 rounded-xl bg-white/10 flex shrink-0 overflow-x-auto no-scrollbar`}>
-                {(['Calendar', 'Analytics', 'Social', 'Badges', 'AI Coach'] as const).map((tab) => (
+                {(['Calendar', 'Analytics', 'Social', 'Badges'] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition whitespace-nowrap ${activeTab === tab ? 'bg-[#00D4AA] text-black' : 'text-white/60'}`}
                     >
-                        {tab === 'Analytics' ? <><Icons.BarChart2 size={12} className="inline mr-1" />Аналитика</> : tab === 'AI Coach' ? <><Icons.Mic size={12} className="inline mr-1" />Coach</> : tab === 'Social' ? <><Icons.Users size={12} className="inline mr-1" />Друзья</> : tab}
+                        {tab === 'Analytics' ? <><Icons.BarChart2 size={12} className="inline mr-1" />Аналитика</> : tab === 'Social' ? <><Icons.Users size={12} className="inline mr-1" />Друзья</> : tab}
                     </button>
                 ))}
             </div>
@@ -359,11 +358,7 @@ const HistoryScreen = ({ logs, streak, onRequestWeeklyReview }: HistoryScreenPro
                 </div>
             )}
 
-            {activeTab === 'AI Coach' && (
-                <PremiumGate feature="AI-коуч">
-                    <AICoachScreen logs={logs} streak={streak} />
-                </PremiumGate>
-            )}
+
 
             {activeTab === 'Analytics' && (
                 <PremiumGate feature="Расширенная аналитика">

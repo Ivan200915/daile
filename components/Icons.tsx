@@ -12,7 +12,6 @@ import {
   Droplets,
   Dumbbell,
   Ban,
-  X,
   Lightbulb,
   Calendar,
   Image as ImageIcon,
@@ -61,7 +60,11 @@ import {
   Octagon,
   Lock,
   User,
-  Globe
+  Globe,
+  ShoppingBag,
+  Brain,
+  X,
+  Send
 } from 'lucide-react';
 
 
@@ -165,6 +168,9 @@ export const Icons = {
   Octagon,
   Lock,
   Globe,
+  ShoppingBag,
+  Brain,
+  Send,
 };
 
 // Unified icon sizes

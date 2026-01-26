@@ -1,4 +1,4 @@
-export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SOCIAL' | 'SETTINGS' | 'LOOKS';
+export type Screen = 'ONBOARDING' | 'DASHBOARD' | 'ADD_MEAL' | 'CHECK_IN' | 'HISTORY' | 'SOCIAL' | 'SETTINGS' | 'LOOKS' | 'SHOP' | 'COACH';
 
 export interface MacroData {
   calories: number;
@@ -80,6 +80,25 @@ export interface UserSettings {
   selectedHabits: string[]; // habit ids
   onboardingComplete: boolean;
   isPro?: boolean; // subscription status
+  // Economy
+  coins: number;
+  inventory: string[]; // List of owned item IDs
+  equipped: {
+    avatar: string; // ID of active avatar
+    theme: string; // ID of active theme
+  };
+}
+
+export interface ShopItem {
+  id: string;
+  type: 'avatar' | 'theme' | 'consumable';
+  name: string;
+  description: string;
+  price: number;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  icon: string; // We'll use string identifier for Icons.tsx or emoji
+  assetUrl?: string;
+  effect?: string;
 }
 
 export interface AvailableHabit {

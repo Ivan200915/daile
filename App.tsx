@@ -72,8 +72,12 @@ import CorrelationChart from './components/CorrelationChart';
 import WeeklyReport, { exportLogsToCSV } from './components/WeeklyReport';
 import SocialScreen from './components/SocialScreen';
 import UmaxScreen from './components/UmaxScreen';
-import AICoachScreen from './components/AICoachScreen';
 import { DailyChallengesWidget } from './components/DailyChallengesWidget';
+import { ShopScreen } from './components/ShopScreen';
+import { AICoachScreen } from './components/AICoachScreen';
+import { AuthScreen } from './components/AuthScreen';
+import { syncService } from './services/syncService';
+import { addCoins, INITIAL_ECONOMY } from './services/currencyService';
 
 // --- Sub-Components ---
 
@@ -371,7 +375,10 @@ const OnboardingScreen = ({ onComplete }: { onComplete: (settings: UserSettings)
               weight: weight ? parseFloat(weight) : undefined,
               gender,
               selectedHabits,
-              onboardingComplete: true
+              onboardingComplete: true,
+              coins: INITIAL_ECONOMY.coins,
+              inventory: INITIAL_ECONOMY.inventory,
+              equipped: INITIAL_ECONOMY.equipped
             };
             saveUserSettings(settings);
             onComplete(settings);
@@ -1393,13 +1400,79 @@ function AppContent() {
   // Load health metrics
   const loadHealthMetrics = async () => {
     const metrics = await getHealthMetrics();
-    setHealthMetrics(metrics);
   };
+
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error'>('idle');
+
+  // Sync: Initial Pull
+  useEffect(() => {
+    const initSync = async () => {
+      if (syncService.token) {
+        const data = await syncService.pullData();
+        if (data) {
+          if (data.settings) setUser(prev => ({ ...prev, ...data.settings } as UserSettings));
+          if (data.logs) setLogs(data.logs);
+          if (data.habits) setHabits(data.habits);
+          setSyncStatus('idle');
+        }
+      }
+    };
+    initSync();
+  }, []);
+
+  // Sync: Auto-Push on Change
+  // Telegram Auto-Login & Sync
+  useEffect(() => {
+    const initAuth = async () => {
+      // 1. Try Telegram Auth first
+      // @ts-ignore
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initData && !syncService.token) {
+        // @ts-ignore
+        await syncService.loginTelegram(window.Telegram.WebApp.initData);
+      }
+
+      // 2. Pull data if token exists
+      if (syncService.token) {
+        const data = await syncService.pullData();
+        if (data) {
+          if (data.settings) setUser(prev => ({ ...prev, ...data.settings } as UserSettings));
+          if (data.logs) setLogs(data.logs);
+          if (data.habits) setHabits(data.habits);
+          setSyncStatus('idle');
+        }
+      }
+    };
+    initAuth();
+  }, []);
+
+  // Sync: Auto-Push on Change
+  useEffect(() => {
+    if (!user || !syncService.token) return;
+
+    const timeout = setTimeout(async () => {
+      setSyncStatus('syncing');
+      const success = await syncService.pushData({
+        settings: user,
+        logs,
+        habits
+      });
+      setSyncStatus(success ? 'idle' : 'error');
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [user, logs, habits]);
 
   // Load data on mount
   useEffect(() => {
     const savedUser = loadUserSettings();
     if (savedUser?.onboardingComplete) {
+      // Economy Migration: Ensure new fields exist
+      if (savedUser.coins === undefined) {
+        savedUser.coins = INITIAL_ECONOMY.coins;
+        savedUser.inventory = INITIAL_ECONOMY.inventory;
+        savedUser.equipped = INITIAL_ECONOMY.equipped;
+      }
       setUser(savedUser);
       setScreen('DASHBOARD');
 
@@ -1526,6 +1599,14 @@ function AppContent() {
 
   const toggleHabit = (id: string) => {
     hapticMedium(); // Vibrate on habit toggle
+
+    // Coin Reward for Completion
+    const habit = habits.find(h => h.id === id);
+    if (habit && !habit.completed) {
+      addCoins(10);
+      if (user) setUser((prev) => prev ? ({ ...prev, coins: (prev.coins || 0) + 10 }) : null);
+    }
+
     setHabits(habits.map(h => h.id === id ? { ...h, completed: !h.completed } : h));
   };
 
@@ -1572,7 +1653,7 @@ function AppContent() {
     setScreen('ONBOARDING');
   };
 
-  const showTabBar = ['DASHBOARD', 'HISTORY', 'SOCIAL', 'SETTINGS'].includes(screen);
+  const showTabBar = ['DASHBOARD', 'HISTORY', 'SOCIAL', 'SETTINGS', 'SHOP'].includes(screen);
 
   return (
     <div className="relative w-full h-screen bg-[#000000] text-white overflow-hidden font-sans selection:bg-[#00D4AA]/30">
@@ -1590,8 +1671,58 @@ function AppContent() {
               >
                 {user.isPro ? (language === 'ru' ? 'ПРЕМИУМ' : 'PRO ACCESS') : (language === 'ru' ? 'БЕСПЛАТНО' : 'FREE PLAN')}
               </button>
+
+              {/* Shop Button */}
+              <button
+                onClick={() => setScreen('SHOP')}
+                className="backdrop-blur-md px-3 py-1 rounded-full border border-[#FFD700]/30 bg-black/40 text-[#FFD700] text-xs font-bold flex items-center space-x-1 hover:bg-[#FFD700]/10 transition"
+              >
+                <span>{user.coins?.toLocaleString() || 0}</span>
+                <span>🟡</span>
+              </button>
+
+              {/* AI Coach Button */}
+              <button
+                onClick={() => setScreen('COACH')}
+                className="backdrop-blur-md px-3 py-1 rounded-full border border-blue-500/30 bg-black/40 text-blue-400 text-xs font-bold flex items-center space-x-1 hover:bg-blue-500/10 transition"
+              >
+                <span>AI</span>
+              </button>
+
+              {/* Profile / Auth Button */}
+              <button
+                onClick={() => setIsAuthOpen(true)}
+                className={`backdrop-blur-md px-2 py-1 rounded-full border border-white/10 bg-black/40 text-white/70 text-xs font-bold flex items-center space-x-1 hover:bg-white/10 transition ${syncStatus === 'syncing' ? 'animate-pulse' : ''}`}
+              >
+                <Icons.User size={14} className={syncStatus === 'error' ? 'text-red-500' : ''} />
+                {syncService.token && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
+              </button>
             </div>
           </div>
+        )}
+
+        {isAuthOpen && (
+          <AuthScreen
+            onSuccess={() => {
+              setIsAuthOpen(false);
+              // Force a pull after login to merge/update
+              syncService.pullData().then(data => {
+                if (data?.settings) setUser(prev => ({ ...prev, ...data.settings } as UserSettings));
+                if (data?.logs) setLogs(data.logs);
+                if (data?.habits) setHabits(data.habits);
+              });
+            }}
+            onClose={() => setIsAuthOpen(false)}
+          />
+        )}
+
+        {screen === 'COACH' && user && (
+          <AICoachScreen
+            user={user}
+            streak={streak}
+            logs={logs}
+            onClose={() => setScreen('DASHBOARD')}
+          />
         )}
 
         {screen === 'ONBOARDING' && <OnboardingScreen onComplete={handleOnboardingComplete} />}
@@ -1688,6 +1819,16 @@ function AppContent() {
             onDeviceChange={loadHealthMetrics}
             streak={streak}
             onStreakUpdate={setStreak}
+          />
+        )}
+
+        {screen === 'SHOP' && user && (
+          <ShopScreen
+            user={user}
+            onUpdateUser={(updated) => {
+              setUser(updated);
+              saveUserSettings(updated);
+            }}
           />
         )}
 
