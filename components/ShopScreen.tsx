@@ -27,10 +27,11 @@ const CATALOG: ShopItem[] = [
 
 interface ShopScreenProps {
     user: UserSettings;
-    onUpdateUser: (user: UserSettings) => void; // Parent needs to reload user to reflect changes
+    onUpdateUser: (user: UserSettings) => void;
+    onClose: () => void;
 }
 
-export const ShopScreen = ({ user, onUpdateUser }: ShopScreenProps) => {
+export const ShopScreen = ({ user, onUpdateUser, onClose }: ShopScreenProps) => {
     const { language } = useLanguage();
     const isRu = language === 'ru';
     const [activeTab, setActiveTab] = useState<'all' | 'avatar' | 'theme' | 'consumable'>('all');
@@ -76,6 +77,15 @@ export const ShopScreen = ({ user, onUpdateUser }: ShopScreenProps) => {
             {/* Header / Balance */}
             <div className={`${GLASS_PANEL} p-6 mb-6 flex flex-col items-center justify-center relative overflow-hidden`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#FFD700]/20 via-transparent to-[#FFD700]/5 animate-pulse-slow" />
+
+                {/* Back Button (Absolute Top Left) */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 left-4 p-2 bg-black/20 rounded-full hover:bg-black/40 transition z-20"
+                >
+                    <Icons.ArrowRight size={20} className="rotate-180 text-white/70" />
+                </button>
+
                 <p className="text-white/60 text-sm uppercase tracking-widest font-bold z-10">{isRu ? 'Твой Баланс' : 'Your Balance'}</p>
                 <div className="flex items-center space-x-2 z-10">
                     <span className="text-5xl font-black text-[#FFD700] drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]">

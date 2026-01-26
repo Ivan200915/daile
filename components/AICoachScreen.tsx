@@ -106,7 +106,7 @@ export const AICoachScreen = ({ user, streak, logs, onClose }: AICoachScreenProp
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#0d0d0d] relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#0d0d0d] animate-slide-up">
             {/* Header */}
             <div className={`${GLASS_PANEL} p-4 pt-safe flex items-center justify-between z-10 shrink-0`}>
                 <div className="flex items-center space-x-3">
@@ -139,8 +139,8 @@ export const AICoachScreen = ({ user, streak, logs, onClose }: AICoachScreenProp
                     >
                         <div
                             className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed animate-scale-in ${m.role === 'user'
-                                    ? 'bg-[#00D4AA] text-black rounded-tr-none font-medium'
-                                    : 'bg-[#1C1C1E] border border-white/10 text-white rounded-tl-none'
+                                ? 'bg-[#00D4AA] text-black rounded-tr-none font-medium'
+                                : 'bg-[#1C1C1E] border border-white/10 text-white rounded-tl-none'
                                 }`}
                         >
                             {m.text}
@@ -174,8 +174,8 @@ export const AICoachScreen = ({ user, streak, logs, onClose }: AICoachScreenProp
                         onClick={handleSend}
                         disabled={!input.trim()}
                         className={`p-3 rounded-xl transition-all ${input.trim()
-                                ? 'bg-[#00D4AA] text-black hover:bg-[#00D4AA]/80 shadow-[0_0_15px_rgba(0,212,170,0.3)]'
-                                : 'bg-white/5 text-white/20'
+                            ? 'bg-[#00D4AA] text-black hover:bg-[#00D4AA]/80 shadow-[0_0_15px_rgba(0,212,170,0.3)]'
+                            : 'bg-white/5 text-white/20'
                             }`}
                     >
                         <Icons.Send size={20} />

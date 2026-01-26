@@ -511,7 +511,7 @@ const AddMealScreen = ({ onSave, onCancel }: { onSave: (meal: Meal) => void, onC
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Type Selector Overlay */}
-            <div className="absolute top-6 left-0 right-0 flex justify-center space-x-2 px-4 z-20">
+            <div className="absolute top-0 left-0 right-0 flex justify-center space-x-2 px-4 z-20 pt-safe mt-4">
               {(['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const).map(type => (
                 <button
                   key={type}
@@ -1275,7 +1275,7 @@ const Dashboard = ({
   );
 };
 
-const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string) => void, meals: Meal[], habits: Habit[] }) => {
+const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insight: string) => void, onClose: () => void, meals: Meal[], habits: Habit[] }) => {
   const [stage, setStage] = useState(0);
   const [insight, setInsight] = useState<string | null>(null);
   const [mood, setMood] = useState(3);
@@ -1384,7 +1384,13 @@ const CheckInScreen = ({ onFinish, meals, habits }: { onFinish: (insight: string
   }
 
   return (
-    <div className="h-full flex flex-col p-8 pt-20 relative overflow-y-auto no-scrollbar">
+    <div className="h-full flex flex-col p-8 pt-safe mt-6 relative overflow-y-auto no-scrollbar">
+      <div className="absolute top-0 right-0 p-4 pt-safe z-50">
+        <button onClick={onClose} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition">
+          <Icons.X size={20} className="text-white/60" />
+        </button>
+      </div>
+
       <div className="flex space-x-2 mb-8 justify-center shrink-0">
         {[0, 1, 2].map(i => (
           <div key={i} className={`h-1 w-8 rounded-full ${i <= stage ? 'bg-[#00D4AA]' : 'bg-white/10'}`} />
@@ -1803,7 +1809,7 @@ function AppContent() {
         )}
 
         {screen === 'CHECK_IN' && (
-          <CheckInScreen onFinish={handleCheckInFinish} meals={meals} habits={habits} />
+          <CheckInScreen onFinish={handleCheckInFinish} onClose={() => setScreen('DASHBOARD')} meals={meals} habits={habits} />
         )}
 
         {screen === 'HISTORY' && (
@@ -1877,6 +1883,7 @@ function AppContent() {
               setUser(updated);
               saveUserSettings(updated);
             }}
+            onClose={() => setScreen('DASHBOARD')}
           />
         )}
 
