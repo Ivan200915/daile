@@ -43,6 +43,7 @@ import {
   getTodayDate,
   getWeeklySummary
 } from './services/storageService';
+import { NOTIFICATIONS, getRandomNotification } from './locales/notifications';
 import { loadBadHabits, saveBadHabits } from './services/badHabitService';
 import {
   getConnectedDevice,
