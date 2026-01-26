@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "notebooklm": {
+            "command": "/opt/homebrew/bin/notebooklm-mcp",
+            "args": []
+        }
+    }
+}

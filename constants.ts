@@ -59,6 +59,15 @@ export const AVAILABLE_HABITS = [
   { id: 'stretch', label: 'Stretching', labelRu: 'Растяжка', category: 'fitness', iconId: 'Activity', type: 'timer' as const, target: 15, unit: 'min', unitRu: 'мин' },
 ] as const;
 
+export const AVAILABLE_BAD_HABITS = [
+  { id: 'smoking', label: 'Smoking', labelRu: 'Курение', category: 'health', iconId: 'Cigarette' },
+  { id: 'vaping', label: 'Vaping', labelRu: 'Вейп', category: 'health', iconId: 'Wind' },
+  { id: 'sugar', label: 'Sweets', labelRu: 'Сладкое', category: 'health', iconId: 'Cookie' },
+  { id: 'social-media', label: 'Social Media', labelRu: 'Соцсети', category: 'time', iconId: 'Smartphone' },
+  { id: 'fast-food', label: 'Fast Food', labelRu: 'Фастфуд', category: 'health', iconId: 'Pizza' },
+  { id: 'spending', label: 'Impulse Buying', labelRu: 'Траты', category: 'finance', iconId: 'CreditCard' },
+] as const;
+
 // Default targets
 export const DEFAULT_TARGETS = {
   calories: 2000,

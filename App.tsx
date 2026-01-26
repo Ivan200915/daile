@@ -7,6 +7,8 @@ import {
   MOCK_HABITS,
   TEXT_GRADIENT,
   AVAILABLE_HABITS,
+  AVAILABLE_HABITS,
+  AVAILABLE_BAD_HABITS,
   DEFAULT_TARGETS
 } from './constants';
 import { playSound } from './services/soundService';
@@ -24,6 +26,8 @@ import LiveChallenges from './components/LiveChallenges';
 import AIInsightsDashboard from './components/AIInsightsDashboard';
 import RPGAvatar from './components/RPGAvatar';
 import HabitDNA from './components/HabitDNA';
+import { BadHabitTracker } from './components/BadHabitTracker';
+import { RestorationTree } from './components/RestorationTree';
 import { InstallPrompt } from './components/InstallPrompt';
 import { updateGroupMemberStats, loadGroups } from './services/socialService';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview, FoodAnalysisResult, FoodComponent } from './services/geminiService';
@@ -39,6 +43,7 @@ import {
   getTodayDate,
   getWeeklySummary
 } from './services/storageService';
+import { loadBadHabits, saveBadHabits } from './services/badHabitService';
 import {
   getConnectedDevice,
   disconnectDevice,
@@ -971,6 +976,13 @@ const Dashboard = ({
       {/* AI Insights Dashboard */}
       <AIInsightsDashboard logs={logs} currentMood={todayMood} />
 
+      {/* --- BAD HABITS MODULE (Restoration) --- */}
+      <div className="mb-6">
+        {/* Only renders if habits exist */}
+        <RestorationTree />
+        <BadHabitTracker settings={user} />
+      </div>
+
       {/* Daily Challenges */}
       {/* Daily Challenges Widget */}
       <DailyChallengesWidget onChallengeComplete={onRefreshXp} />
@@ -1475,6 +1487,26 @@ function AppContent() {
       }
       setUser(savedUser);
       setScreen('DASHBOARD');
+
+      // DEMO: Auto-init Bad Habit if none exist
+      const badHabits = loadBadHabits();
+      if (badHabits.length === 0) {
+        const template = AVAILABLE_BAD_HABITS.find(h => h.id === 'smoking');
+        if (template) {
+          saveBadHabits([{
+            ...template,
+            icon: template.iconId,
+            limit: 10,
+            baseline: 15,
+            logs: [],
+            restorationXP: 0,
+            currentStreak: 0
+          }]);
+          // Force re-render/update
+          // Note: In real app we need a setBadHabits state or event bus, 
+          // but components read from localStorage on mount.
+        }
+      }
 
       // Load logs
       const allLogs = loadAllDailyLogs();

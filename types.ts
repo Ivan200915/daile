@@ -117,3 +117,34 @@ export interface Challenge {
   type: 'water' | 'steps' | 'workout' | 'mindfulness' | 'social' | 'nutrition' | 'health';
   target?: number; // e.g., 2000ml, 5000 steps
 }
+
+export interface BadHabit {
+  id: string;
+  label: string;
+  labelRu: string;
+  icon: string;
+  category: 'health' | 'finance' | 'time' | 'mental';
+
+  // Tapering Mechanics
+  limit: number; // Current daily max (Adaptive)
+  baseline: number; // Starting average usage
+  logs: { date: string; count: number }[]; // History
+
+  // Restoration
+  restorationXP: number; // Total XP earned
+  currentStreak: number;
+}
+
+export interface RestorationBranch {
+  id: string;
+  name: string;
+  nameRu: string;
+  level: number;
+  xp: number;
+  maxXP: number; // XP needed for next level
+  status: 'withered' | 'sprouting' | 'blooming' | 'thriving';
+}
+
+export interface RestorationState {
+  branches: { [key: string]: RestorationBranch };
+}

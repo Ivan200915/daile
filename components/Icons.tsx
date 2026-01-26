@@ -64,7 +64,13 @@ import {
   ShoppingBag,
   Brain,
   X,
-  Send
+  Send,
+  Cigarette,
+  Wind,
+  Cookie,
+  Smartphone,
+  Pizza,
+  CreditCard
 } from 'lucide-react';
 
 
@@ -171,6 +177,12 @@ export const Icons = {
   ShoppingBag,
   Brain,
   Send,
+  Cigarette,
+  Wind,
+  Cookie,
+  Smartphone,
+  Pizza,
+  CreditCard,
 };
 
 // Unified icon sizes
