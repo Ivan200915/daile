@@ -9,7 +9,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const PAYMENTS_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN; // Tribute or other
+const PAYMENTS_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN;
+
+// Embedded Notifications (Simplified to avoid TS import issues in JS server) --
+const NOTIFICATIONS_DB = {
+    morning: [
+        { en: "☀️ New day, fresh canvas. If you only accomplish ONE high-value task today, what would make you feel proud tonight?", ru: "☀️ Новый день, чистый холст. Если ты выполнишь всего ОДНУ ценную задачу сегодня, чем ты будешь гордиться вечером?" },
+        { en: "🌱 Your discipline tree is ready for sunlight. What is the smallest act of care you can give it this morning?", ru: "🌱 Твое дерево дисциплины ждет солнца. Какое самое маленькое действие ты можешь совершить для него этим утром?" }
+    ],
+    restoration: [
+        { en: "🌳 Your Lungs Branch just leveled up! You are building a stronger version of yourself.", ru: "🌳 Ветка 'Легкие' только что повысила уровень! Ты строишь сильную версию себя." },
+        { en: "✨ The roots are getting deeper. Keep this streak protected.", ru: "✨ Корни становятся глубже. Защищай этот стрик." }
+    ]
+};
+
+const getRandomNotification = (type, lang = 'ru') => {
+    const list = NOTIFICATIONS_DB[type] || NOTIFICATIONS_DB['morning'];
+    const item = list[Math.floor(Math.random() * list.length)];
+    return lang === 'ru' ? item.ru : item.en;
+};
+// ----------------------------------------------------------------------------
 
 if (!BOT_TOKEN) {
     console.error("TELEGRAM_BOT_TOKEN is missing!");
@@ -123,10 +142,11 @@ app.post('/api/webhook', async (req, res) => {
             // /today command
             if (text === '/today') {
                 const today = new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
-                // TODO: Fetch real today's data
+                const motivation = getRandomNotification('morning', 'ru');
+
                 await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     chat_id: chatId,
-                    text: `📅 <b>${today}</b>\n\n🎯 Привычки: 3/5 выполнено\n🍽️ Еда: 2 приёма залогировано\n👟 Шаги: 4,230\n😴 Сон: 7.5ч\n\n✅ Открой приложение, чтобы закрыть день:\nhttps://t.me/DailyDisciplin_bot/app`,
+                    text: `📅 <b>${today}</b>\n\n${motivation}\n\n🎯 Привычки: 3/5 выполнено\n🍽️ Еда: 2 приёма залогировано\n\n✅ Открой приложение, чтобы закрыть день:\nhttps://t.me/DailyDisciplin_bot/app`,
                     parse_mode: 'HTML'
                 });
             }
