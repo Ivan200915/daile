@@ -45,6 +45,13 @@ export interface StreakData {
   vacationStartDate?: string | null; // ISO date
 }
 
+export interface DailyTask {
+  id: string;
+  title: string;
+  completed: boolean;
+  date: string; // YYYY-MM-DD - for which day this task is
+}
+
 export interface DailyLog {
   date: string; // ISO date string YYYY-MM-DD
   meals: Meal[];
@@ -87,6 +94,7 @@ export interface UserSettings {
     avatar: string; // ID of active avatar
     theme: string; // ID of active theme
   };
+  dailyTasks?: DailyTask[]; // Daily tasks for planning
 }
 
 export interface ShopItem {

@@ -859,7 +859,9 @@ const Dashboard = ({
   logs,
   onOpenFocus,
   onRefreshXp,
-  userXp
+  userXp,
+  onAddTask,
+  onToggleTask
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -877,11 +879,25 @@ const Dashboard = ({
   logs: DailyLog[],
   onOpenFocus: () => void,
   onRefreshXp: () => void,
-  userXp: number
+  userXp: number,
+  onAddTask: (text: string, date: string) => void,
+  onToggleTask: (id: string) => void
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [newTaskText, setNewTaskText] = useState('');
   const { t, language } = useLanguage();
+  const isRu = language === 'ru';
+
+  // Get tomorrow's date for planning
+  const getTomorrowDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  };
+
+  const tomorrowDate = getTomorrowDate();
+  const tomorrowTasks = (user.dailyTasks || []).filter(t => t.date === tomorrowDate);
 
   const totalCals = meals.reduce((acc, m) => acc + m.macros.calories, 0);
   const totalProtein = meals.reduce((acc, m) => acc + m.macros.protein, 0);
@@ -965,43 +981,19 @@ const Dashboard = ({
         streak={streak.currentStreak}
       />
 
-      {/* Daily Motivation (NotebookLM) */}
-      <div className="mb-6 animate-fade-in">
-        <div className={`${GLASS_PANEL_LIGHT} p-4 flex items-start space-x-3`}>
-          <span className="text-2xl">☀️</span>
-          <div>
-            <p className="text-sm font-medium italic text-white/80">
-              "{getRandomNotification('morning').ru}"
-            </p>
-            <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider">
-              Daily Discipline • Morning Prime
-            </p>
-          </div>
+      {/* Main Stats - Calories & Macros (TOP) */}
+      <div className={`${GLASS_PANEL} p-4 relative overflow-hidden shrink-0`}>
+        <div className="absolute top-[-50%] left-[-50%] w-full h-full bg-[#00D4AA]/10 blur-[60px] rounded-full pointer-events-none" />
+        <div className="flex justify-around items-center">
+          <ProgressRing progress={calPercent} label={`${totalCals}`} subLabel={`/ ${user.targetCalories} ккал`} size={65} />
+          <ProgressRing progress={proteinPercent} label={`${totalProtein}г`} subLabel={`/ ${user.targetProtein}г белка`} color="#FF6B6B" size={65} />
         </div>
       </div>
-
-      {/* Mood Tracker */}
-      <MoodTracker currentMood={todayMood} onMoodSelect={onMoodChange} />
-
-      {/* Habit Score */}
-      <HabitScore logs={logs} />
-
-      {/* Live Challenges */}
-      <LiveChallenges />
 
       {/* AI Insights Dashboard */}
       <AIInsightsDashboard logs={logs} currentMood={todayMood} />
 
-      {/* --- BAD HABITS MODULE (Restoration) --- */}
-      <div className="mb-6">
-        {/* Only renders if habits exist */}
-        <RestorationTree />
-        <BadHabitTracker settings={user} />
-      </div>
 
-      {/* Daily Challenges */}
-      {/* Daily Challenges Widget */}
-      <DailyChallengesWidget onChallengeComplete={onRefreshXp} />
 
       {/* Weekly Challenge */}
       {(() => {
@@ -1060,96 +1052,9 @@ const Dashboard = ({
         );
       })()}
 
-      <div className="h-96" /> {/* Massive spacer to prevent cutoff */}
 
-      {/* Season Banner - Commented out as requested ("Remove World Goal") */}
-      {/* 
-      {(() => {
-        const progress = loadSeasonProgress();
-        const daysLeft = getSeasonDaysRemaining();
-        return (
-          <div className={`${GLASS_PANEL} p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-xl">{CURRENT_SEASON.emoji}</span>
-                <div>
-                  <p className="text-sm font-semibold">{CURRENT_SEASON.nameRu}</p>
-                  <p className="text-xs text-white/50">{daysLeft} дней осталось</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-[#FFD700]">{progress?.points || 0}</p>
-                <p className="text-xs text-white/50">очков</p>
-              </div>
-            </div>
-          </div>
-        );
-      })()} 
-      */}
 
-      {/* Mood Predictor Widget */}
-      {(() => {
-        // Build mock history from logs
-        if (!logs) return null;
-        const mockHistory = logs.slice(-7).map(log => ({
-          date: log.date,
-          mood: log.checkIn?.mood || 3,
-          energy: log.checkIn?.energy || 5,
-          habits: {
-            workout: log.habits?.some(h => h.id === 'workout' && h.completed) || false,
-            meditation: log.habits?.some(h => h.id === 'meditation' && h.completed) || false,
-            sleep: log.metrics?.sleepHours || 7,
-            steps: log.metrics?.steps || 5000
-          }
-        }));
 
-        if (mockHistory.length === 0) return null;
-
-        const todayHabits = {
-          workout: habits.some(h => h.id === 'workout' && h.completed),
-          meditation: habits.some(h => h.id === 'meditation' && h.completed),
-          sleep: 7.5,
-          steps: 6000
-        };
-
-        const prediction = predictTomorrowMood(mockHistory, todayHabits);
-
-        return (
-          <div className={`${GLASS_PANEL} p-4 bg-gradient-to-br from-purple-500/20 to-blue-500/20`}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <IconBadge icon={Icons.Idea} size="sm" color="#A855F7" variant="circle" glowIntensity="light" />
-                <div>
-                  <p className="text-sm font-semibold">Прогноз на завтра</p>
-                  <p className="text-xs text-white/50">{prediction.confidence}% уверенности</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 mb-2">
-              <IconBadge
-                icon={prediction.predictedMood >= 4 ? Icons.SmilePlus : prediction.predictedMood >= 3 ? Icons.Smile : prediction.predictedMood >= 2 ? Icons.Meh : Icons.Frown}
-                size="lg"
-                color={prediction.predictedMood >= 4 ? '#00D4AA' : prediction.predictedMood >= 3 ? '#FFD700' : prediction.predictedMood >= 2 ? '#FF9500' : '#FF3B30'}
-                variant="circle"
-                glowIntensity="medium"
-              />
-              <div className="flex-1">
-                <p className="text-lg font-bold">{getMoodLabel(prediction.predictedMood).ru}</p>
-                <p className="text-xs text-white/60">{prediction.recommendationRu}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Main Stats - Dual Rings */}
-      <div className={`${GLASS_PANEL} p-4 relative overflow-hidden shrink-0`}>
-        <div className="absolute top-[-50%] left-[-50%] w-full h-full bg-[#00D4AA]/10 blur-[60px] rounded-full pointer-events-none" />
-        <div className="flex justify-around items-center">
-          <ProgressRing progress={calPercent} label={`${totalCals}`} subLabel={`/ ${user.targetCalories} kcal`} size={65} />
-          <ProgressRing progress={proteinPercent} label={`${totalProtein}g`} subLabel={`/ ${user.targetProtein}g protein`} color="#FF6B6B" size={65} />
-        </div>
-      </div>
 
       {/* Focus Mode & Metrics Row */}
       <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-2 shrink-0">
@@ -1268,6 +1173,60 @@ const Dashboard = ({
             }}
           />
         )}
+      </div>
+
+      {/* --- Дневные задачи (на завтра) --- */}
+      <div className="shrink-0 mt-6">
+        <h3 className="text-xl font-bold mb-3">📋 Задачи на завтра</h3>
+
+        {/* Input */}
+        <div className="flex space-x-2 mb-3">
+          <input
+            className={`${GLASS_PANEL_LIGHT} flex-1 p-3 text-white placeholder-white/30 outline-none`}
+            placeholder={isRu ? "Добавить задачу..." : "Add task..."}
+            value={newTaskText}
+            onChange={e => setNewTaskText(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && newTaskText.trim()) {
+                onAddTask(newTaskText, tomorrowDate);
+                setNewTaskText('');
+              }
+            }}
+          />
+          <button
+            onClick={() => {
+              if (newTaskText.trim()) {
+                onAddTask(newTaskText, tomorrowDate);
+                setNewTaskText('');
+              }
+            }}
+            className={`${GLASS_BUTTON} p-3`}
+          >
+            <Icons.Plus />
+          </button>
+        </div>
+
+        {/* List */}
+        <div className="space-y-2">
+          {tomorrowTasks.length === 0 && (
+            <p className="text-white/30 text-sm text-center py-2">{isRu ? 'Запланируйте задачи на завтра' : 'Plan tasks for tomorrow'}</p>
+          )}
+          {tomorrowTasks.map(task => (
+            <div key={task.id} onClick={() => onToggleTask(task.id)} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3 cursor-pointer active:scale-98 transition`}>
+              <div className={`w-5 h-5 rounded border flex items-center justify-center ${task.completed ? 'bg-[#00D4AA] border-[#00D4AA]' : 'border-white/30'}`}>
+                {task.completed && <Icons.Check size={14} className="text-black" />}
+              </div>
+              <span className={task.completed ? 'line-through text-white/30' : 'text-white'}>{task.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* --- Вредные привычки (Восстановление) --- */}
+      <div className="shrink-0 mt-6">
+        <h3 className="text-xl font-bold mb-3">🌱 Восстановление</h3>
+        <RestorationTree />
+        <BadHabitTracker settings={user} />
       </div>
 
       <button onClick={closeDay} className={`w-full py-4 ${GLASS_PANEL} border-[#00D4AA]/30 text-[#00D4AA] font-semibold mt-4 shadow-lg hover:shadow-[0_0_20px_rgba(0,212,170,0.2)] transition shrink-0`}>
@@ -1660,11 +1619,38 @@ function AppContent() {
     setHealthMetrics(updated);
   };
 
-  // Handle Focus Complete
   const handleFocusComplete = (minutes: number) => {
     setTodayFocusMinutes(prev => prev + minutes);
     // Refresh XP
     setUserXp(loadGamificationData().xp);
+  };
+
+  // Handle Add Daily Task
+  const handleAddTask = (text: string, date: string) => {
+    if (!user) return;
+    const newTask = {
+      id: Date.now().toString(),
+      title: text,
+      completed: false,
+      date
+    };
+    const updatedUser = {
+      ...user,
+      dailyTasks: [...(user.dailyTasks || []), newTask]
+    };
+    setUser(updatedUser);
+    saveUserSettings(updatedUser);
+  };
+
+  // Handle Toggle Daily Task
+  const handleToggleTask = (taskId: string) => {
+    if (!user) return;
+    const updatedTasks = (user.dailyTasks || []).map(t =>
+      t.id === taskId ? { ...t, completed: !t.completed } : t
+    );
+    const updatedUser = { ...user, dailyTasks: updatedTasks };
+    setUser(updatedUser);
+    saveUserSettings(updatedUser);
   };
 
   // Weekly Review handler
@@ -1857,6 +1843,8 @@ function AppContent() {
             onOpenFocus={() => setIsFocusOpen(true)}
             onRefreshXp={() => setUserXp(loadGamificationData().xp)}
             userXp={userXp}
+            onAddTask={handleAddTask}
+            onToggleTask={handleToggleTask}
           />
         )}
 
