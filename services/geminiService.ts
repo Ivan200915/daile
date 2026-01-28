@@ -7,7 +7,7 @@ const TOGETHER_API_KEY = '5dbbb3a9d05d4fa35ac759a18e99bee8d05c905ea56860f499dbe3
 const TOGETHER_API_URL = 'https://api.together.ai/v1/chat/completions';
 
 // Best vision model on Together AI for quality results
-const VISION_MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct';
+const VISION_MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8';
 const TEXT_MODEL = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo';
 
 const isApiConfigured = true;

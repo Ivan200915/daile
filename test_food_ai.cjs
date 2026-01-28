@@ -1,14 +1,25 @@
 const https = require('https');
 
 const API_KEY = '5dbbb3a9d05d4fa35ac759a18e99bee8d05c905ea56860f499dbe35e36496e71';
-const MODEL = 'meta-llama/Llama-Vision-Free';
+const MODEL = 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8';
 
 const data = JSON.stringify({
     model: MODEL,
     messages: [
         {
             role: "user",
-            content: "Hello, this is a test to verify API key and model availability. Respond with 'OK'."
+            content: [
+                {
+                    type: "text",
+                    text: "What is in this image?"
+                },
+                {
+                    type: "image_url",
+                    image_url: {
+                        url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+                    }
+                }
+            ]
         }
     ],
     max_tokens: 10
