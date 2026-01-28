@@ -899,8 +899,8 @@ const Dashboard = ({
   const tomorrowDate = getTomorrowDate();
   const tomorrowTasks = (user.dailyTasks || []).filter(t => t.date === tomorrowDate);
 
-  const totalCals = meals.reduce((acc, m) => acc + m.macros.calories, 0);
-  const totalProtein = meals.reduce((acc, m) => acc + m.macros.protein, 0);
+  const totalCals = Math.round(meals.reduce((acc, m) => acc + m.macros.calories, 0));
+  const totalProtein = Math.round(meals.reduce((acc, m) => acc + m.macros.protein, 0));
   const calPercent = Math.min((totalCals / user.targetCalories) * 100, 100);
   const proteinPercent = Math.min((totalProtein / user.targetProtein) * 100, 100);
 
