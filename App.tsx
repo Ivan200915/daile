@@ -861,7 +861,8 @@ const Dashboard = ({
   onRefreshXp,
   userXp,
   onAddTask,
-  onToggleTask
+  onToggleTask,
+  onDeleteMeal
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -881,7 +882,8 @@ const Dashboard = ({
   onRefreshXp: () => void,
   userXp: number,
   onAddTask: (text: string, date: string) => void,
-  onToggleTask: (id: string) => void
+  onToggleTask: (id: string) => void,
+  onDeleteMeal: (id: string) => void
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
   const [showAddHabit, setShowAddHabit] = useState(false);
@@ -1118,7 +1120,7 @@ const Dashboard = ({
         </div>
         <div className="space-y-3">
           {meals.map(meal => (
-            <div key={meal.id} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3`}>
+            <div key={meal.id} className={`${GLASS_PANEL_LIGHT} p-3 flex items-center space-x-3 group relative`}>
               {meal.imageUri ? (
                 <img src={meal.imageUri} className="w-12 h-12 rounded-xl object-cover" alt={meal.name} />
               ) : (
@@ -1126,10 +1128,26 @@ const Dashboard = ({
                   <IconBadge icon={Icons.Camera} size="sm" color="white" variant="plain" />
                 </div>
               )}
-              <div className="flex-1">
-                <p className="font-medium">{meal.name}</p>
-                <p className="text-xs text-white/50">{meal.type} • ~{meal.macros.calories} kcal</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate pr-6">{meal.name}</p>
+                <div className="flex items-center space-x-2 text-xs text-white/50">
+                  {/* @ts-ignore */}
+                  <span>{t.addMeal.types[meal.type.toLowerCase()] || meal.type}</span>
+                  <span>•</span>
+                  <span>{Math.round(meal.macros.calories)} kcal</span>
+                </div>
               </div>
+
+              {/* Delete Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteMeal(meal.id);
+                }}
+                className="p-2 text-white/30 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Icons.Trash2 size={18} />
+              </button>
             </div>
           ))}
           {meals.length < 4 && (
@@ -1648,6 +1666,22 @@ function AppContent() {
     saveUserSettings(updatedUser);
   };
 
+  const handleDeleteMeal = async (id: string) => {
+    const updatedMeals = meals.filter(m => m.id !== id);
+    setMeals(updatedMeals);
+
+    // Update daily log
+    const todayLog = await getOrCreateTodayLog(habits);
+    const updatedLog: DailyLog = {
+      ...todayLog,
+      meals: updatedMeals
+    };
+    await saveDailyLog(updatedLog);
+
+    // Update logs state if needed
+    setLogs(prev => prev.map(l => l.date === updatedLog.date ? updatedLog : l));
+  };
+
   // Weekly Review handler
   const handleRequestWeeklyReview = async () => {
     const summary = getWeeklySummary(logs);
@@ -1790,6 +1824,7 @@ function AppContent() {
             toggleHabit={toggleHabit}
             updateHabit={updateHabit}
             onAddHabit={addHabit}
+            onDeleteMeal={handleDeleteMeal}
             todayMood={todayMood}
             onMoodChange={setTodayMood}
             goToAddMeal={() => setShowSmartScanner(true)}
@@ -1802,8 +1837,7 @@ function AppContent() {
             userXp={userXp}
             onAddTask={handleAddTask}
             onToggleTask={handleToggleTask}
-          />
-        )}
+          />)}
 
         {screen === 'ADD_MEAL' && (
           <AddMealScreen onSave={handleAddMeal} onCancel={() => setScreen('DASHBOARD')} />

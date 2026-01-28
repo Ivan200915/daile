@@ -70,10 +70,9 @@ import {
   Cookie,
   Smartphone,
   Pizza,
-  CreditCard
+  CreditCard,
+  Trash2,
 } from 'lucide-react';
-
-
 
 // Brand colors - exported for use elsewhere
 export const BRAND_COLORS = {
@@ -144,6 +143,7 @@ export const Icons = {
   Play,
   ArrowRight,
   ChevronRight,
+  Trash2,
 
   // Features
   Mic,
