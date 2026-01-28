@@ -929,7 +929,7 @@ const Dashboard = ({
     <div
       className="h-full flex flex-col px-5 space-y-5 overflow-y-auto no-scrollbar scroll-container"
       style={{
-        paddingTop: '60px',
+        paddingTop: '100px',
         paddingBottom: '200px'
       }}
     >
