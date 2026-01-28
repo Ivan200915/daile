@@ -811,3 +811,123 @@ export function getPortionMultiplier(size: PortionSize): number {
         case 'custom': return 1.0;
     }
 }
+
+// =====================================================
+// БАЗА ПРОСТЫХ ИНГРЕДИЕНТОВ для автоподсказки
+// =====================================================
+export interface IngredientData {
+    name: string;
+    nameRu: string;
+    caloriesPer100g: number;
+    proteinPer100g: number;
+    fatPer100g: number;
+    carbsPer100g: number;
+}
+
+export const INGREDIENTS_DATABASE: IngredientData[] = [
+    // Овощи
+    { name: 'Cucumber', nameRu: 'Огурец', caloriesPer100g: 15, proteinPer100g: 0.7, fatPer100g: 0.1, carbsPer100g: 2.5 },
+    { name: 'Tomato', nameRu: 'Помидор', caloriesPer100g: 20, proteinPer100g: 1, fatPer100g: 0.2, carbsPer100g: 4 },
+    { name: 'Carrot', nameRu: 'Морковь', caloriesPer100g: 35, proteinPer100g: 1.3, fatPer100g: 0.1, carbsPer100g: 7 },
+    { name: 'Cabbage', nameRu: 'Капуста', caloriesPer100g: 27, proteinPer100g: 1.8, fatPer100g: 0.1, carbsPer100g: 5 },
+    { name: 'Onion', nameRu: 'Лук', caloriesPer100g: 41, proteinPer100g: 1.4, fatPer100g: 0.2, carbsPer100g: 8.2 },
+    { name: 'Pepper', nameRu: 'Перец', caloriesPer100g: 27, proteinPer100g: 1.3, fatPer100g: 0, carbsPer100g: 5.3 },
+    { name: 'Garlic', nameRu: 'Чеснок', caloriesPer100g: 143, proteinPer100g: 6.5, fatPer100g: 0.5, carbsPer100g: 30 },
+    { name: 'Broccoli', nameRu: 'Брокколи', caloriesPer100g: 34, proteinPer100g: 2.8, fatPer100g: 0.4, carbsPer100g: 7 },
+    { name: 'Spinach', nameRu: 'Шпинат', caloriesPer100g: 23, proteinPer100g: 2.9, fatPer100g: 0.4, carbsPer100g: 2 },
+    { name: 'Lettuce', nameRu: 'Салат', caloriesPer100g: 14, proteinPer100g: 1.2, fatPer100g: 0.2, carbsPer100g: 2.3 },
+    { name: 'Zucchini', nameRu: 'Кабачок', caloriesPer100g: 24, proteinPer100g: 0.6, fatPer100g: 0.3, carbsPer100g: 5 },
+    { name: 'Eggplant', nameRu: 'Баклажан', caloriesPer100g: 24, proteinPer100g: 1.2, fatPer100g: 0.1, carbsPer100g: 4.5 },
+    { name: 'Potato', nameRu: 'Картофель', caloriesPer100g: 77, proteinPer100g: 2, fatPer100g: 0.4, carbsPer100g: 17 },
+
+    // Крупы и гарниры
+    { name: 'Rice', nameRu: 'Рис вареный', caloriesPer100g: 130, proteinPer100g: 2.7, fatPer100g: 0.3, carbsPer100g: 28 },
+    { name: 'Buckwheat', nameRu: 'Гречка вареная', caloriesPer100g: 110, proteinPer100g: 4, fatPer100g: 1, carbsPer100g: 21 },
+    { name: 'Pasta', nameRu: 'Макароны', caloriesPer100g: 130, proteinPer100g: 4.5, fatPer100g: 0.5, carbsPer100g: 26 },
+    { name: 'Bread', nameRu: 'Хлеб', caloriesPer100g: 265, proteinPer100g: 9, fatPer100g: 3.2, carbsPer100g: 49 },
+
+    // Мясо и рыба
+    { name: 'Chicken', nameRu: 'Курица', caloriesPer100g: 165, proteinPer100g: 31, fatPer100g: 3.6, carbsPer100g: 0 },
+    { name: 'Beef', nameRu: 'Говядина', caloriesPer100g: 250, proteinPer100g: 26, fatPer100g: 15, carbsPer100g: 0 },
+    { name: 'Pork', nameRu: 'Свинина', caloriesPer100g: 285, proteinPer100g: 25, fatPer100g: 20, carbsPer100g: 0 },
+    { name: 'Fish', nameRu: 'Рыба', caloriesPer100g: 120, proteinPer100g: 21, fatPer100g: 3, carbsPer100g: 0 },
+    { name: 'Salmon', nameRu: 'Лосось', caloriesPer100g: 208, proteinPer100g: 20, fatPer100g: 13, carbsPer100g: 0 },
+    { name: 'Egg', nameRu: 'Яйцо', caloriesPer100g: 155, proteinPer100g: 12.5, fatPer100g: 11, carbsPer100g: 0.7 },
+
+    // Молочные продукты
+    { name: 'Cheese', nameRu: 'Сыр', caloriesPer100g: 350, proteinPer100g: 25, fatPer100g: 28, carbsPer100g: 0 },
+    { name: 'Cottage cheese', nameRu: 'Творог', caloriesPer100g: 120, proteinPer100g: 18, fatPer100g: 5, carbsPer100g: 2 },
+    { name: 'Sour cream', nameRu: 'Сметана', caloriesPer100g: 193, proteinPer100g: 2.5, fatPer100g: 20, carbsPer100g: 3.4 },
+    { name: 'Butter', nameRu: 'Сливочное масло', caloriesPer100g: 717, proteinPer100g: 0.5, fatPer100g: 81, carbsPer100g: 0.1 },
+    { name: 'Milk', nameRu: 'Молоко', caloriesPer100g: 60, proteinPer100g: 3.2, fatPer100g: 3.6, carbsPer100g: 4.7 },
+    { name: 'Yogurt', nameRu: 'Йогурт', caloriesPer100g: 65, proteinPer100g: 4, fatPer100g: 1.5, carbsPer100g: 7 },
+
+    // Соусы и масла
+    { name: 'Cream sauce', nameRu: 'Сливочный соус', caloriesPer100g: 180, proteinPer100g: 2, fatPer100g: 15, carbsPer100g: 8 },
+    { name: 'Tomato sauce', nameRu: 'Томатный соус', caloriesPer100g: 45, proteinPer100g: 1.5, fatPer100g: 0.5, carbsPer100g: 8 },
+    { name: 'Mayonnaise', nameRu: 'Майонез', caloriesPer100g: 680, proteinPer100g: 1, fatPer100g: 75, carbsPer100g: 2.6 },
+    { name: 'Ketchup', nameRu: 'Кетчуп', caloriesPer100g: 97, proteinPer100g: 1.8, fatPer100g: 0, carbsPer100g: 22 },
+    { name: 'Soy sauce', nameRu: 'Соевый соус', caloriesPer100g: 53, proteinPer100g: 8, fatPer100g: 0, carbsPer100g: 5 },
+    { name: 'Olive oil', nameRu: 'Оливковое масло', caloriesPer100g: 884, proteinPer100g: 0, fatPer100g: 100, carbsPer100g: 0 },
+    { name: 'Vegetable oil', nameRu: 'Подсолнечное масло', caloriesPer100g: 899, proteinPer100g: 0, fatPer100g: 100, carbsPer100g: 0 },
+    { name: 'Cheese sauce', nameRu: 'Сырный соус', caloriesPer100g: 200, proteinPer100g: 5, fatPer100g: 16, carbsPer100g: 8 },
+    { name: 'Garlic sauce', nameRu: 'Чесночный соус', caloriesPer100g: 350, proteinPer100g: 1, fatPer100g: 36, carbsPer100g: 6 },
+
+    // Фрукты и ягоды
+    { name: 'Apple', nameRu: 'Яблоко', caloriesPer100g: 52, proteinPer100g: 0.3, fatPer100g: 0.2, carbsPer100g: 14 },
+    { name: 'Banana', nameRu: 'Банан', caloriesPer100g: 96, proteinPer100g: 1.5, fatPer100g: 0.2, carbsPer100g: 21 },
+    { name: 'Orange', nameRu: 'Апельсин', caloriesPer100g: 43, proteinPer100g: 0.9, fatPer100g: 0.2, carbsPer100g: 9 },
+    { name: 'Strawberry', nameRu: 'Клубника', caloriesPer100g: 33, proteinPer100g: 0.8, fatPer100g: 0.4, carbsPer100g: 7.7 },
+    { name: 'Grapes', nameRu: 'Виноград', caloriesPer100g: 72, proteinPer100g: 0.6, fatPer100g: 0.6, carbsPer100g: 17 },
+
+    // Орехи
+    { name: 'Walnuts', nameRu: 'Грецкие орехи', caloriesPer100g: 654, proteinPer100g: 15, fatPer100g: 65, carbsPer100g: 7 },
+    { name: 'Almonds', nameRu: 'Миндаль', caloriesPer100g: 579, proteinPer100g: 21, fatPer100g: 50, carbsPer100g: 10 },
+    { name: 'Peanuts', nameRu: 'Арахис', caloriesPer100g: 567, proteinPer100g: 26, fatPer100g: 49, carbsPer100g: 16 },
+
+    // Сладости
+    { name: 'Sugar', nameRu: 'Сахар', caloriesPer100g: 399, proteinPer100g: 0, fatPer100g: 0, carbsPer100g: 100 },
+    { name: 'Honey', nameRu: 'Мёд', caloriesPer100g: 304, proteinPer100g: 0.3, fatPer100g: 0, carbsPer100g: 82 },
+    { name: 'Chocolate', nameRu: 'Шоколад', caloriesPer100g: 546, proteinPer100g: 5, fatPer100g: 31, carbsPer100g: 59 },
+];
+
+// Поиск ингредиентов для автоподсказки
+export function searchIngredients(query: string, limit: number = 5): IngredientData[] {
+    if (!query || query.length < 2) return [];
+
+    const lowerQuery = query.toLowerCase();
+    const results: IngredientData[] = [];
+
+    for (const ingredient of INGREDIENTS_DATABASE) {
+        const matchRu = ingredient.nameRu.toLowerCase().includes(lowerQuery);
+        const matchEn = ingredient.name.toLowerCase().includes(lowerQuery);
+
+        if (matchRu || matchEn) {
+            results.push(ingredient);
+            if (results.length >= limit) break;
+        }
+    }
+
+    // Также ищем в блюдах
+    for (const dish of DISH_DATABASE) {
+        if (results.length >= limit) break;
+
+        const matchRu = dish.nameRu.toLowerCase().includes(lowerQuery);
+        const matchEn = dish.name.toLowerCase().includes(lowerQuery);
+        const matchKeywords = dish.keywords.some(k => k.toLowerCase().includes(lowerQuery));
+
+        if (matchRu || matchEn || matchKeywords) {
+            // Преобразуем блюдо в формат ингредиента
+            results.push({
+                name: dish.name,
+                nameRu: dish.nameRu,
+                caloriesPer100g: dish.caloriesPer100g,
+                proteinPer100g: dish.proteinPer100g,
+                fatPer100g: dish.fatPer100g,
+                carbsPer100g: dish.carbsPer100g
+            });
+        }
+    }
+
+    return results.slice(0, limit);
+}

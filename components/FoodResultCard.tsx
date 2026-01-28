@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Plus, Minus, Check, Volume2, Edit3, Trash2 } from 'lucide-react';
 import { useLanguage } from '../locales/LanguageContext';
 import { MacroData } from '../types';
+import { searchIngredients, IngredientData } from '../services/foodDatabase';
 
 export interface FoodComponent {
     id: string;
@@ -47,6 +48,7 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
         fatPer100g: '3',
         carbsPer100g: '15'
     });
+    const [suggestions, setSuggestions] = useState<IngredientData[]>([]);
 
     // Рассчитать КБЖУ для компонента
     const calcMacros = (comp: FoodComponent) => {
@@ -127,6 +129,7 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
 
         onComponentsChange([...components, newComp]);
         setShowAddForm(false);
+        setSuggestions([]);
         setNewIngredient({
             name: '',
             grams: '100',
@@ -135,6 +138,30 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
             fatPer100g: '3',
             carbsPer100g: '15'
         });
+    };
+
+    // Обработка ввода названия с автоподсказкой
+    const handleNameInput = (value: string) => {
+        setNewIngredient({ ...newIngredient, name: value });
+        if (value.length >= 2) {
+            const results = searchIngredients(value, 5);
+            setSuggestions(results);
+        } else {
+            setSuggestions([]);
+        }
+    };
+
+    // Выбор из подсказок - автозаполнение КБЖУ
+    const selectSuggestion = (ingredient: IngredientData) => {
+        setNewIngredient({
+            name: ingredient.nameRu,
+            grams: newIngredient.grams, // сохраняем введённые граммы
+            caloriesPer100g: String(ingredient.caloriesPer100g),
+            proteinPer100g: String(ingredient.proteinPer100g),
+            fatPer100g: String(ingredient.fatPer100g),
+            carbsPer100g: String(ingredient.carbsPer100g)
+        });
+        setSuggestions([]);
     };
 
     // Удалить компонент
@@ -307,14 +334,35 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
                         {language === 'ru' ? 'Новый ингредиент' : 'New ingredient'}
                     </div>
 
-                    {/* Название */}
-                    <input
-                        type="text"
-                        value={newIngredient.name}
-                        onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
-                        placeholder={language === 'ru' ? 'Название (напр. Сливочный соус)' : 'Name (e.g. Cream sauce)'}
-                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 text-sm"
-                    />
+                    {/* Название с автоподсказкой */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={newIngredient.name}
+                            onChange={(e) => handleNameInput(e.target.value)}
+                            placeholder={language === 'ru' ? 'Начните вводить название...' : 'Start typing name...'}
+                            className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 text-sm"
+                            autoComplete="off"
+                        />
+
+                        {/* Выпадающий список подсказок */}
+                        {suggestions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-black/95 border border-white/20 rounded-lg overflow-hidden z-50 max-h-48 overflow-y-auto">
+                                {suggestions.map((s, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => selectSuggestion(s)}
+                                        className="w-full px-3 py-2 text-left hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
+                                    >
+                                        <div className="text-white text-sm">{s.nameRu}</div>
+                                        <div className="text-white/50 text-xs">
+                                            {s.caloriesPer100g} ккал • Б{s.proteinPer100g} Ж{s.fatPer100g} У{s.carbsPer100g}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Граммы и Калории */}
                     <div className="flex gap-2">
