@@ -159,9 +159,8 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
                                     </>
                                 ) : (
                                     <>
-                                        {/* Кнопка - */}
                                         <button
-                                            onClick={() => adjustGrams(comp.id, -25)}
+                                            onClick={() => adjustGrams(comp.id, -10)}
                                             className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
                                         >
                                             <Minus size={16} className="text-white/70" />
@@ -177,7 +176,7 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
 
                                         {/* Кнопка + */}
                                         <button
-                                            onClick={() => adjustGrams(comp.id, 25)}
+                                            onClick={() => adjustGrams(comp.id, 10)}
                                             className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
                                         >
                                             <Plus size={16} className="text-white/70" />

@@ -134,27 +134,34 @@ TASK: Analyze this food image and provide ACCURATE nutritional breakdown.
 CRITICAL: If you see MULTIPLE distinct food items on the plate (e.g., rice + cutlet, salad + bread), 
 you MUST list them as SEPARATE components with individual weights and nutrition.
 
+⚠️ IMPORTANT - CONSERVATIVE ESTIMATION:
+Home portions are typically 30-40% SMALLER than restaurant servings or what photos suggest.
+When uncertain, UNDERESTIMATE portion size. It's better to log less than more.
+User can always adjust upward, but overestimating leads to discouragement.
+
 ESTIMATION GUIDELINES:
-1. PORTION SIZE: Estimate the actual portion weight in grams. Use these references:
-   - Standard dinner plate diameter: ~25cm
+1. PORTION SIZE - BE CONSERVATIVE:
+   - Standard HOME plate diameter: ~20-22cm (smaller than restaurant!)
+   - A typical home serving of grain (rice/buckwheat): 100-150g cooked
+   - Palm-sized meat: ~80-100g (not 150g!)
+   - Fist-sized portion: ~100-120g (not 150g!)
+   - Cup of rice/pasta (cooked): ~150g (not 180g!)
    - Tablespoon: ~15g, Teaspoon: ~5g
-   - Palm-sized meat: ~100g
-   - Fist-sized portion: ~150g
-   - Cup of rice/pasta (cooked): ~180g
 
 2. CALORIE ACCURACY: Use these standard values per 100g:
    - Rice (cooked): 130 kcal, 2.7g protein, 0.3g fat, 28g carbs
+   - Buckwheat/Гречка (cooked): 110 kcal, 4g protein, 1g fat, 21g carbs
    - Meat (beef): 250 kcal, 26g protein, 15g fat, 0g carbs
    - Chicken breast: 165 kcal, 31g protein, 3.6g fat, 0g carbs
    - Vegetables: 25-50 kcal average
    - Oil/butter: 900 kcal per 100g (1 tbsp = ~14g = 126 kcal)
 
-3. COMMON DISHES (use these as reference):
-   - Плов/Pilaf (300g): ~450 kcal, 18g P, 18g F, 54g C
-   - Борщ/Borscht (350ml): ~170 kcal, 10g P, 9g F, 13g C
-   - Манты/Manti (5 pcs, 250g): ~550 kcal, 28g P, 25g F, 62g C
-   - Pasta with sauce (350g): ~500-600 kcal
-   - Котлета/Cutlet (100g): ~190 kcal, 18g P, 12g F, 4g C
+3. COMMON HOME DISHES (CONSERVATIVE estimates):
+   - Гречка/Buckwheat home portion: 100-130g (NOT 200-250g!)
+   - Плов/Pilaf home portion: 200-250g (not 300g)
+   - Борщ/Borscht: 300ml (not 350ml)
+   - Pasta home portion: 200-250g
+   - Котлета/Cutlet: 80-100g
 
 4. IMPORTANT FOR COMPONENTS:
    - If dish is MIXED (like pilaf) → single component
