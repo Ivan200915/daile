@@ -941,15 +941,17 @@ const Dashboard = ({
         />
       )}
 
-      {/* Top Greeting */}
+      {/* Top Greeting with Subscription Status */}
       <div className="flex justify-between items-center shrink-0">
         <div>
           <p className="text-white/50 text-sm uppercase tracking-wider">{new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
           <h1 className="text-2xl font-bold">{t.dashboard.greeting}, {user.name}</h1>
         </div>
-        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-xs">
-          {metrics.source === 'terra' ? '✓' : metrics.source === 'demo' ? '⟳' : '✎'}
-        </div>
+        <button
+          className={`px-3 py-1.5 rounded-full text-xs font-bold ${user.isPro ? 'bg-gradient-to-r from-[#00D4AA] to-[#00A884] text-black' : 'bg-white/10 text-white/70'}`}
+        >
+          {user.isPro ? (isRu ? 'ПРЕМИУМ' : 'PREMIUM') : (isRu ? 'FREE TRIAL' : 'FREE')}
+        </button>
       </div>
 
       {/* Streak Banner */}
@@ -959,14 +961,6 @@ const Dashboard = ({
           <div className="flex-1">
             <p className="font-semibold">{streak.currentStreak} {t.dashboard.dayStreak}</p>
             <p className="text-xs text-white/50">{streakMessage}</p>
-          </div>
-          <div className="flex space-x-1">
-            {[...Array(7)].map((_, i) => (
-              <div
-                key={i}
-                className={`w-2 h-2 rounded-full ${i < streak.completedDaysThisWeek ? 'bg-[#00D4AA]' : 'bg-white/20'}`}
-              />
-            ))}
           </div>
         </div>
       )}
@@ -981,17 +975,22 @@ const Dashboard = ({
         streak={streak.currentStreak}
       />
 
-      {/* Main Stats - Calories & Macros (TOP) */}
+      {/* Main Stats - Calories & Macros */}
       <div className={`${GLASS_PANEL} p-4 relative overflow-hidden shrink-0`}>
         <div className="absolute top-[-50%] left-[-50%] w-full h-full bg-[#00D4AA]/10 blur-[60px] rounded-full pointer-events-none" />
         <div className="flex justify-around items-center">
           <ProgressRing progress={calPercent} label={`${totalCals}`} subLabel={`/ ${user.targetCalories} ккал`} size={65} />
           <ProgressRing progress={proteinPercent} label={`${totalProtein}г`} subLabel={`/ ${user.targetProtein}г белка`} color="#FF6B6B" size={65} />
         </div>
+        {/* Quick Add Food Button */}
+        <button
+          onClick={goToAddMeal}
+          className="mt-3 w-full py-2 bg-[#00D4AA] text-black font-semibold rounded-xl flex items-center justify-center space-x-2"
+        >
+          <Icons.Camera size={18} />
+          <span>{isRu ? 'Сфоткать еду' : 'Snap Food'}</span>
+        </button>
       </div>
-
-      {/* AI Insights Dashboard */}
-      <AIInsightsDashboard logs={logs} currentMood={todayMood} />
 
 
 
@@ -1222,12 +1221,8 @@ const Dashboard = ({
         </div>
       </div>
 
-      {/* --- Вредные привычки (Восстановление) --- */}
-      <div className="shrink-0 mt-6">
-        <h3 className="text-xl font-bold mb-3">🌱 Восстановление</h3>
-        <RestorationTree />
-        <BadHabitTracker settings={user} />
-      </div>
+      {/* AI Insights Dashboard */}
+      <AIInsightsDashboard logs={logs} currentMood={todayMood} />
 
       <button onClick={closeDay} className={`w-full py-4 ${GLASS_PANEL} border-[#00D4AA]/30 text-[#00D4AA] font-semibold mt-4 shadow-lg hover:shadow-[0_0_20px_rgba(0,212,170,0.2)] transition shrink-0`}>
         {t.dashboard.closeDay}
@@ -1757,45 +1752,7 @@ function AppContent() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#1C1C1E] via-black to-[#0d0d0d] z-0" />
 
       {/* Content Container - max-width for desktop view constraint */}
-      <div className="relative z-10 w-full h-full max-w-md mx-auto bg-black/20 shadow-2xl overflow-hidden flex flex-col pt-14">
-        {user && screen !== 'ONBOARDING' && (
-          <div className="absolute top-0 right-0 p-4 z-50">
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => !user.isPro && openPaywall()}
-                className={`backdrop-blur-md px-3 py-1 rounded-full border text-xs font-mono transition ${user.isPro ? 'bg-black/40 border-[#00D4AA]/30 text-[#00D4AA]' : 'bg-black/40 border-white/10 text-white/50 hover:bg-white/10'}`}
-              >
-                {user.isPro ? (language === 'ru' ? 'ПРЕМИУМ' : 'PRO ACCESS') : (language === 'ru' ? 'БЕСПЛАТНО' : 'FREE PLAN')}
-              </button>
-
-              {/* Shop Button */}
-              <button
-                onClick={() => setScreen('SHOP')}
-                className="backdrop-blur-md px-3 py-1 rounded-full border border-[#FFD700]/30 bg-black/40 text-[#FFD700] text-xs font-bold flex items-center space-x-1 hover:bg-[#FFD700]/10 transition"
-              >
-                <span>{user.coins?.toLocaleString() || 0}</span>
-                <span>🟡</span>
-              </button>
-
-              {/* AI Coach Button */}
-              <button
-                onClick={() => setScreen('COACH')}
-                className="backdrop-blur-md px-3 py-1 rounded-full border border-blue-500/30 bg-black/40 text-blue-400 text-xs font-bold flex items-center space-x-1 hover:bg-blue-500/10 transition"
-              >
-                <span>AI</span>
-              </button>
-
-              {/* Profile / Auth Button */}
-              <button
-                onClick={() => setIsAuthOpen(true)}
-                className={`backdrop-blur-md px-2 py-1 rounded-full border border-white/10 bg-black/40 text-white/70 text-xs font-bold flex items-center space-x-1 hover:bg-white/10 transition ${syncStatus === 'syncing' ? 'animate-pulse' : ''}`}
-              >
-                <Icons.User size={14} className={syncStatus === 'error' ? 'text-red-500' : ''} />
-                {syncService.token && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
-              </button>
-            </div>
-          </div>
-        )}
+      <div className="relative z-10 w-full h-full max-w-md mx-auto bg-black/20 shadow-2xl overflow-hidden flex flex-col">
 
         {isAuthOpen && (
           <AuthScreen
