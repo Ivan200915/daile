@@ -929,7 +929,7 @@ const Dashboard = ({
     <div
       className="h-full flex flex-col px-5 space-y-5 overflow-y-auto no-scrollbar scroll-container"
       style={{
-        paddingTop: 'calc(var(--safe-area-top, 0px) + 24px)',
+        paddingTop: '60px',
         paddingBottom: '200px'
       }}
     >
@@ -987,8 +987,8 @@ const Dashboard = ({
           onClick={goToAddMeal}
           className="mt-3 w-full py-2 bg-[#00D4AA] text-black font-semibold rounded-xl flex items-center justify-center space-x-2"
         >
-          <Icons.Camera size={18} />
-          <span>{isRu ? 'Сфоткать еду' : 'Snap Food'}</span>
+          <Icons.Plus size={18} />
+          <span>{isRu ? 'Добавить прием пищи' : 'Add Meal'}</span>
         </button>
       </div>
 
@@ -1134,7 +1134,7 @@ const Dashboard = ({
           ))}
           {meals.length < 4 && (
             <button onClick={goToAddMeal} className="w-full h-16 rounded-[20px] border border-dashed border-white/20 flex items-center justify-center text-white/30 hover:bg-white/5 transition">
-              <Icons.Camera size={20} className="mr-2 text-[#00D4AA]" /> {t.dashboard.logMeal}
+              <Icons.Plus size={20} className="mr-2 text-[#00D4AA]" /> {isRu ? 'Добавить прием пищи' : 'Add Meal'}
             </button>
           )}
         </div>
