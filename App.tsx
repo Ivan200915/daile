@@ -862,7 +862,8 @@ const Dashboard = ({
   userXp,
   onAddTask,
   onToggleTask,
-  onDeleteMeal
+  onDeleteMeal,
+  onEditMeal
 }: {
   user: UserSettings,
   habits: Habit[],
@@ -883,7 +884,8 @@ const Dashboard = ({
   userXp: number,
   onAddTask: (text: string, date: string) => void,
   onToggleTask: (id: string) => void,
-  onDeleteMeal: (id: string) => void
+  onDeleteMeal: (id: string) => void,
+  onEditMeal: (meal: Meal) => void
 }) => {
   const [editingMetric, setEditingMetric] = useState<{ type: 'steps' | 'sleep' | 'active', current: number } | null>(null);
   const [showAddHabit, setShowAddHabit] = useState(false);
@@ -1137,6 +1139,17 @@ const Dashboard = ({
                   <span>{Math.round(meal.macros.calories)} kcal</span>
                 </div>
               </div>
+
+              {/* Edit Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditMeal(meal);
+                }}
+                className="p-2 text-white/30 hover:text-[#00D4AA] hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Icons.Edit size={18} />
+              </button>
 
               {/* Delete Button */}
               <button
@@ -1433,6 +1446,7 @@ const CheckInScreen = ({ onFinish, onClose, meals, habits, user, onUpdateUser }:
 
 import HistoryScreen from './components/HistoryScreen';
 import { SettingsScreen } from './components/SettingsScreen';
+import { EditMealModal } from './components/EditMealModal';
 
 // SettingsScreen moved to components/SettingsScreen.tsx
 
@@ -1454,6 +1468,7 @@ function AppContent() {
   const [userXp, setUserXp] = useState(0);
   const [todayMood, setTodayMood] = useState<number | null>(null);
   const [showSmartScanner, setShowSmartScanner] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
 
   // Language from context
   const { language, setLanguage, t } = useLanguage();
@@ -1682,6 +1697,19 @@ function AppContent() {
     setLogs(prev => prev.map(l => l.date === updatedLog.date ? updatedLog : l));
   };
 
+  const handleUpdateMeal = async (updatedMeal: Meal) => {
+    const updatedMeals = meals.map(m => m.id === updatedMeal.id ? updatedMeal : m);
+    setMeals(updatedMeals);
+
+    const todayLog = await getOrCreateTodayLog(habits);
+    const updatedLog: DailyLog = {
+      ...todayLog,
+      meals: updatedMeals
+    };
+    await saveDailyLog(updatedLog);
+    setLogs(prev => prev.map(l => l.date === updatedLog.date ? updatedLog : l));
+  };
+
   // Weekly Review handler
   const handleRequestWeeklyReview = async () => {
     const summary = getWeeklySummary(logs);
@@ -1824,7 +1852,6 @@ function AppContent() {
             toggleHabit={toggleHabit}
             updateHabit={updateHabit}
             onAddHabit={addHabit}
-            onDeleteMeal={handleDeleteMeal}
             todayMood={todayMood}
             onMoodChange={setTodayMood}
             goToAddMeal={() => setShowSmartScanner(true)}
@@ -1837,10 +1864,30 @@ function AppContent() {
             userXp={userXp}
             onAddTask={handleAddTask}
             onToggleTask={handleToggleTask}
+            onDeleteMeal={handleDeleteMeal}
+            onEditMeal={setEditingMeal}
           />)}
 
         {screen === 'ADD_MEAL' && (
           <AddMealScreen onSave={handleAddMeal} onCancel={() => setScreen('DASHBOARD')} />
+        )}
+
+        {editingMeal && (
+          <EditMealModal
+            meal={editingMeal}
+            onClose={() => setEditingMeal(null)}
+            onSave={handleUpdateMeal}
+            onDelete={handleDeleteMeal}
+          />
+        )}
+
+        {editingMeal && (
+          <EditMealModal
+            meal={editingMeal}
+            onClose={() => setEditingMeal(null)}
+            onSave={handleUpdateMeal}
+            onDelete={handleDeleteMeal}
+          />
         )}
 
         {screen === 'CHECK_IN' && (
