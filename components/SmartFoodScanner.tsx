@@ -5,6 +5,7 @@ import { scanBarcode } from '../services/barcodeService';
 import { analyzeFood } from '../services/geminiService';
 import { FoodResultCard, FoodComponent } from './FoodResultCard';
 import { MacroData } from '../types';
+import { findPortionMatch, updatePortionHistory } from '../services/portionHistoryService';
 
 interface SmartFoodScannerProps {
     onFoodAdded: (food: { name: string; macros: MacroData; portionGrams: number }) => void;
@@ -25,6 +26,7 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
     const [confidence, setConfidence] = useState(80);
     const [error, setError] = useState('');
     const [barcodeInput, setBarcodeInput] = useState('');
+    const [personalizedHint, setPersonalizedHint] = useState<string | null>(null);
 
     // Инициализация камеры
     useEffect(() => {
@@ -110,7 +112,7 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
 
             if (result) {
                 // Преобразуем результат AI в компоненты
-                const comps: FoodComponent[] = result.components?.length > 0
+                let comps: FoodComponent[] = result.components?.length > 0
                     ? result.components.map((c, i) => ({
                         id: String(i + 1),
                         name: c.name,
@@ -130,6 +132,21 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
                         carbsPer100g: result.portionGrams > 0 ? Math.round((result.macros.carbs / result.portionGrams) * 100 * 10) / 10 : 0
                     }];
 
+                // 🎯 ПЕРСОНАЛИЗАЦИЯ: Ищем в истории пользователя
+                let hint: string | null = null;
+                comps = comps.map(comp => {
+                    const match = findPortionMatch(comp.name);
+                    if (match && match.count >= 1) {
+                        // Нашли похожее блюдо в истории — применяем персональный вес
+                        hint = language === 'ru'
+                            ? `📊 Ваша обычная порция: ${match.avgGrams}г`
+                            : `📊 Your typical portion: ${match.avgGrams}g`;
+                        return { ...comp, grams: match.avgGrams };
+                    }
+                    return comp;
+                });
+
+                setPersonalizedHint(hint);
                 setComponents(comps);
                 setSource('ai');
                 setConfidence(result.confidence);
@@ -160,7 +177,7 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
                 const result = await analyzeFood(imageData, language);
 
                 if (result) {
-                    setComponents([{
+                    let comp: FoodComponent = {
                         id: '1',
                         name: result.name,
                         grams: result.portionGrams,
@@ -168,7 +185,20 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
                         proteinPer100g: result.portionGrams > 0 ? Math.round((result.macros.protein / result.portionGrams) * 100 * 10) / 10 : 0,
                         fatPer100g: result.portionGrams > 0 ? Math.round((result.macros.fat / result.portionGrams) * 100 * 10) / 10 : 0,
                         carbsPer100g: result.portionGrams > 0 ? Math.round((result.macros.carbs / result.portionGrams) * 100 * 10) / 10 : 0
-                    }]);
+                    };
+
+                    // 🎯 ПЕРСОНАЛИЗАЦИЯ
+                    const match = findPortionMatch(result.name);
+                    if (match && match.count >= 1) {
+                        comp.grams = match.avgGrams;
+                        setPersonalizedHint(language === 'ru'
+                            ? `📊 Ваша обычная порция: ${match.avgGrams}г`
+                            : `📊 Your typical portion: ${match.avgGrams}g`);
+                    } else {
+                        setPersonalizedHint(null);
+                    }
+
+                    setComponents([comp]);
                     setSource('ai');
                     setConfidence(result.confidence);
                     setState('result');
@@ -186,6 +216,8 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
 
     // Подтверждение результата
     const handleConfirm = (macros: MacroData, grams: number, name: string) => {
+        // Сохраняем в историю порций для персонализации
+        updatePortionHistory(name, grams);
         onFoodAdded({ name, macros, portionGrams: grams });
     };
 
@@ -194,6 +226,7 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
         setComponents([]);
         setError('');
         setBarcodeInput('');
+        setPersonalizedHint(null);
         setState('camera');
     };
 
@@ -316,6 +349,7 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
                         onCancel={reset}
                         source={source}
                         confidence={confidence}
+                        personalizedHint={personalizedHint}
                     />
                 </div>
             )}

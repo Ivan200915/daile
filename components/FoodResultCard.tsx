@@ -21,6 +21,7 @@ interface FoodResultCardProps {
     onCancel?: () => void;
     source?: 'ai' | 'barcode' | 'manual';
     confidence?: number;
+    personalizedHint?: string | null;
 }
 
 export const FoodResultCard: React.FC<FoodResultCardProps> = ({
@@ -29,7 +30,8 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
     onConfirm,
     onCancel,
     source = 'ai',
-    confidence = 80
+    confidence = 80,
+    personalizedHint
 }) => {
     const { language } = useLanguage();
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -121,6 +123,13 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
                 </span>
                 {sourceBadge()}
             </div>
+
+            {/* Подсказка персонализации */}
+            {personalizedHint && (
+                <div className="px-4 py-2 bg-green-500/10 border-b border-green-500/20">
+                    <span className="text-green-400 text-sm">{personalizedHint}</span>
+                </div>
+            )}
 
             {/* Список компонентов */}
             <div className="divide-y divide-white/5">
