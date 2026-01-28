@@ -17,20 +17,18 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
   if (!isApiConfigured) return null;
 
   try {
-    // Determine API URL (Local vs Production)
-    // In production, Nginx proxies /api to the backend. Locally we might need full URL if not proxied. 
-    // Assuming frontend is served relative to backend or proxy handles it.
-    const PROXY_URL = '/api/analyze-food';
-
-    const response = await fetch(PROXY_URL, {
+    // Direct call to Together AI API
+    const response = await fetch(TOGETHER_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // No Authorization header needed here, server handles it
+        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
       },
       body: JSON.stringify({
         model,
         messages,
+        max_tokens: 1024,
+        temperature: 0.3,
       }),
     });
 
@@ -84,6 +82,7 @@ export interface FoodAnalysisResult {
   components: FoodComponent[];
   confidence: number;
   insight?: string;
+  source?: 'ai' | 'local_db + ai' | 'fatsecret + ai' | 'barcode';
 }
 
 // Analyze food image to get name and macros with detailed breakdown
@@ -132,6 +131,9 @@ export const analyzeFoodImage = async (base64Image: string, language: string = '
 
 TASK: Analyze this food image and provide ACCURATE nutritional breakdown.
 
+CRITICAL: If you see MULTIPLE distinct food items on the plate (e.g., rice + cutlet, salad + bread), 
+you MUST list them as SEPARATE components with individual weights and nutrition.
+
 ESTIMATION GUIDELINES:
 1. PORTION SIZE: Estimate the actual portion weight in grams. Use these references:
    - Standard dinner plate diameter: ~25cm
@@ -150,20 +152,28 @@ ESTIMATION GUIDELINES:
 3. COMMON DISHES (use these as reference):
    - Плов/Pilaf (300g): ~450 kcal, 18g P, 18g F, 54g C
    - Борщ/Borscht (350ml): ~170 kcal, 10g P, 9g F, 13g C
+   - Манты/Manti (5 pcs, 250g): ~550 kcal, 28g P, 25g F, 62g C
    - Pasta with sauce (350g): ~500-600 kcal
+   - Котлета/Cutlet (100g): ~190 kcal, 18g P, 12g F, 4g C
+
+4. IMPORTANT FOR COMPONENTS:
+   - If dish is MIXED (like pilaf) → single component
+   - If dish has SEPARATE items (rice + cutlet) → multiple components
+   - Always include sauces, bread, drinks if visible
 
 Language: ${language === 'ru' ? 'Russian (Русский) - output names in Russian' : 'English'}.
 
 Return ONLY valid JSON:
 {
-  "name": "Dish Name",
+  "name": "Main Dish Name",
   "portion_grams": 0,
   "total_calories": 0,
   "total_protein": 0,
   "total_fat": 0,
   "total_carbs": 0,
   "components": [
-    {"name": "Ingredient", "grams": 0, "calories": 0, "protein": 0, "fat": 0, "carbs": 0}
+    {"name": "Ingredient 1", "grams": 0, "calories": 0, "protein": 0, "fat": 0, "carbs": 0},
+    {"name": "Ingredient 2", "grams": 0, "calories": 0, "protein": 0, "fat": 0, "carbs": 0}
   ],
   "confidence": 0-100,
   "insight": "Brief nutrition tip"
@@ -204,7 +214,8 @@ Return ONLY valid JSON:
       }
       parsed = JSON.parse(response.substring(startIndex, endIndex));
     }
-    return {
+
+    const aiResult: FoodAnalysisResult = {
       name: parsed.name || "Unknown Dish",
       macros: {
         calories: parsed.total_calories || 0,
@@ -217,11 +228,88 @@ Return ONLY valid JSON:
       confidence: parsed.confidence || 0,
       insight: parsed.insight
     };
+
+    // ============ MULTI-SOURCE VALIDATION ============
+    // Try to validate/enhance AI result with database lookups
+
+    // 1. Check local database first (fastest, no API call)
+    const { findDishInDatabase, calculateNutrition } = await import('./foodDatabase');
+    const localMatch = findDishInDatabase(aiResult.name);
+
+    if (localMatch) {
+      // Local database has verified data - use it with AI portion estimate
+      const localNutrition = calculateNutrition(localMatch, aiResult.portionGrams || localMatch.typicalPortionGrams);
+
+      return {
+        name: language === 'ru' ? localMatch.nameRu : localMatch.name,
+        macros: {
+          calories: localNutrition.calories,
+          protein: localNutrition.protein,
+          fat: localNutrition.fat,
+          carbs: localNutrition.carbs
+        },
+        portionGrams: localNutrition.portionGrams,
+        components: aiResult.components, // Keep AI's component breakdown
+        confidence: Math.min(aiResult.confidence + 15, 98), // Boost confidence with DB match
+        insight: aiResult.insight,
+        source: 'local_db + ai'
+      };
+    }
+
+    // 2. Try FatSecret API for professional-grade data
+    try {
+      const fatSecretResponse = await fetch('/api/fatsecret/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: aiResult.name,
+          max_results: 1,
+          language: language === 'ru' ? 'ru' : 'en'
+        })
+      });
+
+      if (fatSecretResponse.ok) {
+        const fsData = await fatSecretResponse.json();
+        const fsFood = fsData.foods?.[0];
+
+        if (fsFood && fsFood.servings?.serving) {
+          const serving = Array.isArray(fsFood.servings.serving)
+            ? fsFood.servings.serving[0]
+            : fsFood.servings.serving;
+
+          // Calculate based on AI's portion estimate
+          const portionMultiplier = (aiResult.portionGrams || 100) / (serving.metric_serving_amount || 100);
+
+          return {
+            name: fsFood.food_name || aiResult.name,
+            macros: {
+              calories: Math.round((parseFloat(serving.calories) || 0) * portionMultiplier),
+              protein: Math.round((parseFloat(serving.protein) || 0) * portionMultiplier * 10) / 10,
+              fat: Math.round((parseFloat(serving.fat) || 0) * portionMultiplier * 10) / 10,
+              carbs: Math.round((parseFloat(serving.carbohydrate) || 0) * portionMultiplier * 10) / 10
+            },
+            portionGrams: aiResult.portionGrams || 100,
+            components: aiResult.components,
+            confidence: 95, // FatSecret data is highly reliable
+            insight: aiResult.insight,
+            source: 'fatsecret + ai'
+          };
+        }
+      }
+    } catch (fsError) {
+      console.log('FatSecret validation skipped:', fsError);
+    }
+
+    // 3. Return AI-only result if no database matches
+    return aiResult;
   } catch (error) {
     console.error('JSON Parse Error:', error);
     return fallback;
   }
 };
+
+// Alias for SmartFoodScanner compatibility
+export const analyzeFood = analyzeFoodImage;
 
 // Generate a daily insight
 export const generateDailyInsight = async (steps: number, sleep: number, meals: number): Promise<string> => {

@@ -110,6 +110,8 @@ export interface Translations {
         seeYouTomorrow: string;
         dailyInsight: string;
         generatingInsight: string;
+        planTomorrow: string;
+        selectHabits: string;
     };
 
     // History
@@ -276,6 +278,8 @@ export const translations: Record<Language, Translations> = {
             seeYouTomorrow: 'See you tomorrow.',
             dailyInsight: 'Daily Insight',
             generatingInsight: 'Generating insight...',
+            planTomorrow: 'Plan Tomorrow',
+            selectHabits: 'Select habits for tomorrow',
         },
         history: {
             title: 'History',
@@ -374,7 +378,7 @@ export const translations: Record<Language, Translations> = {
             greeting: 'Привет',
             meals: 'Приёмы пищи',
             logMeal: 'Добавить еду',
-            habits: 'Привычки',
+            habits: 'Дневные задачи',
             closeDay: 'Закрыть день',
             steps: 'Шаги',
             sleep: 'Сон',
@@ -422,6 +426,8 @@ export const translations: Record<Language, Translations> = {
             low: 'Низко',
             high: 'Высоко',
             whatHelped: 'Что помогло сегодня?',
+            planTomorrow: 'План на завтра',
+            selectHabits: 'Выбери задачи на завтра',
             tags: {
                 goodSleep: 'Хороший сон',
                 workout: 'Тренировка',

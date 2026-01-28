@@ -1,5 +1,7 @@
-// Barcode Scanner Service - Open Food Facts API
-// Бесплатная база данных продуктов с более чем 2 миллионами товаров
+// Barcode Scanner Service - Локальная база РФ + Open Food Facts
+// Приоритет: 1) Локальная база РФ 2) Open Food Facts
+
+import { findProductByBarcode } from './russianProductsDB';
 
 export interface BarcodeProduct {
     barcode: string;
@@ -13,6 +15,7 @@ export interface BarcodeProduct {
     servingSize?: number; // в граммах
     imageUrl?: string;
     isComplete: boolean; // все ли данные есть
+    source: 'local_ru' | 'openfoodfacts';
 }
 
 export interface BarcodeScanResult {
@@ -25,6 +28,28 @@ export interface BarcodeScanResult {
 const OFF_API_URL = 'https://world.openfoodfacts.org/api/v2/product';
 
 export async function scanBarcode(barcode: string): Promise<BarcodeScanResult> {
+    // 1. Сначала проверяем локальную базу РФ (мгновенно)
+    const localProduct = findProductByBarcode(barcode);
+
+    if (localProduct) {
+        return {
+            success: true,
+            product: {
+                barcode,
+                name: localProduct.name,
+                brand: localProduct.brand,
+                caloriesPer100g: localProduct.caloriesPer100g,
+                proteinPer100g: localProduct.proteinPer100g,
+                fatPer100g: localProduct.fatPer100g,
+                carbsPer100g: localProduct.carbsPer100g,
+                servingSize: localProduct.servingSize,
+                isComplete: true,
+                source: 'local_ru'
+            }
+        };
+    }
+
+    // 2. Fallback на Open Food Facts
     try {
         const response = await fetch(`${OFF_API_URL}/${barcode}.json`);
 
@@ -40,7 +65,7 @@ export async function scanBarcode(barcode: string): Promise<BarcodeScanResult> {
         if (data.status !== 1 || !data.product) {
             return {
                 success: false,
-                error: 'Продукт не найден в базе. Попробуйте сфотографировать.'
+                error: 'Продукт не найден. Попробуйте сфотографировать.'
             };
         }
 
@@ -68,14 +93,15 @@ export async function scanBarcode(barcode: string): Promise<BarcodeScanResult> {
                 carbsPer100g: Math.round(carbsPer100g * 10) / 10,
                 servingSize: p.serving_size ? parseFloat(p.serving_size) : undefined,
                 imageUrl: p.image_front_small_url || p.image_url,
-                isComplete
+                isComplete,
+                source: 'openfoodfacts'
             }
         };
     } catch (error) {
         console.error('Barcode scan error:', error);
         return {
             success: false,
-            error: 'Ошибка сканирования. Проверьте интернет-соединение.'
+            error: 'Ошибка сканирования. Проверьте интернет.'
         };
     }
 }

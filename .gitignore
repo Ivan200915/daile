@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# NotebookLM profile
+chrome_profile_notebooklm/

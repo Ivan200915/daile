@@ -212,7 +212,222 @@ app.post('/api/analyze-food', async (req, res) => {
     }
 });
 
-// 4. Premium Status Check
+// ============== FATSECRET API INTEGRATION ==============
+// OAuth 1.0 authentication for FatSecret Platform API
+// Docs: https://platform.fatsecret.com/docs
+
+const FATSECRET_CONSUMER_KEY = process.env.FATSECRET_KEY || '';
+const FATSECRET_CONSUMER_SECRET = process.env.FATSECRET_SECRET || '';
+const FATSECRET_API_URL = 'https://platform.fatsecret.com/rest/server.api';
+
+// Generate OAuth 1.0 signature
+function generateOAuthSignature(method, url, params, consumerSecret) {
+    const sortedParams = Object.keys(params).sort().map(key =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+    ).join('&');
+
+    const baseString = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(sortedParams)}`;
+    const signingKey = `${encodeURIComponent(consumerSecret)}&`;
+
+    return crypto.createHmac('sha1', signingKey)
+        .update(baseString)
+        .digest('base64');
+}
+
+// Build OAuth params
+function buildOAuthParams(methodName, extraParams = {}) {
+    const oauthParams = {
+        oauth_consumer_key: FATSECRET_CONSUMER_KEY,
+        oauth_signature_method: 'HMAC-SHA1',
+        oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+        oauth_nonce: crypto.randomBytes(16).toString('hex'),
+        oauth_version: '1.0',
+        method: methodName,
+        format: 'json',
+        ...extraParams
+    };
+
+    oauthParams.oauth_signature = generateOAuthSignature(
+        'POST',
+        FATSECRET_API_URL,
+        oauthParams,
+        FATSECRET_CONSUMER_SECRET
+    );
+
+    return oauthParams;
+}
+
+// Make FatSecret API request
+async function fatSecretRequest(methodName, params = {}) {
+    if (!FATSECRET_CONSUMER_KEY || !FATSECRET_CONSUMER_SECRET) {
+        throw new Error('FatSecret API keys not configured');
+    }
+
+    const oauthParams = buildOAuthParams(methodName, params);
+    const formData = new URLSearchParams(oauthParams).toString();
+
+    const response = await axios.post(FATSECRET_API_URL, formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    return response.data;
+}
+
+// 4. FatSecret: Search Foods
+app.post('/api/fatsecret/search', async (req, res) => {
+    try {
+        const { query, max_results = 10, language = 'en' } = req.body;
+
+        if (!query) {
+            return res.status(400).json({ error: 'Query is required' });
+        }
+
+        const data = await fatSecretRequest('foods.search', {
+            search_expression: query,
+            max_results: max_results,
+            language: language === 'ru' ? 'ru' : 'en'
+        });
+
+        // Transform to our format
+        const foods = data.foods?.food || [];
+        res.json({
+            foods: Array.isArray(foods) ? foods : [foods],
+            total_results: data.foods?.total_results || 0,
+            max_results: max_results,
+            page_number: 0
+        });
+
+    } catch (error) {
+        console.error('FatSecret Search Error:', error.response?.data || error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 5. FatSecret: Get Food by ID
+app.get('/api/fatsecret/food/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const data = await fatSecretRequest('food.get.v4', {
+            food_id: id
+        });
+
+        res.json(data.food || null);
+
+    } catch (error) {
+        console.error('FatSecret Get Food Error:', error.response?.data || error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 6. FatSecret: Barcode Lookup (90%+ UPC/EAN coverage)
+app.post('/api/fatsecret/barcode', async (req, res) => {
+    try {
+        const { barcode } = req.body;
+
+        if (!barcode) {
+            return res.status(400).json({ error: 'Barcode is required' });
+        }
+
+        const data = await fatSecretRequest('food.find_id_for_barcode', {
+            barcode: barcode
+        });
+
+        if (data.food_id) {
+            // Get full food details
+            const foodData = await fatSecretRequest('food.get.v4', {
+                food_id: data.food_id.value
+            });
+            res.json({ food: foodData.food });
+        } else {
+            res.json({ food: null, error: 'Barcode not found' });
+        }
+
+    } catch (error) {
+        console.error('FatSecret Barcode Error:', error.response?.data || error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 7. FatSecret: Natural Language Processing (Premier feature)
+app.post('/api/fatsecret/nlp', async (req, res) => {
+    try {
+        const { text, language = 'en' } = req.body;
+
+        if (!text) {
+            return res.status(400).json({ error: 'Text is required' });
+        }
+
+        const data = await fatSecretRequest('foods.get_by_natural_language', {
+            user_text_input: text,
+            language: language === 'ru' ? 'ru' : 'en',
+            include_food_attributes: true
+        });
+
+        res.json(data);
+
+    } catch (error) {
+        console.error('FatSecret NLP Error:', error.response?.data || error.message);
+        // NLP might not be available on free tier
+        res.status(error.response?.status || 500).json({
+            error: error.message,
+            hint: 'NLP requires FatSecret Premier subscription'
+        });
+    }
+});
+
+// 8. FatSecret: Image Recognition (Premier feature)
+app.post('/api/fatsecret/image', async (req, res) => {
+    try {
+        const { image, language = 'en' } = req.body;
+
+        if (!image) {
+            return res.status(400).json({ error: 'Image is required' });
+        }
+
+        const data = await fatSecretRequest('foods.get_by_image_upload', {
+            image_base64: image,
+            language: language === 'ru' ? 'ru' : 'en',
+            include_food_attributes: true
+        });
+
+        res.json(data);
+
+    } catch (error) {
+        console.error('FatSecret Image Error:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({
+            error: error.message,
+            hint: 'Image recognition requires FatSecret Premier subscription'
+        });
+    }
+});
+
+// 9. FatSecret: Autocomplete
+app.post('/api/fatsecret/autocomplete', async (req, res) => {
+    try {
+        const { query, max_results = 5 } = req.body;
+
+        if (!query) {
+            return res.status(400).json({ suggestions: [] });
+        }
+
+        const data = await fatSecretRequest('foods.autocomplete', {
+            search_expression: query,
+            max_results: max_results
+        });
+
+        const suggestions = data.suggestions?.suggestion || [];
+        res.json({
+            suggestions: Array.isArray(suggestions) ? suggestions : [suggestions]
+        });
+
+    } catch (error) {
+        console.error('FatSecret Autocomplete Error:', error.response?.data || error.message);
+        res.json({ suggestions: [] });
+    }
+});
+
+// 10. Premium Status Check
 app.get('/api/premium/check', async (req, res) => {
     try {
         const { telegram_id } = req.query;

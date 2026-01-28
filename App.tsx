@@ -7,7 +7,6 @@ import {
   MOCK_HABITS,
   TEXT_GRADIENT,
   AVAILABLE_HABITS,
-  AVAILABLE_HABITS,
   AVAILABLE_BAD_HABITS,
   DEFAULT_TARGETS
 } from './constants';
@@ -29,6 +28,7 @@ import HabitDNA from './components/HabitDNA';
 import { BadHabitTracker } from './components/BadHabitTracker';
 import { RestorationTree } from './components/RestorationTree';
 import { InstallPrompt } from './components/InstallPrompt';
+import { SmartFoodScanner } from './components/SmartFoodScanner';
 import { updateGroupMemberStats, loadGroups } from './services/socialService';
 import { analyzeFoodImage, generateDailyInsight, generateWeeklyReview, FoodAnalysisResult, FoodComponent } from './services/geminiService';
 import {
@@ -1062,7 +1062,8 @@ const Dashboard = ({
 
       <div className="h-96" /> {/* Massive spacer to prevent cutoff */}
 
-      {/* Season Banner */}
+      {/* Season Banner - Commented out as requested ("Remove World Goal") */}
+      {/* 
       {(() => {
         const progress = loadSeasonProgress();
         const daysLeft = getSeasonDaysRemaining();
@@ -1083,7 +1084,8 @@ const Dashboard = ({
             </div>
           </div>
         );
-      })()}
+      })()} 
+      */}
 
       {/* Mood Predictor Widget */}
       {(() => {
@@ -1275,7 +1277,14 @@ const Dashboard = ({
   );
 };
 
-const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insight: string) => void, onClose: () => void, meals: Meal[], habits: Habit[] }) => {
+const CheckInScreen = ({ onFinish, onClose, meals, habits, user, onUpdateUser }: {
+  onFinish: (insight: string) => void,
+  onClose: () => void,
+  meals: Meal[],
+  habits: Habit[],
+  user: UserSettings,
+  onUpdateUser: (u: UserSettings) => void
+}) => {
   const [stage, setStage] = useState(0);
   const [insight, setInsight] = useState<string | null>(null);
   const [mood, setMood] = useState(3);
@@ -1299,6 +1308,18 @@ const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insigh
       });
     }
   }, [stage]);
+
+  const toggleFutureHabit = (id: string) => {
+    const current = user.selectedHabits || [];
+    const updated = current.includes(id)
+      ? current.filter(h => h !== id)
+      : [...current, id];
+
+    // Auto-save logic can be here or on "Next"
+    // We'll update parent state immediately but maybe user wants "Save" button?
+    // Let's rely on parent passing a "save" function.
+    onUpdateUser({ ...user, selectedHabits: updated });
+  };
 
   const stages = [
     {
@@ -1356,10 +1377,39 @@ const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insigh
           ))}
         </div>
       )
+    },
+    {
+      q: "План на завтра", // Plan Tomorrow
+      content: (
+        <div className="mt-6 flex flex-col space-y-3 h-[50vh] overflow-y-auto pr-2">
+          <p className="text-white/50 text-center mb-4 text-sm">Выбери задачи (привычки) на завтра</p>
+          {AVAILABLE_HABITS.map(habit => (
+            <button
+              key={habit.id}
+              onClick={() => toggleFutureHabit(habit.id)}
+              className={`${GLASS_PANEL_LIGHT} p-3 flex items-center justify-between transition-all ${user.selectedHabits.includes(habit.id) ? 'bg-[#00D4AA]/20 border-[#00D4AA]' : 'border- transparent'}`}
+            >
+              <div className="flex items-center space-x-3">
+                {/* @ts-ignore */}
+                <IconBadge icon={Icons[habit.iconId] || Icons.Star} size="sm" variant="circle" color={user.selectedHabits.includes(habit.id) ? '#00D4AA' : 'white'} />
+                <span className={user.selectedHabits.includes(habit.id) ? 'text-white' : 'text-white/50'}>
+                  {habit.labelRu}
+                </span>
+              </div>
+              {user.selectedHabits.includes(habit.id) && <Icons.Check size={16} className="text-[#00D4AA]" />}
+            </button>
+          ))}
+          <button onClick={() => setStage(4)} className={`mt-6 w-full py-3 ${GLASS_BUTTON}`}>Готово</button>
+        </div>
+      )
+    },
+    {
+      q: "День закрыт!", // Day Closed
+      content: null // Content handled below in specific render check
     }
   ];
 
-  if (stage === 3) {
+  if (stage === 4) { // Updated index for Day Closed
     return (
       <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-fade-in relative overflow-y-auto no-scrollbar">
         <div className="absolute inset-0 bg-gradient-to-t from-[#00D4AA]/20 to-transparent pointer-events-none" />
@@ -1383,6 +1433,11 @@ const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insigh
     );
   }
 
+  // Handle stage 3 (Plan Tomorrow) special render if needed, or just let default render handle it
+  // The default render uses stages[stage].q and content. 
+  // We added "Plan Tomorrow" as stage 3.
+  // "Day Closed" is stage 4.
+
   return (
     <div className="h-full flex flex-col p-8 pt-safe mt-6 relative overflow-y-auto no-scrollbar">
       <div className="absolute top-0 right-0 p-4 pt-safe z-50">
@@ -1392,13 +1447,13 @@ const CheckInScreen = ({ onFinish, onClose, meals, habits }: { onFinish: (insigh
       </div>
 
       <div className="flex space-x-2 mb-8 justify-center shrink-0">
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2, 3].map(i => (
           <div key={i} className={`h-1 w-8 rounded-full ${i <= stage ? 'bg-[#00D4AA]' : 'bg-white/10'}`} />
         ))}
       </div>
-      <h2 className="text-3xl font-bold text-center shrink-0">{stages[stage].q}</h2>
+      <h2 className="text-3xl font-bold text-center shrink-0">{stages[stage]?.q}</h2>
       <div className="flex-1">
-        {stages[stage].content}
+        {stages[stage]?.content}
       </div>
     </div>
   );
@@ -1426,6 +1481,7 @@ function AppContent() {
   const [todayFocusMinutes, setTodayFocusMinutes] = useState(0);
   const [userXp, setUserXp] = useState(0);
   const [todayMood, setTodayMood] = useState<number | null>(null);
+  const [showSmartScanner, setShowSmartScanner] = useState(false);
 
   // Language from context
   const { language, setLanguage, t } = useLanguage();
@@ -1793,7 +1849,7 @@ function AppContent() {
             onAddHabit={addHabit}
             todayMood={todayMood}
             onMoodChange={setTodayMood}
-            goToAddMeal={() => setScreen('ADD_MEAL')}
+            goToAddMeal={() => setShowSmartScanner(true)}
             closeDay={() => setScreen('CHECK_IN')}
             onMetricUpdate={handleMetricUpdate}
             logs={logs}
@@ -1809,7 +1865,17 @@ function AppContent() {
         )}
 
         {screen === 'CHECK_IN' && (
-          <CheckInScreen onFinish={handleCheckInFinish} onClose={() => setScreen('DASHBOARD')} meals={meals} habits={habits} />
+          <CheckInScreen
+            onFinish={handleCheckInFinish}
+            onClose={() => setScreen('DASHBOARD')}
+            meals={meals}
+            habits={habits}
+            user={user}
+            onUpdateUser={(updated) => {
+              setUser(updated);
+              saveUserSettings(updated);
+            }}
+          />
         )}
 
         {screen === 'HISTORY' && (
@@ -1896,6 +1962,23 @@ function AppContent() {
 
       {/* Focus Mode Overlay */}
       {isFocusOpen && <FocusScreen onBackendExit={() => setIsFocusOpen(false)} onComplete={handleFocusComplete} />}
+
+      {/* Smart Food Scanner Overlay */}
+      {showSmartScanner && (
+        <SmartFoodScanner
+          onFoodAdded={(food) => {
+            handleAddMeal({
+              name: food.name,
+              macros: food.macros,
+              type: 'Lunch' as const,
+              id: Date.now().toString(),
+              timestamp: new Date()
+            });
+            setShowSmartScanner(false);
+          }}
+          onClose={() => setShowSmartScanner(false)}
+        />
+      )}
     </div>
   );
 }

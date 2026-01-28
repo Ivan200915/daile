@@ -239,8 +239,533 @@ export const DISH_DATABASE: DishNutrition[] = [
         typicalPortionGrams: 150,
         category: 'american',
         keywords: ['фри', 'fries', 'картошка фри', 'french fries']
+    },
+
+    // === ДОПОЛНИТЕЛЬНАЯ РУССКАЯ/СНГ КУХНЯ ===
+    {
+        name: 'Shawarma',
+        nameRu: 'Шаурма',
+        caloriesPer100g: 215,
+        proteinPer100g: 11,
+        fatPer100g: 12,
+        carbsPer100g: 16,
+        typicalPortionGrams: 350,
+        category: 'asian',
+        keywords: ['шаурма', 'шаверма', 'shawarma', 'донер', 'doner']
+    },
+    {
+        name: 'Manti',
+        nameRu: 'Манты',
+        caloriesPer100g: 220,
+        proteinPer100g: 10,
+        fatPer100g: 12,
+        carbsPer100g: 18,
+        typicalPortionGrams: 300,
+        category: 'asian',
+        keywords: ['манты', 'manti', 'mante']
+    },
+    {
+        name: 'Lagman',
+        nameRu: 'Лагман',
+        caloriesPer100g: 95,
+        proteinPer100g: 5,
+        fatPer100g: 4,
+        carbsPer100g: 10,
+        typicalPortionGrams: 400,
+        category: 'asian',
+        keywords: ['лагман', 'lagman', 'лапша']
+    },
+    {
+        name: 'Chebureki',
+        nameRu: 'Чебуреки',
+        caloriesPer100g: 280,
+        proteinPer100g: 9,
+        fatPer100g: 16,
+        carbsPer100g: 25,
+        typicalPortionGrams: 150,
+        category: 'russian',
+        keywords: ['чебурек', 'cheburek', 'чебуреки']
+    },
+    {
+        name: 'Khinkali',
+        nameRu: 'Хинкали',
+        caloriesPer100g: 235,
+        proteinPer100g: 11,
+        fatPer100g: 10,
+        carbsPer100g: 25,
+        typicalPortionGrams: 250,
+        category: 'russian',
+        keywords: ['хинкали', 'khinkali']
+    },
+    {
+        name: 'Solyanka',
+        nameRu: 'Солянка',
+        caloriesPer100g: 69,
+        proteinPer100g: 5.5,
+        fatPer100g: 3.5,
+        carbsPer100g: 4,
+        typicalPortionGrams: 350,
+        category: 'soup',
+        keywords: ['солянка', 'solyanka']
+    },
+    {
+        name: 'Okroshka',
+        nameRu: 'Окрошка',
+        caloriesPer100g: 52,
+        proteinPer100g: 2.8,
+        fatPer100g: 2,
+        carbsPer100g: 5.5,
+        typicalPortionGrams: 350,
+        category: 'soup',
+        keywords: ['окрошка', 'okroshka']
+    },
+    {
+        name: 'Blini with Sour Cream',
+        nameRu: 'Блины со сметаной',
+        caloriesPer100g: 189,
+        proteinPer100g: 5,
+        fatPer100g: 8,
+        carbsPer100g: 24,
+        typicalPortionGrams: 200,
+        category: 'russian',
+        keywords: ['блины', 'блинчики', 'blini', 'pancakes', 'crepes']
+    },
+    {
+        name: 'Syrniki',
+        nameRu: 'Сырники',
+        caloriesPer100g: 183,
+        proteinPer100g: 12,
+        fatPer100g: 7,
+        carbsPer100g: 18,
+        typicalPortionGrams: 200,
+        category: 'russian',
+        keywords: ['сырники', 'syrniki', 'творожники']
+    },
+    {
+        name: 'Vareniki',
+        nameRu: 'Вареники',
+        caloriesPer100g: 155,
+        proteinPer100g: 5,
+        fatPer100g: 3,
+        carbsPer100g: 27,
+        typicalPortionGrams: 250,
+        category: 'russian',
+        keywords: ['вареники', 'vareniki']
+    },
+
+    // === FAST FOOD ===
+    {
+        name: 'Big Mac',
+        nameRu: 'Биг Мак',
+        caloriesPer100g: 229,
+        proteinPer100g: 12,
+        fatPer100g: 11,
+        carbsPer100g: 20,
+        typicalPortionGrams: 215,
+        category: 'american',
+        keywords: ['биг мак', 'big mac', 'бигмак']
+    },
+    {
+        name: 'Chicken Nuggets',
+        nameRu: 'Куриные наггетсы',
+        caloriesPer100g: 296,
+        proteinPer100g: 15,
+        fatPer100g: 18,
+        carbsPer100g: 18,
+        typicalPortionGrams: 100,
+        category: 'american',
+        keywords: ['наггетсы', 'nuggets', 'наги']
+    },
+    {
+        name: 'KFC Chicken',
+        nameRu: 'KFC Курица',
+        caloriesPer100g: 260,
+        proteinPer100g: 18,
+        fatPer100g: 16,
+        carbsPer100g: 11,
+        typicalPortionGrams: 150,
+        category: 'american',
+        keywords: ['kfc', 'кфс', 'ростикс', 'острые крылышки']
+    },
+    {
+        name: 'Hot Dog',
+        nameRu: 'Хот-дог',
+        caloriesPer100g: 290,
+        proteinPer100g: 10,
+        fatPer100g: 18,
+        carbsPer100g: 22,
+        typicalPortionGrams: 150,
+        category: 'american',
+        keywords: ['хот-дог', 'хотдог', 'hot dog']
+    },
+
+    // === НАПИТКИ ===
+    {
+        name: 'Latte',
+        nameRu: 'Латте',
+        caloriesPer100g: 56,
+        proteinPer100g: 3,
+        fatPer100g: 3,
+        carbsPer100g: 4,
+        typicalPortionGrams: 300,
+        category: 'drink',
+        keywords: ['латте', 'latte', 'кофе латте']
+    },
+    {
+        name: 'Cappuccino',
+        nameRu: 'Капучино',
+        caloriesPer100g: 45,
+        proteinPer100g: 2.5,
+        fatPer100g: 2.5,
+        carbsPer100g: 3.5,
+        typicalPortionGrams: 250,
+        category: 'drink',
+        keywords: ['капучино', 'cappuccino']
+    },
+    {
+        name: 'Americano',
+        nameRu: 'Американо',
+        caloriesPer100g: 2,
+        proteinPer100g: 0.1,
+        fatPer100g: 0,
+        carbsPer100g: 0.3,
+        typicalPortionGrams: 300,
+        category: 'drink',
+        keywords: ['американо', 'americano', 'черный кофе']
+    },
+    {
+        name: 'Orange Juice',
+        nameRu: 'Апельсиновый сок',
+        caloriesPer100g: 45,
+        proteinPer100g: 0.7,
+        fatPer100g: 0.2,
+        carbsPer100g: 10,
+        typicalPortionGrams: 250,
+        category: 'drink',
+        keywords: ['апельсиновый сок', 'orange juice', 'сок']
+    },
+    {
+        name: 'Smoothie',
+        nameRu: 'Смузи',
+        caloriesPer100g: 65,
+        proteinPer100g: 1.5,
+        fatPer100g: 0.5,
+        carbsPer100g: 14,
+        typicalPortionGrams: 350,
+        category: 'drink',
+        keywords: ['смузи', 'smoothie']
+    },
+    {
+        name: 'Beer',
+        nameRu: 'Пиво',
+        caloriesPer100g: 43,
+        proteinPer100g: 0.5,
+        fatPer100g: 0,
+        carbsPer100g: 3.5,
+        typicalPortionGrams: 500,
+        category: 'drink',
+        keywords: ['пиво', 'beer']
+    },
+    {
+        name: 'Wine',
+        nameRu: 'Вино',
+        caloriesPer100g: 83,
+        proteinPer100g: 0.1,
+        fatPer100g: 0,
+        carbsPer100g: 2.6,
+        typicalPortionGrams: 150,
+        category: 'drink',
+        keywords: ['вино', 'wine', 'красное вино', 'белое вино']
+    },
+
+    // === ЗАВТРАКИ ===
+    {
+        name: 'Fried Eggs',
+        nameRu: 'Яичница глазунья',
+        caloriesPer100g: 196,
+        proteinPer100g: 13,
+        fatPer100g: 15,
+        carbsPer100g: 1,
+        typicalPortionGrams: 120,
+        category: 'european',
+        keywords: ['глазунья', 'fried eggs', 'яйца жареные']
+    },
+    {
+        name: 'Cottage Cheese',
+        nameRu: 'Творог',
+        caloriesPer100g: 121,
+        proteinPer100g: 17,
+        fatPer100g: 5,
+        carbsPer100g: 2,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['творог', 'cottage cheese', 'творожок']
+    },
+    {
+        name: 'Yogurt',
+        nameRu: 'Йогурт',
+        caloriesPer100g: 65,
+        proteinPer100g: 4,
+        fatPer100g: 2,
+        carbsPer100g: 8,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['йогурт', 'yogurt', 'йогурт натуральный']
+    },
+    {
+        name: 'Granola',
+        nameRu: 'Гранола',
+        caloriesPer100g: 471,
+        proteinPer100g: 10,
+        fatPer100g: 20,
+        carbsPer100g: 64,
+        typicalPortionGrams: 50,
+        category: 'european',
+        keywords: ['гранола', 'granola', 'мюсли']
+    },
+    {
+        name: 'Toast with Butter',
+        nameRu: 'Тост с маслом',
+        caloriesPer100g: 313,
+        proteinPer100g: 7,
+        fatPer100g: 12,
+        carbsPer100g: 45,
+        typicalPortionGrams: 60,
+        category: 'european',
+        keywords: ['тост', 'toast', 'хлеб с маслом']
+    },
+    {
+        name: 'Avocado Toast',
+        nameRu: 'Тост с авокадо',
+        caloriesPer100g: 220,
+        proteinPer100g: 5,
+        fatPer100g: 12,
+        carbsPer100g: 24,
+        typicalPortionGrams: 150,
+        category: 'european',
+        keywords: ['авокадо тост', 'avocado toast']
+    },
+
+    // === СЛАДКОЕ И ДЕСЕРТЫ ===
+    {
+        name: 'Chocolate Bar',
+        nameRu: 'Шоколад',
+        caloriesPer100g: 546,
+        proteinPer100g: 5,
+        fatPer100g: 31,
+        carbsPer100g: 60,
+        typicalPortionGrams: 50,
+        category: 'dessert',
+        keywords: ['шоколад', 'chocolate', 'шоколадка']
+    },
+    {
+        name: 'Ice Cream',
+        nameRu: 'Мороженое',
+        caloriesPer100g: 207,
+        proteinPer100g: 4,
+        fatPer100g: 11,
+        carbsPer100g: 24,
+        typicalPortionGrams: 100,
+        category: 'dessert',
+        keywords: ['мороженое', 'ice cream', 'пломбир']
+    },
+    {
+        name: 'Cake',
+        nameRu: 'Торт',
+        caloriesPer100g: 350,
+        proteinPer100g: 5,
+        fatPer100g: 18,
+        carbsPer100g: 42,
+        typicalPortionGrams: 100,
+        category: 'dessert',
+        keywords: ['торт', 'cake', 'пирожное']
+    },
+    {
+        name: 'Croissant',
+        nameRu: 'Круассан',
+        caloriesPer100g: 406,
+        proteinPer100g: 8,
+        fatPer100g: 21,
+        carbsPer100g: 46,
+        typicalPortionGrams: 60,
+        category: 'dessert',
+        keywords: ['круассан', 'croissant']
+    },
+    {
+        name: 'Donut',
+        nameRu: 'Пончик',
+        caloriesPer100g: 421,
+        proteinPer100g: 5,
+        fatPer100g: 22,
+        carbsPer100g: 51,
+        typicalPortionGrams: 65,
+        category: 'dessert',
+        keywords: ['пончик', 'donut', 'донат']
+    },
+
+    // === СНЕКИ ===
+    {
+        name: 'Potato Chips',
+        nameRu: 'Чипсы',
+        caloriesPer100g: 536,
+        proteinPer100g: 7,
+        fatPer100g: 35,
+        carbsPer100g: 50,
+        typicalPortionGrams: 50,
+        category: 'american',
+        keywords: ['чипсы', 'chips', 'lays', 'pringles']
+    },
+    {
+        name: 'Nuts Mix',
+        nameRu: 'Орехи',
+        caloriesPer100g: 607,
+        proteinPer100g: 20,
+        fatPer100g: 54,
+        carbsPer100g: 16,
+        typicalPortionGrams: 30,
+        category: 'european',
+        keywords: ['орехи', 'nuts', 'миндаль', 'almonds', 'кешью']
+    },
+    {
+        name: 'Protein Bar',
+        nameRu: 'Протеиновый батончик',
+        caloriesPer100g: 380,
+        proteinPer100g: 25,
+        fatPer100g: 12,
+        carbsPer100g: 40,
+        typicalPortionGrams: 60,
+        category: 'european',
+        keywords: ['протеиновый батончик', 'protein bar', 'батончик']
+    },
+
+    // === ГАРНИРЫ ===
+    {
+        name: 'White Rice',
+        nameRu: 'Белый рис',
+        caloriesPer100g: 130,
+        proteinPer100g: 2.7,
+        fatPer100g: 0.3,
+        carbsPer100g: 28,
+        typicalPortionGrams: 180,
+        category: 'asian',
+        keywords: ['рис', 'rice', 'белый рис']
+    },
+    {
+        name: 'Pasta',
+        nameRu: 'Макароны',
+        caloriesPer100g: 131,
+        proteinPer100g: 5,
+        fatPer100g: 1.1,
+        carbsPer100g: 25,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['макароны', 'pasta', 'спагетти', 'spaghetti']
+    },
+    {
+        name: 'Boiled Potatoes',
+        nameRu: 'Отварной картофель',
+        caloriesPer100g: 82,
+        proteinPer100g: 2,
+        fatPer100g: 0.4,
+        carbsPer100g: 17,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['отварной картофель', 'boiled potatoes', 'картошка']
+    },
+    {
+        name: 'Steamed Vegetables',
+        nameRu: 'Овощи на пару',
+        caloriesPer100g: 35,
+        proteinPer100g: 2,
+        fatPer100g: 0.3,
+        carbsPer100g: 6,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['овощи на пару', 'steamed vegetables', 'овощи']
+    },
+
+    // === МЯСО И РЫБА ===
+    {
+        name: 'Beef Steak',
+        nameRu: 'Стейк из говядины',
+        caloriesPer100g: 271,
+        proteinPer100g: 26,
+        fatPer100g: 18,
+        carbsPer100g: 0,
+        typicalPortionGrams: 200,
+        category: 'european',
+        keywords: ['стейк', 'steak', 'говядина', 'beef']
+    },
+    {
+        name: 'Salmon Fillet',
+        nameRu: 'Филе лосося',
+        caloriesPer100g: 208,
+        proteinPer100g: 20,
+        fatPer100g: 13,
+        carbsPer100g: 0,
+        typicalPortionGrams: 150,
+        category: 'european',
+        keywords: ['лосось', 'salmon', 'семга', 'рыба']
+    },
+    {
+        name: 'Shrimp',
+        nameRu: 'Креветки',
+        caloriesPer100g: 99,
+        proteinPer100g: 24,
+        fatPer100g: 0.3,
+        carbsPer100g: 0.2,
+        typicalPortionGrams: 150,
+        category: 'european',
+        keywords: ['креветки', 'shrimp', 'морепродукты']
+    },
+    {
+        name: 'Pork Chop',
+        nameRu: 'Свиная отбивная',
+        caloriesPer100g: 242,
+        proteinPer100g: 27,
+        fatPer100g: 14,
+        carbsPer100g: 0,
+        typicalPortionGrams: 150,
+        category: 'european',
+        keywords: ['свинина', 'pork', 'отбивная', 'свиная котлета']
+    },
+
+    // === СУПЫ ===
+    {
+        name: 'Chicken Soup',
+        nameRu: 'Куриный суп',
+        caloriesPer100g: 36,
+        proteinPer100g: 3.5,
+        fatPer100g: 1.2,
+        carbsPer100g: 3,
+        typicalPortionGrams: 350,
+        category: 'soup',
+        keywords: ['куриный суп', 'chicken soup', 'бульон']
+    },
+    {
+        name: 'Tom Yum',
+        nameRu: 'Том Ям',
+        caloriesPer100g: 45,
+        proteinPer100g: 4,
+        fatPer100g: 2,
+        carbsPer100g: 3,
+        typicalPortionGrams: 350,
+        category: 'asian',
+        keywords: ['том ям', 'tom yum', 'тайский суп']
+    },
+    {
+        name: 'Pho',
+        nameRu: 'Фо',
+        caloriesPer100g: 40,
+        proteinPer100g: 3.5,
+        fatPer100g: 1,
+        carbsPer100g: 4,
+        typicalPortionGrams: 500,
+        category: 'asian',
+        keywords: ['фо', 'pho', 'вьетнамский суп']
     }
 ];
+
 
 // Поиск блюда в базе по названию
 export function findDishInDatabase(dishName: string): DishNutrition | null {
