@@ -27,8 +27,9 @@ async function callTogetherAI(messages: any[], model: string): Promise<string | 
       body: JSON.stringify({
         model,
         messages,
-        max_tokens: 1024,
+        max_tokens: 512,
         temperature: 0.3,
+        stream: false,
       }),
     });
 

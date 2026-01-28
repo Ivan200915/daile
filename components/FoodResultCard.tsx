@@ -36,6 +36,17 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
     const { language } = useLanguage();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempGrams, setTempGrams] = useState<string>('');
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [editingNameId, setEditingNameId] = useState<string | null>(null);
+    const [tempName, setTempName] = useState('');
+    const [newIngredient, setNewIngredient] = useState({
+        name: '',
+        grams: '100',
+        caloriesPer100g: '100',
+        proteinPer100g: '5',
+        fatPer100g: '3',
+        carbsPer100g: '15'
+    });
 
     // Рассчитать КБЖУ для компонента
     const calcMacros = (comp: FoodComponent) => {
@@ -67,13 +78,13 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
         ));
     }, [components, onComponentsChange]);
 
-    // Начать редактирование
+    // Начать редактирование граммов
     const startEdit = (comp: FoodComponent) => {
         setEditingId(comp.id);
         setTempGrams(comp.grams.toString());
     };
 
-    // Сохранить редактирование
+    // Сохранить редактирование граммов
     const saveEdit = (id: string) => {
         const newGrams = parseInt(tempGrams) || 100;
         onComponentsChange(components.map(c =>
@@ -81,6 +92,49 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
         ));
         setEditingId(null);
         setTempGrams('');
+    };
+
+    // Начать редактирование названия
+    const startEditName = (comp: FoodComponent) => {
+        setEditingNameId(comp.id);
+        setTempName(comp.name);
+    };
+
+    // Сохранить редактирование названия
+    const saveEditName = (id: string) => {
+        if (tempName.trim()) {
+            onComponentsChange(components.map(c =>
+                c.id === id ? { ...c, name: tempName.trim() } : c
+            ));
+        }
+        setEditingNameId(null);
+        setTempName('');
+    };
+
+    // Добавить новый ингредиент
+    const addNewComponent = () => {
+        if (!newIngredient.name.trim()) return;
+
+        const newComp: FoodComponent = {
+            id: String(Date.now()),
+            name: newIngredient.name.trim(),
+            grams: parseInt(newIngredient.grams) || 100,
+            caloriesPer100g: parseInt(newIngredient.caloriesPer100g) || 100,
+            proteinPer100g: parseFloat(newIngredient.proteinPer100g) || 5,
+            fatPer100g: parseFloat(newIngredient.fatPer100g) || 3,
+            carbsPer100g: parseFloat(newIngredient.carbsPer100g) || 15
+        };
+
+        onComponentsChange([...components, newComp]);
+        setShowAddForm(false);
+        setNewIngredient({
+            name: '',
+            grams: '100',
+            caloriesPer100g: '100',
+            proteinPer100g: '5',
+            fatPer100g: '3',
+            carbsPer100g: '15'
+        });
     };
 
     // Удалить компонент
@@ -136,13 +190,43 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
                 {components.map((comp) => {
                     const macros = calcMacros(comp);
                     const isEditing = editingId === comp.id;
+                    const isEditingName = editingNameId === comp.id;
 
                     return (
-                        <div key={comp.id} className="px-4 py-3 flex items-center gap-3">
-                            {/* Название */}
-                            <div className="flex-1 min-w-0">
-                                <div className="text-white font-medium truncate">{comp.name}</div>
-                                <div className="text-white/50 text-sm">
+                        <div key={comp.id} className="px-4 py-3">
+                            {/* Название (кликабельно для редактирования) */}
+                            <div className="flex items-center gap-2 mb-1">
+                                {isEditingName ? (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={tempName}
+                                            onChange={(e) => setTempName(e.target.value)}
+                                            className="flex-1 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm"
+                                            autoFocus
+                                            onKeyDown={(e) => e.key === 'Enter' && saveEditName(comp.id)}
+                                            onBlur={() => saveEditName(comp.id)}
+                                        />
+                                        <button
+                                            onClick={() => saveEditName(comp.id)}
+                                            className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg"
+                                        >
+                                            <Check size={14} className="text-green-400" />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => startEditName(comp)}
+                                        className="text-white font-medium truncate text-left hover:text-white/80 transition-colors flex-1"
+                                    >
+                                        {comp.name} <Edit3 size={12} className="inline ml-1 text-white/40" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                {/* КБЖУ */}
+                                <div className="flex-1 text-white/50 text-sm">
                                     {macros.calories} ккал • Б{macros.protein} Ж{macros.fat} У{macros.carbs}
                                 </div>
                             </div>
@@ -207,6 +291,102 @@ export const FoodResultCard: React.FC<FoodResultCardProps> = ({
                     );
                 })}
             </div>
+
+            {/* Добавить ингредиент */}
+            {!showAddForm ? (
+                <button
+                    onClick={() => setShowAddForm(true)}
+                    className="w-full px-4 py-3 border-t border-white/10 text-white/70 hover:text-white hover:bg-white/5 transition-colors flex items-center justify-center gap-2"
+                >
+                    <Plus size={18} />
+                    {language === 'ru' ? 'Добавить ингредиент' : 'Add ingredient'}
+                </button>
+            ) : (
+                <div className="px-4 py-3 border-t border-white/10 space-y-3">
+                    <div className="text-white/70 text-sm font-medium">
+                        {language === 'ru' ? 'Новый ингредиент' : 'New ingredient'}
+                    </div>
+
+                    {/* Название */}
+                    <input
+                        type="text"
+                        value={newIngredient.name}
+                        onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
+                        placeholder={language === 'ru' ? 'Название (напр. Сливочный соус)' : 'Name (e.g. Cream sauce)'}
+                        className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 text-sm"
+                    />
+
+                    {/* Граммы и Калории */}
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <label className="text-white/50 text-xs">{language === 'ru' ? 'Граммы' : 'Grams'}</label>
+                            <input
+                                type="number"
+                                value={newIngredient.grams}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, grams: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-white/50 text-xs">{language === 'ru' ? 'Ккал/100г' : 'Kcal/100g'}</label>
+                            <input
+                                type="number"
+                                value={newIngredient.caloriesPer100g}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, caloriesPer100g: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    {/* БЖУ */}
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <label className="text-white/50 text-xs">Б</label>
+                            <input
+                                type="number"
+                                value={newIngredient.proteinPer100g}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, proteinPer100g: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-white/50 text-xs">Ж</label>
+                            <input
+                                type="number"
+                                value={newIngredient.fatPer100g}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, fatPer100g: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-white/50 text-xs">У</label>
+                            <input
+                                type="number"
+                                value={newIngredient.carbsPer100g}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, carbsPer100g: e.target.value })}
+                                className="w-full px-2 py-1.5 bg-white/10 border border-white/20 rounded text-white text-sm"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Кнопки */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowAddForm(false)}
+                            className="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white/70 text-sm"
+                        >
+                            {language === 'ru' ? 'Отмена' : 'Cancel'}
+                        </button>
+                        <button
+                            onClick={addNewComponent}
+                            disabled={!newIngredient.name.trim()}
+                            className="flex-1 py-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg text-green-400 text-sm disabled:opacity-50"
+                        >
+                            {language === 'ru' ? 'Добавить' : 'Add'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Итого (если > 1 компонента) */}
             {components.length > 1 && (

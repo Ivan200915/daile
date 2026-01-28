@@ -232,8 +232,8 @@ export const SmartFoodScanner: React.FC<SmartFoodScannerProps> = ({ onFoodAdded,
 
     return (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
-            {/* Заголовок */}
-            <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
+            {/* Заголовок с Safe Area */}
+            <div className="absolute top-0 left-0 right-0 z-10 pt-[60px] px-4 pb-4 flex items-center justify-between bg-gradient-to-b from-black/90 via-black/60 to-transparent">
                 <button onClick={onClose} className="p-2 bg-white/10 backdrop-blur-sm rounded-full">
                     <X size={24} className="text-white" />
                 </button>
